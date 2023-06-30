@@ -1,4 +1,4 @@
-package com.repl.gifthub;
+package org.swmaestro.repl.gifthub;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
