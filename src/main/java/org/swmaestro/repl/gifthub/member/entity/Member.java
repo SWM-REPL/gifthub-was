@@ -1,31 +1,35 @@
 package org.swmaestro.repl.gifthub.member.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Member {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column
+	@NotNull
+	@Column(length = 60)
 	private String password;
 
+	@NotNull
 	@Column(length = 12)
 	private String nickname;
 
+	@NotNull
 	@CreatedDate
-	@Column(name = "created_at")
 	private LocalDateTime createdAt;
 
+	@NotNull
 	@LastModifiedDate
-	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
 
-	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 }

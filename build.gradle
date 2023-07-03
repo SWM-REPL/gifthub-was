@@ -22,6 +22,14 @@ dependencies {
 
     // database Connector
     runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // lombok
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.24'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // jakarta.validation annotation
+    implementation group: 'jakarta.validation', name: 'jakarta.validation-api', version: '3.0.2'
+
 }
 
 tasks.named('test') {
