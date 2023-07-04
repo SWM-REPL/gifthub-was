@@ -10,6 +10,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.swmaestro.repl.gifthub.member.entity.Member;
 import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest
@@ -41,5 +42,23 @@ class MemberServiceTest {
 
 		// then
 		verify(memberRepository).save(member);
+	}
+
+	@Test
+	void passwordEncryption() {
+		// given
+		String testPassword = "abc123";
+		Member member = Member.builder()
+			.id(Long.valueOf(1))
+			.username("jinlee1703")
+			.password(testPassword)
+			.nickname("이진우")
+			.build();
+
+		// when
+		memberService.signUp(member);
+
+		// then
+		assertThat(memberRepository.findById(Long.valueOf(1)).get().getPassword()).isNotEqualTo(testPassword);
 	}
 }
