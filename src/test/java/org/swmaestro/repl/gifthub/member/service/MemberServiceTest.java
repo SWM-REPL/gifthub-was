@@ -1,26 +1,26 @@
 package org.swmaestro.repl.gifthub.member.service;
 
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.swmaestro.repl.gifthub.member.entity.Member;
 import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 
-@Transactional
 @SpringBootTest
+@ExtendWith(SpringExtension.class)
 class MemberServiceTest {
 	@Autowired
-	MemberService memberService;
+	private MemberService memberService;
 
-	@Autowired
-	SpringDataJpaMemberRepository memberRepository;
+	@MockBean
+	private SpringDataJpaMemberRepository memberRepository;
 
-
-	// Test 메서드를 매번 실행하기 전에 MemberService에 가짜 객체를 주입
 	@BeforeEach
 	void setUp() {
 		memberService = new MemberService(memberRepository);
@@ -39,9 +39,7 @@ class MemberServiceTest {
 		// when
 		memberService.signUp(member);
 
-		System.out.println(memberRepository.findAll().get(0).getUsername());
-
 		// then
-		assertTrue(memberRepository.findById(Long.valueOf(1)).isPresent());
+		verify(memberRepository).save(member);
 	}
 }
