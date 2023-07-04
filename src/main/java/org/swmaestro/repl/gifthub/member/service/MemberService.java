@@ -15,6 +15,6 @@ public class MemberService {
 	}
 
 	public void signUp(Member member) {
-
+		memberRepository.save(member);
 	}
 }
