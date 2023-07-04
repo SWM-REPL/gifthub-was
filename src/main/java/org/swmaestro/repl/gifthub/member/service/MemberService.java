@@ -1,20 +1,19 @@
 package org.swmaestro.repl.gifthub.member.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.member.entity.Member;
-import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
 
-@Service
-public class MemberService {
-	private final SpringDataJpaMemberRepository memberRepository;
+import java.util.List;
 
-	@Autowired
-	public MemberService(SpringDataJpaMemberRepository memberRepository) {
-		this.memberRepository = memberRepository;
-	}
+public interface MemberService {
+	Long create();
 
-	public void signUp(Member member) {
-		memberRepository.save(member);
-	}
+	Member read(Long id);
+
+	int count();
+
+	List<Member> list();
+
+	Long update(Long id, Member member);
+
+	Long delete(Long id);
 }

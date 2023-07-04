@@ -16,14 +16,14 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(SpringExtension.class)
 class MemberServiceTest {
 	@Autowired
-	private MemberService memberService;
+	private MemberServiceImpl memberService;
 
 	@MockBean
 	private SpringDataJpaMemberRepository memberRepository;
 
 	@BeforeEach
 	void setUp() {
-		memberService = new MemberService(memberRepository);
+		memberService = new MemberServiceImpl(memberRepository);
 	}
 
 	@Test
