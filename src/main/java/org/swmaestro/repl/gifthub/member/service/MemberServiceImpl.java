@@ -3,6 +3,7 @@ package org.swmaestro.repl.gifthub.member.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.swmaestro.repl.gifthub.member.dto.SignUpDTO;
 import org.swmaestro.repl.gifthub.member.entity.Member;
 import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
 
@@ -25,10 +26,20 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public Long create(Member member) {
+	public Long create(SignUpDTO signUpDTO) {
+		Member member = convertSignUpDTOtoMember(signUpDTO);
 		Member encodedMember = passwordEncryption(member);
+
 		memberRepository.save(encodedMember);
-		return encodedMember.getId();
+		return member.getId();
+	}
+
+	public Member convertSignUpDTOtoMember(SignUpDTO signUpDTO) {
+		return Member.builder()
+			.username(signUpDTO.getUsername())
+			.password(signUpDTO.getPassword())
+			.nickname(signUpDTO.getNickname())
+			.build();
 	}
 
 	@Override

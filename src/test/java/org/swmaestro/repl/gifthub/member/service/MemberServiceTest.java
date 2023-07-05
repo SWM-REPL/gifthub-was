@@ -8,11 +8,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.swmaestro.repl.gifthub.member.dto.SignUpDTO;
 import org.swmaestro.repl.gifthub.member.entity.Member;
 import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
@@ -35,35 +37,34 @@ class MemberServiceTest {
 	@DisplayName("signUp logic test")
 	void create() {
 		// given
-		Member member = Member.builder()
-			.id(Long.valueOf(1))
-			.username("jinlee1703")
+		String testUsername = "jinlee1703";
+		SignUpDTO signUpDTO = SignUpDTO.builder()
+			.username(testUsername)
 			.password("abc123")
 			.nickname("이진우")
 			.build();
 
 		// when
-		memberService.create(member);
+		memberService.create(signUpDTO);
 
 		// then
-		verify(memberRepository).save(member);
+		verify(memberRepository).save(memberRepository.findByUsername(testUsername));
 	}
 
 	@Test
 	@DisplayName("password encryption logic test")
 	void passwordEncryption() {
 		// given
+		String testUsername = "jinlee1703";
 		String testPassword = "abc123";
-		Member member = Member.builder()
-			.id(Long.valueOf(1))
-			.username("jinlee1703")
+		SignUpDTO signUpDTO = SignUpDTO.builder()
+			.username(testUsername)
 			.password(testPassword)
 			.nickname("이진우")
 			.build();
 
 		// when
-		when(memberRepository.save(any(Member.class))).thenReturn(member);
-		memberService.create(member);
+		memberService.create(signUpDTO);
 
 		// then
 		verify(memberRepository, times(1)).save(any(Member.class));
@@ -73,16 +74,15 @@ class MemberServiceTest {
 	@DisplayName("Validation Check - Username Test")
 	void validationCheck1() {
 		// given
+		String testUsername = "jinlee1703";
 		String testPassword = "abc123";
-		Member member = Member.builder()
-			.id(Long.valueOf(1))
+		SignUpDTO signUpDTO = SignUpDTO.builder()
 			.password(testPassword)
 			.nickname("이진우")
 			.build();
 
 		// when
-		when(memberRepository.save(any(Member.class))).thenReturn(member);
-		memberService.create(member);
+		memberService.create(signUpDTO);
 
 		// then
 		verify(memberRepository, times(0)).save(any(Member.class));
@@ -92,16 +92,14 @@ class MemberServiceTest {
 	@DisplayName("Validation Check - password Test")
 	void validationCheck2() {
 		// given
-		String testPassword = "abc123";
-		Member member = Member.builder()
-			.id(Long.valueOf(1))
-			.username("jinlee1703")
+		String testUsername = "jinlee1703";
+		SignUpDTO signUpDTO = SignUpDTO.builder()
+			.username(testUsername)
 			.nickname("이진우")
 			.build();
 
 		// when
-		when(memberRepository.save(any(Member.class))).thenReturn(member);
-		memberService.create(member);
+		memberService.create(signUpDTO);
 
 		// then
 		verify(memberRepository, times(0)).save(any(Member.class));
@@ -111,16 +109,15 @@ class MemberServiceTest {
 	@DisplayName("Validation Check - nickname Test")
 	void validationCheck3() {
 		// given
+		String testUsername = "jinlee1703";
 		String testPassword = "abc123";
-		Member member = Member.builder()
-			.id(Long.valueOf(1))
-			.username("jinlee1703")
+		SignUpDTO signUpDTO = SignUpDTO.builder()
+			.username(testUsername)
 			.password(testPassword)
 			.build();
 
 		// when
-		when(memberRepository.save(any(Member.class))).thenReturn(member);
-		memberService.create(member);
+		memberService.create(signUpDTO);
 
 		// then
 		verify(memberRepository, times(0)).save(any(Member.class));
