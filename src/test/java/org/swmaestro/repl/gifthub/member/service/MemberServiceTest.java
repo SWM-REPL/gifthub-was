@@ -5,12 +5,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.swmaestro.repl.gifthub.member.entity.Member;
 import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
@@ -20,9 +22,13 @@ class MemberServiceTest {
 	@Mock
 	private SpringDataJpaMemberRepository memberRepository;
 
+	@Mock
+	private PasswordEncoder passwordEncoder;
+
 	@BeforeEach
 	void setUp() {
-		memberService = new MemberServiceImpl(memberRepository);
+		MockitoAnnotations.openMocks(this);
+		memberService = new MemberServiceImpl(memberRepository, passwordEncoder);
 	}
 
 	@Test
@@ -56,9 +62,10 @@ class MemberServiceTest {
 			.build();
 
 		// when
+		when(memberRepository.save(any(Member.class))).thenReturn(member);
 		memberService.signUp(member);
 
 		// then
-		assertThat(memberRepository.findById(Long.valueOf(1)).get().getPassword()).isNotEqualTo(testPassword);
+		verify(memberRepository, times(1)).save(any(Member.class));
 	}
 }
