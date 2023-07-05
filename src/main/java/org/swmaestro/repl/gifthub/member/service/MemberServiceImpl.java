@@ -8,6 +8,8 @@ import org.swmaestro.repl.gifthub.member.entity.Member;
 import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class MemberServiceImpl implements MemberService {
@@ -30,11 +32,19 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public Long create(SignUpDTO signUpDTO) {
-		Member member = convertSignUpDTOtoMember(signUpDTO);
-		Member encodedMember = passwordEncryption(member);
+		String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@#$%^&+=_\\-!]).{8,64}$";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(signUpDTO.getPassword());
 
-		memberRepository.save(encodedMember);
-		return member.getId();
+		if (matcher.matches()) {
+			Member member = convertSignUpDTOtoMember(signUpDTO);
+			Member encodedMember = passwordEncryption(member);
+
+			memberRepository.save(encodedMember);
+			return member.getId();
+		} else {
+			return -1L;
+		}
 	}
 
 	public Member convertSignUpDTOtoMember(SignUpDTO signUpDTO) {
