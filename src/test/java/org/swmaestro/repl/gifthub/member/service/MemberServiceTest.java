@@ -1,25 +1,23 @@
 package org.swmaestro.repl.gifthub.member.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.swmaestro.repl.gifthub.member.entity.Member;
 import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
-	@Autowired
+	@Mock
 	private MemberServiceImpl memberService;
 
-	@MockBean
+	@Mock
 	private SpringDataJpaMemberRepository memberRepository;
 
 	@BeforeEach
@@ -28,6 +26,7 @@ class MemberServiceTest {
 	}
 
 	@Test
+	@DisplayName("signUp logic test")
 	void signUp() {
 		// given
 		Member member = Member.builder()
@@ -45,6 +44,7 @@ class MemberServiceTest {
 	}
 
 	@Test
+	@DisplayName("password encryption logic test")
 	void passwordEncryption() {
 		// given
 		String testPassword = "abc123";

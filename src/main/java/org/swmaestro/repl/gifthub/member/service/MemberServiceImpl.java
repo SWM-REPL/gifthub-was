@@ -19,7 +19,11 @@ public class MemberServiceImpl implements MemberService {
 	public void signUp(Member member) {
 		memberRepository.save(member);
 	}
-	
+
+	public void passwordEncryption() {
+
+	}
+
 	@Override
 	public Long create() {
 		return null;

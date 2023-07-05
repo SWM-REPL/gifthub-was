@@ -30,6 +30,8 @@ dependencies {
     // jakarta.validation annotation
     implementation group: 'jakarta.validation', name: 'jakarta.validation-api', version: '3.0.2'
 
+    // spring security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 tasks.named('test') {
