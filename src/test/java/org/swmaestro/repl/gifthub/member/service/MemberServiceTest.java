@@ -40,10 +40,9 @@ class MemberServiceTest {
 	@DisplayName("signUp logic test")
 	void create() {
 		// given
-		String testUsername = "jinlee1703";
 		SignUpDTO signUpDTO = SignUpDTO.builder()
-			.username(testUsername)
-			.password("abc123")
+			.username("jinlee1703")
+			.password("abc123##")
 			.nickname("이진우")
 			.build();
 
@@ -84,40 +83,82 @@ class MemberServiceTest {
 	}
 
 	/*
-	 * password validation test
-	 * 1. 영문/숫자/문자 포함 여부
-	 * 2. 8-64자
+	 * 중복된 username 테스트
+	 */
+	@Test
+	@DisplayName("duplicated username test")
+	void duplicatedUsername() {
+		// given
+		SignUpDTO signUpDTO1 = SignUpDTO.builder()
+			.username("jinlee1703")
+			.password("abc123##")
+			.nickname("이진우")
+			.build();
+
+		SignUpDTO signUpDTO2 = SignUpDTO.builder()
+			.username("jinlee1703")
+			.password("abc123##")
+			.nickname("이진수")
+			.build();
+
+		// when
+		memberService.create(signUpDTO1);
+		memberService.create(signUpDTO2);
+		verify(memberRepository, times(1)).save(any(Member.class));
+	}
+
+	/*
+	 * username 최소 길이 테스트
+	 */
+	@Test
+	@DisplayName("username minimum length test")
+	void usernameMinimumSize() {
+		String testUsername = "jin";
+		String testPassword = "abc123##";
+		String testNickname = "이진우";
+
+		// given
+		SignUpDTO signUpDTO = SignUpDTO.builder()
+			.username(testUsername)
+			.password(testPassword)
+			.nickname(testNickname)
+			.build();
+
+		// when
+		memberService.create(signUpDTO);
+		verify(memberRepository, times(0)).save(any(Member.class));
+	}
+
+	/*
+	 * username 최대 길이 테스트
+	 */
+	@Test
+	@DisplayName("username maximum length test")
+	void usernameThanMaximumSize() {
+		String testUsername = "jinwoo".repeat(11);
+		String testPassword = "abc123##";
+		String testNickname = "이진우";
+
+		// given
+		SignUpDTO signUpDTO = SignUpDTO.builder()
+			.username(testUsername)
+			.password(testPassword)
+			.nickname(testNickname)
+			.build();
+
+		// when
+		memberService.create(signUpDTO);
+		verify(memberRepository, times(0)).save(any(Member.class));
+	}
+
+	/*
+	 * password 영문/숫자/문자 포함 여부 테스트
 	 */
 	@Test
 	@DisplayName("password validation test")
 	void passwordValidation() {
 		String testUsername = "jinlee1703";
-		String testPassword = "abc123";
-		String testNickname = "이진우";
-
-		// given
-		SignUpDTO signUpDTO = SignUpDTO.builder()
-			.username(testUsername)
-			.password(testPassword)
-			.nickname(testNickname)
-			.build();
-
-		// when
-		memberService.create(signUpDTO);
-		verify(memberRepository, times(0)).save(any(Member.class));
-	}
-
-
-	/*
-	 * username validation test
-	 * 1. 중복 검사
-	 * 2. 4-60자
-	 */
-	@Test
-	@DisplayName("username validation test")
-	void usernameValidation() {
-		String testUsername = "jinlee1703";
-		String testPassword = "abc123";
+		String testPassword = "abc123123";
 		String testNickname = "이진우";
 
 		// given
@@ -133,16 +174,58 @@ class MemberServiceTest {
 	}
 
 	/*
-	 * nickname validation test
-	 * 1. 중복 검사
-	 * 2. 2-12자
+	 * nickname 중복 검사 테스트
 	 */
 	@Test
 	@DisplayName("nickname validation test")
 	void nicknameValidation() {
-		String testUsername = "jinlee1703";
-		String testPassword = "abc123";
-		String testNickname = "이진우";
+		// given
+		SignUpDTO signUpDTO1 = SignUpDTO.builder()
+			.username("jinlee1703")
+			.password("abc123##")
+			.nickname("이진우")
+			.build();
+
+		SignUpDTO signUpDTO2 = SignUpDTO.builder()
+			.username("jinlee1704")
+			.password("abc123##")
+			.nickname("이진우")
+			.build();
+
+		// when
+		memberService.create(signUpDTO1);
+		memberService.create(signUpDTO2);
+		verify(memberRepository, times(1)).save(any(Member.class));
+	}
+
+	/*
+	 * nickname 최소 길이 테스트
+	 */
+	@Test
+	@DisplayName("nickname minimum length test")
+	void nicknameMinimumSize() {
+		String testUsername = "jin";
+		String testPassword = "abc123##";
+		String testNickname = "j";
+
+		// given
+		SignUpDTO signUpDTO = SignUpDTO.builder()
+			.username(testUsername)
+			.password(testPassword)
+			.nickname(testNickname)
+			.build();
+
+		// when
+		memberService.create(signUpDTO);
+		verify(memberRepository, times(0)).save(any(Member.class));
+	}
+
+	@Test
+	@DisplayName("nickname maximum length test")
+	void nicknameMaximumSize() {
+		String testUsername = "jin";
+		String testPassword = "abc123##";
+		String testNickname = "jinwoojinwoo1";
 
 		// given
 		SignUpDTO signUpDTO = SignUpDTO.builder()
