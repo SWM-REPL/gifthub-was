@@ -1,7 +1,6 @@
 package org.swmaestro.repl.gifthub.member.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.swmaestro.repl.gifthub.util.entity.BaseTimeEntity;
 
@@ -14,20 +13,17 @@ public class Member extends BaseTimeEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull
-	@Column(length = 60)
+	@Column(length = 60, nullable = false)
 	private String username;
 
-	@NotNull
-	@Column(length = 60)
+	@Column(length = 60, nullable = false)
 	private String password;
 
-	@NotNull
-	@Column(length = 12)
+	@Column(length = 12, nullable = false)
 	private String nickname;
 
 	@Builder
-	public Member(Long id, @NotNull String username, @NotNull String password, @NotNull String nickname) {
+	public Member(Long id, String username, String password, String nickname) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
