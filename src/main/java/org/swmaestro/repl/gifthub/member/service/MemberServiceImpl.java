@@ -19,19 +19,16 @@ public class MemberServiceImpl implements MemberService {
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	public void signUp(Member member) {
-		Member encodedMember = passwordEncryption(member);
-		memberRepository.save(encodedMember);
-	}
-
 	public Member passwordEncryption(Member member) {
 		member.setPassword(passwordEncoder.encode(member.getPassword()));
 		return member;
 	}
 
 	@Override
-	public Long create() {
-		return null;
+	public Long create(Member member) {
+		Member encodedMember = passwordEncryption(member);
+		memberRepository.save(encodedMember);
+		return encodedMember.getId();
 	}
 
 	@Override

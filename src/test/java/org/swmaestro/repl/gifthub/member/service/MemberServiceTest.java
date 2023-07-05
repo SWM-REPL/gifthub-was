@@ -33,7 +33,7 @@ class MemberServiceTest {
 
 	@Test
 	@DisplayName("signUp logic test")
-	void signUp() {
+	void create() {
 		// given
 		Member member = Member.builder()
 			.id(Long.valueOf(1))
@@ -43,7 +43,7 @@ class MemberServiceTest {
 			.build();
 
 		// when
-		memberService.signUp(member);
+		memberService.create(member);
 
 		// then
 		verify(memberRepository).save(member);
@@ -63,7 +63,7 @@ class MemberServiceTest {
 
 		// when
 		when(memberRepository.save(any(Member.class))).thenReturn(member);
-		memberService.signUp(member);
+		memberService.create(member);
 
 		// then
 		verify(memberRepository, times(1)).save(any(Member.class));

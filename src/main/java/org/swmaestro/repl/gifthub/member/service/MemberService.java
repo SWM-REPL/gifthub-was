@@ -5,7 +5,7 @@ import org.swmaestro.repl.gifthub.member.entity.Member;
 import java.util.List;
 
 public interface MemberService {
-	Long create();
+	Long create(Member member);
 
 	Member read(Long id);
 
