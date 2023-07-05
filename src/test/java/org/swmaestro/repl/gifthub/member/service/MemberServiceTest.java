@@ -68,4 +68,61 @@ class MemberServiceTest {
 		// then
 		verify(memberRepository, times(1)).save(any(Member.class));
 	}
+
+	@Test
+	@DisplayName("Validation Check - Username Test")
+	void validationCheck1() {
+		// given
+		String testPassword = "abc123";
+		Member member = Member.builder()
+			.id(Long.valueOf(1))
+			.password(testPassword)
+			.nickname("이진우")
+			.build();
+
+		// when
+		when(memberRepository.save(any(Member.class))).thenReturn(member);
+		memberService.create(member);
+
+		// then
+		verify(memberRepository, times(0)).save(any(Member.class));
+	}
+
+	@Test
+	@DisplayName("Validation Check - password Test")
+	void validationCheck2() {
+		// given
+		String testPassword = "abc123";
+		Member member = Member.builder()
+			.id(Long.valueOf(1))
+			.username("jinlee1703")
+			.nickname("이진우")
+			.build();
+
+		// when
+		when(memberRepository.save(any(Member.class))).thenReturn(member);
+		memberService.create(member);
+
+		// then
+		verify(memberRepository, times(0)).save(any(Member.class));
+	}
+
+	@Test
+	@DisplayName("Validation Check - nickname Test")
+	void validationCheck3() {
+		// given
+		String testPassword = "abc123";
+		Member member = Member.builder()
+			.id(Long.valueOf(1))
+			.username("jinlee1703")
+			.password(testPassword)
+			.build();
+
+		// when
+		when(memberRepository.save(any(Member.class))).thenReturn(member);
+		memberService.create(member);
+
+		// then
+		verify(memberRepository, times(0)).save(any(Member.class));
+	}
 }
