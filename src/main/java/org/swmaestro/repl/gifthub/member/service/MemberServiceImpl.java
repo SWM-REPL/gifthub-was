@@ -21,8 +21,11 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	public Member passwordEncryption(Member member) {
-		member.setPassword(passwordEncoder.encode(member.getPassword()));
-		return member;
+		return Member.builder()
+			.username(member.getUsername())
+			.password(passwordEncoder.encode(member.getPassword()))
+			.nickname(member.getNickname())
+			.build();
 	}
 
 	@Override

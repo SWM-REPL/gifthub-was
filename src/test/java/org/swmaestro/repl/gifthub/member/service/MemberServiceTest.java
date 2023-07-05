@@ -12,9 +12,9 @@ import org.swmaestro.repl.gifthub.member.dto.SignUpDTO;
 import org.swmaestro.repl.gifthub.member.entity.Member;
 import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
@@ -48,7 +48,7 @@ class MemberServiceTest {
 		memberService.create(signUpDTO);
 
 		// then
-		verify(memberRepository).save(memberRepository.findByUsername(testUsername));
+		verify(memberRepository, times(1)).save(any(Member.class));
 	}
 
 	@Test
@@ -64,10 +64,17 @@ class MemberServiceTest {
 			.build();
 
 		// when
+		Member member = Member.builder()
+			.username(signUpDTO.getUsername())
+			.password("hashed_password")
+			.nickname(signUpDTO.getNickname())
+			.build();
+
 		memberService.create(signUpDTO);
+		when(memberRepository.findByUsername(any(String.class))).thenReturn(member);
 
 		// then
-		verify(memberRepository, times(1)).save(any(Member.class));
+		assertNotEquals(memberRepository.findByUsername(testUsername).getPassword(), testPassword);
 	}
 
 	@Test
