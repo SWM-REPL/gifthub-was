@@ -1,6 +1,7 @@
 package org.swmaestro.repl.gifthub.member.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.member.entity.Member;
 import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
@@ -10,16 +11,24 @@ import java.util.List;
 @Service
 public class MemberServiceImpl implements MemberService {
 	private final SpringDataJpaMemberRepository memberRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public MemberServiceImpl(SpringDataJpaMemberRepository memberRepository) {
+	public MemberServiceImpl(SpringDataJpaMemberRepository memberRepository, PasswordEncoder passwordEncoder) {
 		this.memberRepository = memberRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	public void signUp(Member member) {
-		memberRepository.save(member);
+		Member encodedMember = passwordEncryption(member);
+		memberRepository.save(encodedMember);
 	}
-	
+
+	public Member passwordEncryption(Member member) {
+		member.setPassword(passwordEncoder.encode(member.getPassword()));
+		return member;
+	}
+
 	@Override
 	public Long create() {
 		return null;
