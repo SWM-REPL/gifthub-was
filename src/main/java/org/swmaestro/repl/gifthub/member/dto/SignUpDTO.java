@@ -15,10 +15,10 @@ public class SignUpDTO {
 	private String username;
 
 	@NotNull
-	@Size(min = 8)
+	@Size(min = 8, max = 64)
 	private String password;
 
 	@NotNull
-	@Size(min = 2)
+	@Size(min = 2, max = 12)
 	private String nickname;
 }

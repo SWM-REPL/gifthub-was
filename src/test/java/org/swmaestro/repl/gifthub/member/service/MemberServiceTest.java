@@ -33,6 +33,9 @@ class MemberServiceTest {
 		memberService = new MemberServiceImpl(memberRepository, passwordEncoder);
 	}
 
+	/*
+	 * 회원가입 전체 로직 테스트
+	 */
 	@Test
 	@DisplayName("signUp logic test")
 	void create() {
@@ -51,6 +54,9 @@ class MemberServiceTest {
 		verify(memberRepository, times(1)).save(any(Member.class));
 	}
 
+	/*
+	 * password 암호화 테스트
+	 */
 	@Test
 	@DisplayName("password encryption logic test")
 	void passwordEncryption() {
@@ -77,56 +83,76 @@ class MemberServiceTest {
 		assertNotEquals(memberRepository.findByUsername(testUsername).getPassword(), testPassword);
 	}
 
+	/*
+	 * password validation test
+	 * 1. 영문/숫자/문자 포함 여부
+	 * 2. 8-64자
+	 */
 	@Test
-	@DisplayName("Validation Check - Username Test")
-	void validationCheck1() {
-		// given
+	@DisplayName("password validation test")
+	void passwordValidation() {
 		String testUsername = "jinlee1703";
 		String testPassword = "abc123";
-		SignUpDTO signUpDTO = SignUpDTO.builder()
-			.password(testPassword)
-			.nickname("이진우")
-			.build();
+		String testNickname = "이진우";
 
-		// when
-		memberService.create(signUpDTO);
-
-		// then
-		verify(memberRepository, times(0)).save(any(Member.class));
-	}
-
-	@Test
-	@DisplayName("Validation Check - password Test")
-	void validationCheck2() {
 		// given
-		String testUsername = "jinlee1703";
-		SignUpDTO signUpDTO = SignUpDTO.builder()
-			.username(testUsername)
-			.nickname("이진우")
-			.build();
-
-		// when
-		memberService.create(signUpDTO);
-
-		// then
-		verify(memberRepository, times(0)).save(any(Member.class));
-	}
-
-	@Test
-	@DisplayName("Validation Check - nickname Test")
-	void validationCheck3() {
-		// given
-		String testUsername = "jinlee1703";
-		String testPassword = "abc123";
 		SignUpDTO signUpDTO = SignUpDTO.builder()
 			.username(testUsername)
 			.password(testPassword)
+			.nickname(testNickname)
 			.build();
 
 		// when
 		memberService.create(signUpDTO);
+		verify(memberRepository, times(0)).save(any(Member.class));
+	}
 
-		// then
+
+	/*
+	 * username validation test
+	 * 1. 중복 검사
+	 * 2. 4-60자
+	 */
+	@Test
+	@DisplayName("username validation test")
+	void usernameValidation() {
+		String testUsername = "jinlee1703";
+		String testPassword = "abc123";
+		String testNickname = "이진우";
+
+		// given
+		SignUpDTO signUpDTO = SignUpDTO.builder()
+			.username(testUsername)
+			.password(testPassword)
+			.nickname(testNickname)
+			.build();
+
+		// when
+		memberService.create(signUpDTO);
+		verify(memberRepository, times(0)).save(any(Member.class));
+	}
+
+	/*
+	 * nickname validation test
+	 * 1. 중복 검사
+	 * 2. 2-12자
+	 */
+	@Test
+	@DisplayName("nickname validation test")
+	void nicknameValidation() {
+		String testUsername = "jinlee1703";
+		String testPassword = "abc123";
+		String testNickname = "이진우";
+
+		// given
+		SignUpDTO signUpDTO = SignUpDTO.builder()
+			.username(testUsername)
+			.password(testPassword)
+			.nickname(testNickname)
+			.build();
+
+		// when
+		memberService.create(signUpDTO);
 		verify(memberRepository, times(0)).save(any(Member.class));
 	}
 }
