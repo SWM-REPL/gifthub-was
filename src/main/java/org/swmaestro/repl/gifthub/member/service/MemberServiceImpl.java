@@ -32,19 +32,17 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public Long create(SignUpDTO signUpDTO) {
-		String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@#$%^&+=_\\-!]).{8,64}$";
-		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(signUpDTO.getPassword());
-
-		if (matcher.matches()) {
-			Member member = convertSignUpDTOtoMember(signUpDTO);
-			Member encodedMember = passwordEncryption(member);
-
-			memberRepository.save(encodedMember);
-			return member.getId();
-		} else {
+		if (isDuplicateUsername(signUpDTO.getUsername()) ||
+			isDuplicateNickname(signUpDTO.getNickname()) ||
+			!isValidatePassword(signUpDTO.getPassword())) {
 			return -1L;
 		}
+
+		Member member = convertSignUpDTOtoMember(signUpDTO);
+		Member encodedMember = passwordEncryption(member);
+
+		memberRepository.save(encodedMember);
+		return member.getId();
 	}
 
 	public Member convertSignUpDTOtoMember(SignUpDTO signUpDTO) {
@@ -53,6 +51,22 @@ public class MemberServiceImpl implements MemberService {
 			.password(signUpDTO.getPassword())
 			.nickname(signUpDTO.getNickname())
 			.build();
+	}
+
+	public boolean isDuplicateUsername(String username) {
+		return memberRepository.findByUsername(username) != null;
+	}
+
+	public boolean isDuplicateNickname(String nickname) {
+		return memberRepository.findByNickname(nickname) != null;
+	}
+
+	public boolean isValidatePassword(String password) {
+		String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@#$%^&+=_\\-!]).{8,64}$";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(password);
+
+		return matcher.matches();
 	}
 
 	@Override
