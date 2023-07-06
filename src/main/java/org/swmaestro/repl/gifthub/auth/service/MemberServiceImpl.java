@@ -42,7 +42,7 @@ public class MemberServiceImpl implements MemberService {
 		Member encodedMember = passwordEncryption(member);
 
 		memberRepository.save(encodedMember);
-		return member.getId();
+		return encodedMember.getId();
 	}
 
 	public Member convertSignUpDTOtoMember(SignUpDto signUpDTO) {
