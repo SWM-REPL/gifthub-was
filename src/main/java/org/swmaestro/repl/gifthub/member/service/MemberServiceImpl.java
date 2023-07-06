@@ -3,10 +3,13 @@ package org.swmaestro.repl.gifthub.member.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.swmaestro.repl.gifthub.member.dto.SignUpDTO;
 import org.swmaestro.repl.gifthub.member.entity.Member;
 import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class MemberServiceImpl implements MemberService {
@@ -19,19 +22,51 @@ public class MemberServiceImpl implements MemberService {
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	public void signUp(Member member) {
-		Member encodedMember = passwordEncryption(member);
-		memberRepository.save(encodedMember);
-	}
-
 	public Member passwordEncryption(Member member) {
-		member.setPassword(passwordEncoder.encode(member.getPassword()));
-		return member;
+		return Member.builder()
+			.username(member.getUsername())
+			.password(passwordEncoder.encode(member.getPassword()))
+			.nickname(member.getNickname())
+			.build();
 	}
 
 	@Override
-	public Long create() {
-		return null;
+	public Long create(SignUpDTO signUpDTO) {
+		if (isDuplicateUsername(signUpDTO.getUsername()) ||
+			isDuplicateNickname(signUpDTO.getNickname()) ||
+			!isValidatePassword(signUpDTO.getPassword())) {
+			return -1L;
+		}
+
+		Member member = convertSignUpDTOtoMember(signUpDTO);
+		Member encodedMember = passwordEncryption(member);
+
+		memberRepository.save(encodedMember);
+		return member.getId();
+	}
+
+	public Member convertSignUpDTOtoMember(SignUpDTO signUpDTO) {
+		return Member.builder()
+			.username(signUpDTO.getUsername())
+			.password(signUpDTO.getPassword())
+			.nickname(signUpDTO.getNickname())
+			.build();
+	}
+
+	public boolean isDuplicateUsername(String username) {
+		return memberRepository.findByUsername(username) != null;
+	}
+
+	public boolean isDuplicateNickname(String nickname) {
+		return memberRepository.findByNickname(nickname) != null;
+	}
+
+	public boolean isValidatePassword(String password) {
+		String regex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@#$%^&+=_\\-!]).{8,64}$";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(password);
+
+		return matcher.matches();
 	}
 
 	@Override
