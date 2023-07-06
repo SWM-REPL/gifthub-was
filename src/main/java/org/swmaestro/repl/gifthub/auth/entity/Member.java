@@ -1,4 +1,4 @@
-package org.swmaestro.repl.gifthub.member.entity;
+package org.swmaestro.repl.gifthub.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

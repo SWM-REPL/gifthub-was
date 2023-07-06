@@ -1,11 +1,11 @@
-package org.swmaestro.repl.gifthub.member.service;
+package org.swmaestro.repl.gifthub.auth.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.member.dto.SignUpDTO;
-import org.swmaestro.repl.gifthub.member.entity.Member;
-import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
+import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.repository.SpringDataJpaMemberRepository;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,7 +31,7 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public Long create(SignUpDTO signUpDTO) {
+	public Long create(SignUpDto signUpDTO) {
 		if (isDuplicateUsername(signUpDTO.getUsername()) ||
 			isDuplicateNickname(signUpDTO.getNickname()) ||
 			!isValidatePassword(signUpDTO.getPassword())) {
@@ -45,7 +45,7 @@ public class MemberServiceImpl implements MemberService {
 		return member.getId();
 	}
 
-	public Member convertSignUpDTOtoMember(SignUpDTO signUpDTO) {
+	public Member convertSignUpDTOtoMember(SignUpDto signUpDTO) {
 		return Member.builder()
 			.username(signUpDTO.getUsername())
 			.password(signUpDTO.getPassword())

@@ -1,4 +1,4 @@
-package org.swmaestro.repl.gifthub.member.dto;
+package org.swmaestro.repl.gifthub.auth.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class SignUpDTO {
+public class SignUpDto {
 	@NotNull
 	@Size(min = 4, max = 60)
 	private String username;
