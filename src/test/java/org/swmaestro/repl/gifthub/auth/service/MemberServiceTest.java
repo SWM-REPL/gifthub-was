@@ -1,4 +1,4 @@
-package org.swmaestro.repl.gifthub.member.service;
+package org.swmaestro.repl.gifthub.auth.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -8,9 +8,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.swmaestro.repl.gifthub.member.dto.SignUpDTO;
-import org.swmaestro.repl.gifthub.member.entity.Member;
-import org.swmaestro.repl.gifthub.member.repository.SpringDataJpaMemberRepository;
+import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.repository.SpringDataJpaMemberRepository;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +40,7 @@ class MemberServiceTest {
 	@DisplayName("signUp logic test")
 	void create() {
 		// given
-		SignUpDTO signUpDTO = SignUpDTO.builder()
+		SignUpDto signUpDTO = SignUpDto.builder()
 			.username("jinlee1703")
 			.password("abc123##")
 			.nickname("이진우")
@@ -62,7 +62,7 @@ class MemberServiceTest {
 		// given
 		String testUsername = "jinlee1703";
 		String testPassword = "abc123";
-		SignUpDTO signUpDTO = SignUpDTO.builder()
+		SignUpDto signUpDTO = SignUpDto.builder()
 			.username(testUsername)
 			.password(testPassword)
 			.nickname("이진우")
@@ -91,7 +91,7 @@ class MemberServiceTest {
 		String testUsername = "jinlee1703";
 
 		// given
-		SignUpDTO signUpDTO = SignUpDTO.builder()
+		SignUpDto signUpDTO = SignUpDto.builder()
 			.username(testUsername)
 			.password("abc123##")
 			.nickname("이진우")
@@ -122,7 +122,7 @@ class MemberServiceTest {
 		String testNickname = "이진우";
 
 		// given
-		SignUpDTO signUpDTO = SignUpDTO.builder()
+		SignUpDto signUpDTO = SignUpDto.builder()
 			.username(testUsername)
 			.password(testPassword)
 			.nickname(testNickname)
@@ -142,7 +142,7 @@ class MemberServiceTest {
 		String testNickname = "이진우";
 
 		// given
-		SignUpDTO signUpDTO = SignUpDTO.builder()
+		SignUpDto signUpDTO = SignUpDto.builder()
 			.username("jinlee1703")
 			.password("abc123##")
 			.nickname(testNickname)
