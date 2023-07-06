@@ -269,4 +269,7 @@ class MemberServiceTest {
         assertEquals(expectedMembers, actualMembers);
         verify(memberRepository, times(1)).findAll();
     }
+    /*
+     * 비밀번호 검증 테스트
+     */
 }
