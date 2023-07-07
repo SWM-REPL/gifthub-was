@@ -14,73 +14,73 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 class AuthServiceTest {
-    @Mock
-    private SpringDataJpaMemberRepository memberRepository;
+	@Mock
+	private SpringDataJpaMemberRepository memberRepository;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+	@Mock
+	private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private AuthServiceImpl authService;
+	@Mock
+	private AuthServiceImpl authService;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        authService = new AuthServiceImpl(memberRepository, passwordEncoder);
-    }
+	@BeforeEach
+	public void setUp() {
+		MockitoAnnotations.openMocks(this);
+		authService = new AuthServiceImpl(memberRepository, passwordEncoder);
+	}
 
-    /*
-     * 비밀번호 검증 로직 성공 테스트
-     */
-    @Test
-    void verifyPasswordSuccess() {
-        //given
-        SignUpDto signUpDto = SignUpDto.builder()
-                .username("jinlee1703")
-                .password("abc123##")
-                .nickname("이진우")
-                .build();
-        Member member = Member.builder()
-                .username("jinlee1703")
-                .password("abc123##")
-                .nickname("이진우")
-                .build();
+	/*
+	 * 비밀번호 검증 로직 성공 테스트
+	 */
+	@Test
+	void verifyPasswordSuccess() {
+		//given
+		SignUpDto signUpDto = SignUpDto.builder()
+			.username("jinlee1703")
+			.password("abc123##")
+			.nickname("이진우")
+			.build();
+		Member member = Member.builder()
+			.username("jinlee1703")
+			.password("abc123##")
+			.nickname("이진우")
+			.build();
 
-        when(memberRepository.findByUsername(signUpDto.getUsername())).thenReturn(member);
-        when(passwordEncoder.matches(signUpDto.getPassword(), member.getPassword())).thenReturn(true);
+		when(memberRepository.findByUsername(signUpDto.getUsername())).thenReturn(member);
+		when(passwordEncoder.matches(signUpDto.getPassword(), member.getPassword())).thenReturn(true);
 
-        // When
-        SignUpDto result = authService.verifyPassword(signUpDto);
+		// When
+		SignUpDto result = authService.verifyPassword(signUpDto);
 
-        // Then
-        assertNotNull(result);
-        assertEquals(signUpDto.getUsername(), result.getUsername());
-    }
+		// Then
+		assertNotNull(result);
+		assertEquals(signUpDto.getUsername(), result.getUsername());
+	}
 
-    /*
-     * 비밀번호 검증 로직 실패 테스트
-     */
-    @Test
-    void verifyPasswordFail() {
-        //given
-        SignUpDto signUpDto = SignUpDto.builder()
-                .username("jinlee1703")
-                .password("abc123##")
-                .nickname("이진우")
-                .build();
-        Member member = Member.builder()
-                .username("jinlee1703")
-                .password("abc123##XX")
-                .nickname("이진우")
-                .build();
+	/*
+	 * 비밀번호 검증 로직 실패 테스트
+	 */
+	@Test
+	void verifyPasswordFail() {
+		//given
+		SignUpDto signUpDto = SignUpDto.builder()
+			.username("jinlee1703")
+			.password("abc123##")
+			.nickname("이진우")
+			.build();
+		Member member = Member.builder()
+			.username("jinlee1703")
+			.password("abc123##XX")
+			.nickname("이진우")
+			.build();
 
-        when(memberRepository.findByUsername(signUpDto.getUsername())).thenReturn(member);
-        when(passwordEncoder.matches(signUpDto.getPassword(), member.getPassword())).thenReturn(false);
+		when(memberRepository.findByUsername(signUpDto.getUsername())).thenReturn(member);
+		when(passwordEncoder.matches(signUpDto.getPassword(), member.getPassword())).thenReturn(false);
 
-        // When
-        SignUpDto result = authService.verifyPassword(signUpDto);
+		// When
+		SignUpDto result = authService.verifyPassword(signUpDto);
 
-        // Then
-        assertEquals(null, result);
-    }
+		// Then
+		assertEquals(null, result);
+	}
 }

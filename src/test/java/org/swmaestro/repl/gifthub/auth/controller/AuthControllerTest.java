@@ -36,7 +36,7 @@ public class AuthControllerTest {
 			.nickname("이진우")
 			.build();
 
-		given(memberService.create(signUpDto)).willReturn(1L);
+		given(memberService.create(signUpDto)).willReturn("myawesomejwt");
 
 		mockMvc.perform(post("/auth/sign-up")
 				.contentType(MediaType.APPLICATION_JSON)
