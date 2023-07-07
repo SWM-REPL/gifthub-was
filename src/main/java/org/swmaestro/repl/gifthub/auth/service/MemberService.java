@@ -6,15 +6,15 @@ import org.swmaestro.repl.gifthub.auth.entity.Member;
 import java.util.List;
 
 public interface MemberService {
-    Long create(SignUpDto signUpDTO);
+	String create(SignUpDto signUpDTO);
 
-    Member read(SignUpDto signUpDto);
+	Member read(SignUpDto signUpDto);
 
-    int count();
+	int count();
 
-    List<Member> list();
+	List<Member> list();
 
-    Long update(Long id, Member member);
+	Long update(Long id, Member member);
 
-    Long delete(Long id);
+	Long delete(Long id);
 }
