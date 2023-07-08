@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.dto.LoginDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.SpringDataJpaMemberRepository;
 
@@ -35,26 +35,25 @@ class AuthServiceTest {
 	@Test
 	void verifyPasswordSuccess() {
 		//given
-		SignUpDto signUpDto = SignUpDto.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.nickname("이진우")
-			.build();
+		LoginDto loginDto = LoginDto.builder()
+				.username("jinlee1703")
+				.password("abc123##")
+				.build();
 		Member member = Member.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.nickname("이진우")
-			.build();
+				.username("jinlee1703")
+				.password("abc123##")
+				.nickname("이진우")
+				.build();
 
-		when(memberRepository.findByUsername(signUpDto.getUsername())).thenReturn(member);
-		when(passwordEncoder.matches(signUpDto.getPassword(), member.getPassword())).thenReturn(true);
+		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(member);
+		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(true);
 
 		// When
-		SignUpDto result = authService.verifyPassword(signUpDto);
+		LoginDto result = authService.verifyPassword(loginDto);
 
 		// Then
 		assertNotNull(result);
-		assertEquals(signUpDto.getUsername(), result.getUsername());
+		assertEquals(loginDto.getUsername(), result.getUsername());
 	}
 
 	/*
@@ -63,22 +62,21 @@ class AuthServiceTest {
 	@Test
 	void verifyPasswordFail() {
 		//given
-		SignUpDto signUpDto = SignUpDto.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.nickname("이진우")
-			.build();
+		LoginDto loginDto = LoginDto.builder()
+				.username("jinlee1703")
+				.password("abc123##")
+				.build();
 		Member member = Member.builder()
-			.username("jinlee1703")
-			.password("abc123##XX")
-			.nickname("이진우")
-			.build();
+				.username("jinlee1703")
+				.password("abc123##XX")
+				.nickname("이진우")
+				.build();
 
-		when(memberRepository.findByUsername(signUpDto.getUsername())).thenReturn(member);
-		when(passwordEncoder.matches(signUpDto.getPassword(), member.getPassword())).thenReturn(false);
+		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(member);
+		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(false);
 
 		// When
-		SignUpDto result = authService.verifyPassword(signUpDto);
+		LoginDto result = authService.verifyPassword(loginDto);
 
 		// Then
 		assertEquals(null, result);
