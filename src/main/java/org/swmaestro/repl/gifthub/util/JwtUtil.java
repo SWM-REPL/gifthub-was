@@ -38,6 +38,7 @@ public class JwtUtil {
 	public String generateToken(String username) {
 		return io.jsonwebtoken.Jwts.builder()
 			.setSubject(username)
+			.setIssuer(issuer)
 			.setIssuedAt(new java.util.Date(System.currentTimeMillis()))
 			.setExpiration(new java.util.Date(System.currentTimeMillis() + expiration))
 			.signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, secretKey)
