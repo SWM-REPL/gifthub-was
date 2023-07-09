@@ -1,7 +1,8 @@
-package org.swmaestro.repl.gifthub.auth.entity;
+package org.swmaestro.repl.gifthub.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.swmaestro.repl.gifthub.auth.entity.Member;
 
 import java.util.Collection;
 
