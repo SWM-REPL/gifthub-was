@@ -2,7 +2,6 @@ package org.swmaestro.repl.gifthub.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.swmaestro.repl.gifthub.util.entity.BaseTimeEntity;
 
 @Entity
 @Getter

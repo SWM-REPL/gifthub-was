@@ -1,7 +1,8 @@
-package org.swmaestro.repl.gifthub.auth.entity;
+package org.swmaestro.repl.gifthub.security;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.swmaestro.repl.gifthub.auth.entity.Member;
 
 import java.util.Collection;
 
@@ -12,6 +13,10 @@ public class CustomUserDetails implements UserDetails {
 		this.member = member;
 	}
 
+	public final Member getMember() {
+		return member;
+	}
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return null;
@@ -19,31 +24,31 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public String getPassword() {
-		return null;
+		return member.getPassword();
 	}
 
 	@Override
 	public String getUsername() {
-		return null;
+		return member.getUsername();
 	}
 
 	@Override
 	public boolean isAccountNonExpired() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isAccountNonLocked() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isCredentialsNonExpired() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isEnabled() {
-		return false;
+		return true;
 	}
 }

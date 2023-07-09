@@ -1,18 +1,17 @@
-package org.swmaestro.repl.gifthub.auth.service;
+package org.swmaestro.repl.gifthub.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.entity.CustomUserDetails;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.repository.SpringDataJpaMemberRepository;
+import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 
 @Service
 @RequiredArgsConstructor
 public class JpaUserDetailsService implements UserDetailsService {
-	private final SpringDataJpaMemberRepository memberRepository;
+	private final MemberRepository memberRepository;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

@@ -16,7 +16,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.swmaestro.repl.gifthub.util.filter.JwtAuthenticationFilter;
+import org.swmaestro.repl.gifthub.filter.JwtAuthenticationFilter;
 
 import java.io.IOException;
 

@@ -12,7 +12,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class JwtUtilTest {
 	@Mock
-	private JwtUtil jwtUtil;
+	private JwtProvider jwtProvider;
 
 	@Test
 	@DisplayName("generateToken test")
@@ -21,10 +21,10 @@ class JwtUtilTest {
 		String username = "jinwoolee";
 
 		// when
-		jwtUtil.generateToken(username);
+		jwtProvider.generateToken(username);
 
 		// then
-		verify(jwtUtil, times(1)).generateToken(username);
+		verify(jwtProvider, times(1)).generateToken(username);
 	}
 
 	@Test
@@ -34,13 +34,13 @@ class JwtUtilTest {
 		String username = "jinwoolee";
 
 		// when
-		when(jwtUtil.generateToken(anyString())).thenReturn("myawesomejwt");
-		when(jwtUtil.validateToken(anyString())).thenReturn(true);
+		when(jwtProvider.generateToken(anyString())).thenReturn("myawesomejwt");
+		when(jwtProvider.validateToken(anyString())).thenReturn(true);
 
-		String myJwtToken = jwtUtil.generateToken(username);
+		String myJwtToken = jwtProvider.generateToken(username);
 
 		// then
-		assertTrue(jwtUtil.validateToken(myJwtToken));
-		verify(jwtUtil, times(1)).validateToken(myJwtToken);
+		assertTrue(jwtProvider.validateToken(myJwtToken));
+		verify(jwtProvider, times(1)).validateToken(myJwtToken);
 	}
 }

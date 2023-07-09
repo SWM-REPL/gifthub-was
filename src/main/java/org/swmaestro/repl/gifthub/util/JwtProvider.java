@@ -10,19 +10,19 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.swmaestro.repl.gifthub.auth.service.JpaUserDetailsService;
+import org.swmaestro.repl.gifthub.security.JpaUserDetailsService;
 
 import java.util.Date;
 
 @Component
 @PropertySource("classpath:application.yml")
-public class JwtUtil {
+public class JwtProvider {
 	private final String secretKey;
 	private final long expiration;
 	private final String issuer;
 	private final JpaUserDetailsService userDetailsService;
 
-	public JwtUtil(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration, @Value("${issuer}") String issuer, JpaUserDetailsService userDetailsService) {
+	public JwtProvider(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration, @Value("${issuer}") String issuer, JpaUserDetailsService userDetailsService) {
 		this.secretKey = secretKey;
 		this.expiration = expiration;
 		this.issuer = issuer;
@@ -38,6 +38,7 @@ public class JwtUtil {
 	public String generateToken(String username) {
 		return io.jsonwebtoken.Jwts.builder()
 			.setSubject(username)
+			.setIssuer(issuer)
 			.setIssuedAt(new java.util.Date(System.currentTimeMillis()))
 			.setExpiration(new java.util.Date(System.currentTimeMillis() + expiration))
 			.signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, secretKey)

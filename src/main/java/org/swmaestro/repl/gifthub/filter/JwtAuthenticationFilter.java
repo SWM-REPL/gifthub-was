@@ -1,4 +1,4 @@
-package org.swmaestro.repl.gifthub.util.filter;
+package org.swmaestro.repl.gifthub.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.swmaestro.repl.gifthub.util.JwtUtil;
+import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import java.io.IOException;
 
@@ -19,14 +19,14 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-	private final JwtUtil jwtUtil;
+	private final JwtProvider jwtProvider;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		String token = jwtUtil.resolveToken(request);
-		if (token != null && jwtUtil.validateToken(token)) {
+		String token = jwtProvider.resolveToken(request);
+		if (token != null && jwtProvider.validateToken(token)) {
 			token = token.substring(7);
-			Authentication auth = jwtUtil.getAuthentication(token);
+			Authentication auth = jwtProvider.getAuthentication(token);
 			SecurityContextHolder.getContext().setAuthentication(auth);
 		}
 		filterChain.doFilter(request, response);

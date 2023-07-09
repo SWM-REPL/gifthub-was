@@ -5,8 +5,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.repository.SpringDataJpaMemberRepository;
-import org.swmaestro.repl.gifthub.util.JwtUtil;
+import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -15,9 +15,9 @@ import java.util.regex.Pattern;
 @Service
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
-	private final SpringDataJpaMemberRepository memberRepository;
+	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final JwtUtil jwtUtil;
+	private final JwtProvider jwtProvider;
 
 //	@Autowired
 //	public MemberServiceImpl(SpringDataJpaMemberRepository memberRepository, PasswordEncoder passwordEncoder) {
@@ -45,7 +45,7 @@ public class MemberServiceImpl implements MemberService {
 		Member encodedMember = passwordEncryption(member);
 
 		memberRepository.save(encodedMember);
-		return jwtUtil.generateToken(encodedMember.getUsername());
+		return jwtProvider.generateToken(encodedMember.getUsername());
 	}
 
 	public Member convertSignUpDTOtoMember(SignUpDto signUpDTO) {
