@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.repository.SpringDataJpaMemberRepository;
+import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ class MemberServiceTest {
 	private MemberServiceImpl memberService;
 
 	@Mock
-	private SpringDataJpaMemberRepository memberRepository;
+	private MemberRepository memberRepository;
 
 	@Mock
 	private PasswordEncoder passwordEncoder;

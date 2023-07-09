@@ -7,7 +7,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.swmaestro.repl.gifthub.auth.dto.LoginDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.repository.SpringDataJpaMemberRepository;
+import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
 
 class AuthServiceTest {
 	@Mock
-	private SpringDataJpaMemberRepository memberRepository;
+	private MemberRepository memberRepository;
 
 	@Mock
 	private PasswordEncoder passwordEncoder;
@@ -36,14 +36,14 @@ class AuthServiceTest {
 	void verifyPasswordSuccess() {
 		//given
 		LoginDto loginDto = LoginDto.builder()
-				.username("jinlee1703")
-				.password("abc123##")
-				.build();
+			.username("jinlee1703")
+			.password("abc123##")
+			.build();
 		Member member = Member.builder()
-				.username("jinlee1703")
-				.password("abc123##")
-				.nickname("이진우")
-				.build();
+			.username("jinlee1703")
+			.password("abc123##")
+			.nickname("이진우")
+			.build();
 
 		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(member);
 		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(true);
@@ -63,14 +63,14 @@ class AuthServiceTest {
 	void verifyPasswordFail() {
 		//given
 		LoginDto loginDto = LoginDto.builder()
-				.username("jinlee1703")
-				.password("abc123##")
-				.build();
+			.username("jinlee1703")
+			.password("abc123##")
+			.build();
 		Member member = Member.builder()
-				.username("jinlee1703")
-				.password("abc123##XX")
-				.nickname("이진우")
-				.build();
+			.username("jinlee1703")
+			.password("abc123##XX")
+			.nickname("이진우")
+			.build();
 
 		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(member);
 		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(false);
