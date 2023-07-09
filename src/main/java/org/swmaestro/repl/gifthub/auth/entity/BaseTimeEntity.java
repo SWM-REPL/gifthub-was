@@ -1,4 +1,4 @@
-package org.swmaestro.repl.gifthub.util.entity;
+package org.swmaestro.repl.gifthub.auth.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
