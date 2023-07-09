@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.SpringDataJpaMemberRepository;
-import org.swmaestro.repl.gifthub.util.JwtUtil;
+import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +32,12 @@ class MemberServiceTest {
 	private PasswordEncoder passwordEncoder;
 
 	@Mock
-	private JwtUtil jwtUtil;
+	private JwtProvider jwtProvider;
 
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
-		memberService = new MemberServiceImpl(memberRepository, passwordEncoder, jwtUtil);
+		memberService = new MemberServiceImpl(memberRepository, passwordEncoder, jwtProvider);
 	}
 
 	/*

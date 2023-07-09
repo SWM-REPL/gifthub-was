@@ -16,13 +16,13 @@ import java.util.Date;
 
 @Component
 @PropertySource("classpath:application.yml")
-public class JwtUtil {
+public class JwtProvider {
 	private final String secretKey;
 	private final long expiration;
 	private final String issuer;
 	private final JpaUserDetailsService userDetailsService;
 
-	public JwtUtil(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration, @Value("${issuer}") String issuer, JpaUserDetailsService userDetailsService) {
+	public JwtProvider(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration, @Value("${issuer}") String issuer, JpaUserDetailsService userDetailsService) {
 		this.secretKey = secretKey;
 		this.expiration = expiration;
 		this.issuer = issuer;
