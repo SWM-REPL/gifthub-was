@@ -1,4 +1,4 @@
-package org.swmaestro.repl.gifthub.util.filter;
+package org.swmaestro.repl.gifthub.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
