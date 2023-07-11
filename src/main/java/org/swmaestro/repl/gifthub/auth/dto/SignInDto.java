@@ -9,7 +9,7 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class LoginDto {
+public class SignInDto {
 	@NotNull
 	@Size(min = 4, max = 60)
 	private String username;

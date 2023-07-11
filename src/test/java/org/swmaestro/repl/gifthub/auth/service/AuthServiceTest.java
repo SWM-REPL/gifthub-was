@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.swmaestro.repl.gifthub.auth.dto.LoginDto;
+import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 
@@ -35,7 +35,7 @@ class AuthServiceTest {
 	@Test
 	void verifyPasswordSuccess() {
 		//given
-		LoginDto loginDto = LoginDto.builder()
+		SignInDto loginDto = SignInDto.builder()
 			.username("jinlee1703")
 			.password("abc123##")
 			.build();
@@ -49,7 +49,7 @@ class AuthServiceTest {
 		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(true);
 
 		// When
-		LoginDto result = authService.verifyPassword(loginDto);
+		SignInDto result = authService.signIn(loginDto);
 
 		// Then
 		assertNotNull(result);
@@ -62,7 +62,7 @@ class AuthServiceTest {
 	@Test
 	void verifyPasswordFail() {
 		//given
-		LoginDto loginDto = LoginDto.builder()
+		SignInDto loginDto = SignInDto.builder()
 			.username("jinlee1703")
 			.password("abc123##")
 			.build();
@@ -76,7 +76,7 @@ class AuthServiceTest {
 		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(false);
 
 		// When
-		LoginDto result = authService.verifyPassword(loginDto);
+		SignInDto result = authService.signIn(loginDto);
 
 		// Then
 		assertEquals(null, result);
