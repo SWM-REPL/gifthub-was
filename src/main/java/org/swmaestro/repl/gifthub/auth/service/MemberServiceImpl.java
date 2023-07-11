@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -18,26 +19,21 @@ public class MemberServiceImpl implements MemberService {
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
-
-//	@Autowired
-//	public MemberServiceImpl(SpringDataJpaMemberRepository memberRepository, PasswordEncoder passwordEncoder) {
-//		this.memberRepository = memberRepository;
-//		this.passwordEncoder = passwordEncoder;
-//	}
+	private final RefreshTokenService refreshTokenService;
 
 	public Member passwordEncryption(Member member) {
 		return Member.builder()
-			.username(member.getUsername())
-			.password(passwordEncoder.encode(member.getPassword()))
-			.nickname(member.getNickname())
-			.build();
+				.username(member.getUsername())
+				.password(passwordEncoder.encode(member.getPassword()))
+				.nickname(member.getNickname())
+				.build();
 	}
 
 	@Override
-	public String create(SignUpDto signUpDTO) {
+	public TokenDto create(SignUpDto signUpDTO) {
 		if (isDuplicateUsername(signUpDTO.getUsername()) ||
-			isDuplicateNickname(signUpDTO.getNickname()) ||
-			!isValidatePassword(signUpDTO.getPassword())) {
+				isDuplicateNickname(signUpDTO.getNickname()) ||
+				!isValidatePassword(signUpDTO.getPassword())) {
 			return null;
 		}
 
@@ -45,15 +41,26 @@ public class MemberServiceImpl implements MemberService {
 		Member encodedMember = passwordEncryption(member);
 
 		memberRepository.save(encodedMember);
-		return jwtProvider.generateToken(encodedMember.getUsername());
+
+		String accessToken = jwtProvider.generateToken(encodedMember.getUsername());
+		String refreshToken = jwtProvider.generateRefreshToken(encodedMember.getUsername());
+
+		TokenDto tokenDto = TokenDto.builder()
+				.accessToken(accessToken)
+				.refreshToken(refreshToken)
+				.build();
+
+		refreshTokenService.storeRefreshToken(tokenDto, encodedMember.getUsername());
+
+		return tokenDto;
 	}
 
 	public Member convertSignUpDTOtoMember(SignUpDto signUpDTO) {
 		return Member.builder()
-			.username(signUpDTO.getUsername())
-			.password(signUpDTO.getPassword())
-			.nickname(signUpDTO.getNickname())
-			.build();
+				.username(signUpDTO.getUsername())
+				.password(signUpDTO.getPassword())
+				.nickname(signUpDTO.getNickname())
+				.build();
 	}
 
 	public boolean isDuplicateUsername(String username) {

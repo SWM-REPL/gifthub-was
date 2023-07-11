@@ -1,12 +1,13 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 
 import java.util.List;
 
 public interface MemberService {
-	String create(SignUpDto signUpDTO);
+	TokenDto create(SignUpDto signUpDTO);
 
 	Member read(SignUpDto signUpDto);
 
