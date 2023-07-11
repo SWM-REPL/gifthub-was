@@ -21,7 +21,7 @@ import org.swmaestro.repl.gifthub.filter.JwtAuthenticationFilter;
 import java.io.IOException;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;

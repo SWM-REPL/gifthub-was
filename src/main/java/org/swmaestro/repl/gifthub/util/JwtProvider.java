@@ -10,8 +10,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.swmaestro.repl.gifthub.auth.repository.RefreshTokenRepository;
 import org.swmaestro.repl.gifthub.security.JpaUserDetailsService;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Component
@@ -21,28 +24,30 @@ public class JwtProvider {
 	private final long expiration;
 	private final String issuer;
 	private final JpaUserDetailsService userDetailsService;
+	private final RefreshTokenRepository refreshTokenRepository;
 
-	public JwtProvider(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration, @Value("${issuer}") String issuer, JpaUserDetailsService userDetailsService) {
+	public JwtProvider(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration, @Value("${issuer}") String issuer, JpaUserDetailsService userDetailsService, RefreshTokenRepository refreshTokenRepository) {
 		this.secretKey = secretKey;
 		this.expiration = expiration;
 		this.issuer = issuer;
 		this.userDetailsService = userDetailsService;
+		this.refreshTokenRepository = refreshTokenRepository;
 	}
 
 	/**
-	 * JWT 생성 메소드
+	 * AccessToken 생성 메소드
 	 *
 	 * @param username
 	 * @return JWT 토큰
 	 */
 	public String generateToken(String username) {
 		return io.jsonwebtoken.Jwts.builder()
-			.setSubject(username)
-			.setIssuer(issuer)
-			.setIssuedAt(new java.util.Date(System.currentTimeMillis()))
-			.setExpiration(new java.util.Date(System.currentTimeMillis() + expiration))
-			.signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, secretKey)
-			.compact();
+				.setSubject(username)
+				.setIssuer(issuer)
+				.setIssuedAt(new java.util.Date(System.currentTimeMillis()))
+				.setExpiration(new java.util.Date(System.currentTimeMillis() + expiration))
+				.signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, secretKey.getBytes())
+				.compact();
 	}
 
 	/**
@@ -96,10 +101,42 @@ public class JwtProvider {
 	 */
 	public String getUsername(String token) {
 		return Jwts.parserBuilder()
-			.setSigningKey(secretKey.getBytes())
-			.build()
-			.parseClaimsJws(token)
-			.getBody()
-			.getSubject();
+				.setSigningKey(secretKey.getBytes())
+				.build()
+				.parseClaimsJws(token)
+				.getBody()
+				.getSubject();
+	}
+
+	/**
+	 * RefreshToken 생성 메소드
+	 *
+	 * @param username
+	 * @return username
+	 */
+	public String generateRefreshToken(String username) {
+		return io.jsonwebtoken.Jwts.builder()
+				.setSubject(username)
+				.setIssuer(issuer)
+				.setIssuedAt(new java.util.Date(System.currentTimeMillis()))
+				.setExpiration(Date.from(Instant.now().plus(15, ChronoUnit.DAYS)))
+				.signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, secretKey.getBytes())
+				.compact();
+	}
+
+	/**
+	 * RefreshToken으로 AccessToken을 재발급하는 메소드(단 DB에 저장 되어 있던 RefreshToken과 username이 일치해야 함)
+	 *
+	 * @param refreshToken
+	 * @return accessToken
+	 */
+	public String reissueAccessToken(String refreshToken) {
+		String username = getUsername(refreshToken);
+		String storedRefreshToken = refreshTokenRepository.findByUsername(username).get().getRefreshToken();
+
+		if (!refreshToken.equals(storedRefreshToken)) {
+			throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+		}
+		return generateToken(username);
 	}
 }

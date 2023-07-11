@@ -8,10 +8,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class AuthServiceTest {
 	@Mock
@@ -23,10 +24,16 @@ class AuthServiceTest {
 	@Mock
 	private AuthServiceImpl authService;
 
+	@Mock
+	private JwtProvider jwtProvider;
+
+	@Mock
+	private RefreshTokenService refreshTokenService;
+
 	@BeforeEach
 	public void setUp() {
 		MockitoAnnotations.openMocks(this);
-		authService = new AuthServiceImpl(memberRepository, passwordEncoder);
+		authService = new AuthServiceImpl(memberRepository, passwordEncoder, jwtProvider, refreshTokenService);
 	}
 
 	/*
@@ -40,20 +47,25 @@ class AuthServiceTest {
 			.password("abc123##")
 			.build();
 		Member member = Member.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.nickname("이진우")
-			.build();
+				.username(username)
+				.password(password)
+				.nickname("이진우")
+				.build();
+
 
 		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(member);
 		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(true);
+		when(jwtProvider.generateToken(member.getUsername())).thenReturn("accessToken");
+		when(jwtProvider.generateRefreshToken(member.getUsername())).thenReturn("refreshToken");
 
 		// When
 		SignInDto result = authService.signIn(loginDto);
 
-		// Then
-		assertNotNull(result);
-		assertEquals(loginDto.getUsername(), result.getUsername());
+		// Assert
+		assertNotNull(tokenDto);
+		assertEquals("accessToken", tokenDto.getAccessToken());
+		assertEquals("refreshToken", tokenDto.getRefreshToken());
+		verify(refreshTokenService, times(1)).storeRefreshToken(any(TokenDto.class), eq(username));
 	}
 
 	/*
@@ -67,13 +79,13 @@ class AuthServiceTest {
 			.password("abc123##")
 			.build();
 		Member member = Member.builder()
-			.username("jinlee1703")
-			.password("abc123##XX")
-			.nickname("이진우")
-			.build();
+				.username("jinlee1703")
+				.password("abc123##XX")
+				.nickname("이진우")
+				.build();
 
-		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(member);
-		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(false);
+		// Mocking behavior of the repository
+		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(null);
 
 		// When
 		SignInDto result = authService.signIn(loginDto);

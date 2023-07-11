@@ -11,14 +11,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.service.AuthService;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
+import org.swmaestro.repl.gifthub.util.JwtProvider;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -37,6 +40,12 @@ public class AuthControllerTest {
 	@MockBean
 	private AuthService authService;
 
+	@MockBean
+	private RefreshTokenService refreshTokenService;
+
+	@MockBean
+	private JwtProvider jwtProvider;
+
 	@Test
 	public void signUpTest() throws Exception {
 		SignUpDto signUpDto = SignUpDto.builder()
@@ -45,7 +54,12 @@ public class AuthControllerTest {
 			.nickname("이진우")
 			.build();
 
-		given(memberService.create(signUpDto)).willReturn("myawesomejwt");
+		TokenDto tokenDto = TokenDto.builder()
+				.accessToken("myawesomejwt")
+				.refreshToken("myawesomejwt")
+				.build();
+
+		given(memberService.create(signUpDto)).willReturn(tokenDto);
 
 		mockMvc.perform(post("/auth/sign-up")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -60,6 +74,7 @@ public class AuthControllerTest {
 			.password("abc123##")
 			.build();
 
+<<<<<<< HEAD
 		when(authService.signIn(any(SignInDto.class))).thenReturn(loginDto);
 
 		// when
@@ -69,8 +84,36 @@ public class AuthControllerTest {
 			)
 			.andExpect(status().isOk())
 			.andReturn();
+=======
+		TokenDto tokenDto = TokenDto.builder()
+				.accessToken("myawesomejwt")
+				.refreshToken("myawesomejwt")
+				.build();
 
-		String resultString = result.getResponse().getContentAsString();
-		assertEquals(resultString, loginDto.getUsername());
+		when(authService.verifyPassword(any(LoginDto.class))).thenReturn(tokenDto);
+
+		mockMvc.perform(post("/auth/sign-up")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(loginDto)))
+				.andExpect(status().isOk());
+	}
+>>>>>>> a7885ca19ccea1e6d9d09cce46c8a3fbfd6e2fc6
+
+	@Test
+	public void validateRefreshTokenTest() throws Exception {
+		String refreshToken = "sampleRefreshToken";
+		String newAccessToken = "sampleNewAccessToken";
+		String newRefreshToken = "sampleNewRefreshToken";
+		String username = "jinlee1703";
+
+		when(refreshTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken)).thenReturn(newAccessToken);
+		when(refreshTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken)).thenReturn(newRefreshToken);
+		when(jwtProvider.getUsername(refreshToken)).thenReturn(username);
+
+		mockMvc.perform(post("/auth/refresh")
+						.header("Authorization", refreshToken))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.accessToken").value(newAccessToken))
+				.andExpect(jsonPath("$.refreshToken").value(newRefreshToken));
 	}
 }
