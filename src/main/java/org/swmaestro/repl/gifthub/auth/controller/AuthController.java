@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import org.swmaestro.repl.gifthub.auth.dto.LoginDto;
+import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.service.AuthService;
@@ -28,23 +28,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/auth/sign-in")
-	public TokenDto signIn(@RequestBody LoginDto loginDto) {
-		TokenDto tokenDto = authService.verifyPassword(loginDto);
-		return tokenDto;
-	}
-
-	@PostMapping("/auth/refresh")
-	public TokenDto validateRefreshToken(@RequestHeader("Authorization") String refreshToken) {
-		String newAccessToken = refreshTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken);
-		String newRefreshToken = refreshTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken);
-
-		TokenDto tokenDto = TokenDto.builder()
-				.accessToken(newAccessToken)
-				.refreshToken(newRefreshToken)
-				.build();
-
-		refreshToken = refreshToken.substring(7);
-		refreshTokenService.storeRefreshToken(tokenDto, jwtProvider.getUsername(refreshToken));
-		return tokenDto;
+	public String signIn(@RequestBody SignInDto loginDto) {
+		return authService.signIn(loginDto).getUsername();
 	}
 }

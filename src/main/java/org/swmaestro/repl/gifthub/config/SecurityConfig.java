@@ -29,32 +29,32 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(authorizeHttpRequests ->
-						authorizeHttpRequests.requestMatchers("/auth/sign-up", "/auth/sign-in", "/auth/refresh").permitAll()
-								.anyRequest().authenticated())
-				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-				.exceptionHandling(exceptionHandling -> exceptionHandling
-						.accessDeniedHandler(new AccessDeniedHandler() {
-							@Override
-							public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException, IOException {
-								// 권한 문제가 발생했을 때 이 부분을 호출한다.
-								response.setStatus(403);
-								response.setCharacterEncoding("utf-8");
-								response.setContentType("text/html; charset=UTF-8");
-								response.getWriter().write("권한이 없습니다.");
-							}
-						})
-						.authenticationEntryPoint(new AuthenticationEntryPoint() {
-							@Override
-							public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-								// 인증문제가 발생했을 때 이 부분을 호출한다.
-								response.setStatus(401);
-								response.setCharacterEncoding("utf-8");
-								response.setContentType("text/html; charset=UTF-8");
-								response.getWriter().write("인증되지 않은 사용자입니다.");
-							}
-						})
-				);
+			.authorizeHttpRequests(authorizeHttpRequests ->
+				authorizeHttpRequests.requestMatchers("/auth/sign-up", "/auth/sign-in").permitAll()
+					.anyRequest().authenticated())
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+			.exceptionHandling(exceptionHandling -> exceptionHandling
+				.accessDeniedHandler(new AccessDeniedHandler() {
+					@Override
+					public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException, IOException {
+						// 권한 문제가 발생했을 때 이 부분을 호출한다.
+						response.setStatus(403);
+						response.setCharacterEncoding("utf-8");
+						response.setContentType("text/html; charset=UTF-8");
+						response.getWriter().write("권한이 없습니다.");
+					}
+				})
+				.authenticationEntryPoint(new AuthenticationEntryPoint() {
+					@Override
+					public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+						// 인증문제가 발생했을 때 이 부분을 호출한다.
+						response.setStatus(401);
+						response.setCharacterEncoding("utf-8");
+						response.setContentType("text/html; charset=UTF-8");
+						response.getWriter().write("인증되지 않은 사용자입니다.");
+					}
+				})
+			);
 
 		return httpSecurity.build();
 	}

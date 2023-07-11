@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.swmaestro.repl.gifthub.auth.dto.LoginDto;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -43,15 +42,10 @@ class AuthServiceTest {
 	@Test
 	void verifyPasswordSuccess() {
 		//given
-		String username = "jinlee1703";
-		String password = "abc123##";
-		String encodedPassword = "abc123##XX";
-
-
-		LoginDto loginDto = LoginDto.builder()
-				.username(username)
-				.password(password)
-				.build();
+		SignInDto loginDto = SignInDto.builder()
+			.username("jinlee1703")
+			.password("abc123##")
+			.build();
 		Member member = Member.builder()
 				.username(username)
 				.password(password)
@@ -65,7 +59,7 @@ class AuthServiceTest {
 		when(jwtProvider.generateRefreshToken(member.getUsername())).thenReturn("refreshToken");
 
 		// When
-		TokenDto tokenDto = authService.verifyPassword(loginDto);
+		SignInDto result = authService.signIn(loginDto);
 
 		// Assert
 		assertNotNull(tokenDto);
@@ -80,10 +74,10 @@ class AuthServiceTest {
 	@Test
 	void verifyPasswordFail() {
 		//given
-		LoginDto loginDto = LoginDto.builder()
-				.username("jinlee1703")
-				.password("abc123##")
-				.build();
+		SignInDto loginDto = SignInDto.builder()
+			.username("jinlee1703")
+			.password("abc123##")
+			.build();
 		Member member = Member.builder()
 				.username("jinlee1703")
 				.password("abc123##XX")
@@ -94,7 +88,7 @@ class AuthServiceTest {
 		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(null);
 
 		// When
-		TokenDto result = authService.verifyPassword(loginDto);
+		SignInDto result = authService.signIn(loginDto);
 
 		// Then
 		assertEquals(null, result);
