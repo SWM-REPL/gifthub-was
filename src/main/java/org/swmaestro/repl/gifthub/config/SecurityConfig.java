@@ -30,8 +30,8 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(authorizeHttpRequests ->
-						authorizeHttpRequests.requestMatchers("/auth/sign-up", "/auth/sign-in").permitAll()
-								.anyRequest().authenticated());
+				authorizeHttpRequests.requestMatchers("/auth/sign-up", "/auth/sign-in").permitAll()
+					.anyRequest().authenticated())
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.exceptionHandling(exceptionHandling -> exceptionHandling
 				.accessDeniedHandler(new AccessDeniedHandler() {
@@ -55,7 +55,7 @@ public class SecurityConfig {
 					}
 				})
 			);
-    
+
 		return httpSecurity.build();
 	}
 
