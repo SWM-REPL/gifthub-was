@@ -34,10 +34,13 @@ class MemberServiceTest {
 	@Mock
 	private JwtProvider jwtProvider;
 
+	@Mock
+	private RefreshTokenService refreshTokenService;
+
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
-		memberService = new MemberServiceImpl(memberRepository, passwordEncoder, jwtProvider);
+		memberService = new MemberServiceImpl(memberRepository, passwordEncoder, jwtProvider, refreshTokenService);
 	}
 
 	/*
@@ -48,10 +51,10 @@ class MemberServiceTest {
 	void create() {
 		// given
 		SignUpDto signUpDto = SignUpDto.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.nickname("이진우")
-			.build();
+				.username("jinlee1703")
+				.password("abc123##")
+				.nickname("이진우")
+				.build();
 
 		// when
 		memberService.create(signUpDto);
@@ -70,17 +73,17 @@ class MemberServiceTest {
 		String testUsername = "jinlee1703";
 		String testPassword = "abc123";
 		SignUpDto signUpDto = SignUpDto.builder()
-			.username(testUsername)
-			.password(testPassword)
-			.nickname("이진우")
-			.build();
+				.username(testUsername)
+				.password(testPassword)
+				.nickname("이진우")
+				.build();
 
 		// when
 		Member member = Member.builder()
-			.username(signUpDto.getUsername())
-			.password("hashed_password")
-			.nickname(signUpDto.getNickname())
-			.build();
+				.username(signUpDto.getUsername())
+				.password("hashed_password")
+				.nickname(signUpDto.getNickname())
+				.build();
 
 		memberService.create(signUpDto);
 		when(memberRepository.findByUsername(any(String.class))).thenReturn(member);
@@ -99,17 +102,17 @@ class MemberServiceTest {
 
 		// given
 		SignUpDto signUpDto = SignUpDto.builder()
-			.username(testUsername)
-			.password("abc123##")
-			.nickname("이진우")
-			.build();
+				.username(testUsername)
+				.password("abc123##")
+				.nickname("이진우")
+				.build();
 
 		// when
 		Member member = Member.builder()
-			.username(testUsername)
-			.password("hashed_password")
-			.nickname("이진수")
-			.build();
+				.username(testUsername)
+				.password("hashed_password")
+				.nickname("이진수")
+				.build();
 
 		when(memberRepository.findByUsername(any(String.class))).thenReturn(member);
 		memberService.create(signUpDto);
@@ -130,10 +133,10 @@ class MemberServiceTest {
 
 		// given
 		SignUpDto signUpDto = SignUpDto.builder()
-			.username(testUsername)
-			.password(testPassword)
-			.nickname(testNickname)
-			.build();
+				.username(testUsername)
+				.password(testPassword)
+				.nickname(testNickname)
+				.build();
 
 		// when
 		memberService.create(signUpDto);
@@ -150,17 +153,17 @@ class MemberServiceTest {
 
 		// given
 		SignUpDto signUpDto = SignUpDto.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.nickname(testNickname)
-			.build();
+				.username("jinlee1703")
+				.password("abc123##")
+				.nickname(testNickname)
+				.build();
 
 		// when
 		Member member = Member.builder()
-			.username("testUsername")
-			.password("hashed_password")
-			.nickname(testNickname)
-			.build();
+				.username("testUsername")
+				.password("hashed_password")
+				.nickname(testNickname)
+				.build();
 
 		when(memberRepository.findByNickname(any(String.class))).thenReturn(member);
 		memberService.create(signUpDto);
@@ -178,16 +181,16 @@ class MemberServiceTest {
 	void read() {
 		// given
 		SignUpDto signUpDto = SignUpDto.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.nickname("이진우")
-			.build();
+				.username("jinlee1703")
+				.password("abc123##")
+				.nickname("이진우")
+				.build();
 
 		Member member = Member.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.nickname("이진우")
-			.build();
+				.username("jinlee1703")
+				.password("abc123##")
+				.nickname("이진우")
+				.build();
 
 		memberService.create(signUpDto);
 
@@ -210,24 +213,24 @@ class MemberServiceTest {
 	void count() {
 		// given
 		SignUpDto signUpDto1 = SignUpDto.builder()
-			.username("user1")
-			.password("password1")
-			.nickname("User 1")
-			.build();
+				.username("user1")
+				.password("password1")
+				.nickname("User 1")
+				.build();
 		memberService.create(signUpDto1);
 
 		SignUpDto signUpDto2 = SignUpDto.builder()
-			.username("user2")
-			.password("password2")
-			.nickname("User 2")
-			.build();
+				.username("user2")
+				.password("password2")
+				.nickname("User 2")
+				.build();
 		memberService.create(signUpDto2);
 
 		SignUpDto signUpDto3 = SignUpDto.builder()
-			.username("user3")
-			.password("password3")
-			.nickname("User 3")
-			.build();
+				.username("user3")
+				.password("password3")
+				.nickname("User 3")
+				.build();
 		memberService.create(signUpDto3);
 
 		// Mock memberRepository.count() to return a fixed count value
@@ -249,16 +252,16 @@ class MemberServiceTest {
 	void list() {
 		// given
 		Member member1 = Member.builder()
-			.username("user1")
-			.password("password1")
-			.nickname("User 1")
-			.build();
+				.username("user1")
+				.password("password1")
+				.nickname("User 1")
+				.build();
 
 		Member member2 = Member.builder()
-			.username("user2")
-			.password("password2")
-			.nickname("User 2")
-			.build();
+				.username("user2")
+				.password("password2")
+				.nickname("User 2")
+				.build();
 
 		List<Member> expectedMembers = new ArrayList<>();
 		expectedMembers.add(member1);

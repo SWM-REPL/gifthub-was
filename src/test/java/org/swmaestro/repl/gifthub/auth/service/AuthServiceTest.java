@@ -6,12 +6,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.swmaestro.repl.gifthub.auth.dto.LoginDto;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class AuthServiceTest {
 	@Mock
@@ -23,10 +25,16 @@ class AuthServiceTest {
 	@Mock
 	private AuthServiceImpl authService;
 
+	@Mock
+	private JwtProvider jwtProvider;
+
+	@Mock
+	private RefreshTokenService refreshTokenService;
+
 	@BeforeEach
 	public void setUp() {
 		MockitoAnnotations.openMocks(this);
-		authService = new AuthServiceImpl(memberRepository, passwordEncoder);
+		authService = new AuthServiceImpl(memberRepository, passwordEncoder, jwtProvider, refreshTokenService);
 	}
 
 	/*
@@ -35,25 +43,35 @@ class AuthServiceTest {
 	@Test
 	void verifyPasswordSuccess() {
 		//given
+		String username = "jinlee1703";
+		String password = "abc123##";
+		String encodedPassword = "abc123##XX";
+
+
 		LoginDto loginDto = LoginDto.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.build();
+				.username(username)
+				.password(password)
+				.build();
 		Member member = Member.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.nickname("이진우")
-			.build();
+				.username(username)
+				.password(password)
+				.nickname("이진우")
+				.build();
+
 
 		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(member);
 		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(true);
+		when(jwtProvider.generateToken(member.getUsername())).thenReturn("accessToken");
+		when(jwtProvider.generateRefreshToken(member.getUsername())).thenReturn("refreshToken");
 
 		// When
-		LoginDto result = authService.verifyPassword(loginDto);
+		TokenDto tokenDto = authService.verifyPassword(loginDto);
 
-		// Then
-		assertNotNull(result);
-		assertEquals(loginDto.getUsername(), result.getUsername());
+		// Assert
+		assertNotNull(tokenDto);
+		assertEquals("accessToken", tokenDto.getAccessToken());
+		assertEquals("refreshToken", tokenDto.getRefreshToken());
+		verify(refreshTokenService, times(1)).storeRefreshToken(any(TokenDto.class), eq(username));
 	}
 
 	/*
@@ -63,20 +81,20 @@ class AuthServiceTest {
 	void verifyPasswordFail() {
 		//given
 		LoginDto loginDto = LoginDto.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.build();
+				.username("jinlee1703")
+				.password("abc123##")
+				.build();
 		Member member = Member.builder()
-			.username("jinlee1703")
-			.password("abc123##XX")
-			.nickname("이진우")
-			.build();
+				.username("jinlee1703")
+				.password("abc123##XX")
+				.nickname("이진우")
+				.build();
 
-		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(member);
-		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(false);
+		// Mocking behavior of the repository
+		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(null);
 
 		// When
-		LoginDto result = authService.verifyPassword(loginDto);
+		TokenDto result = authService.verifyPassword(loginDto);
 
 		// Then
 		assertEquals(null, result);
