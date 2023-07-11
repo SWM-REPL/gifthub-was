@@ -19,7 +19,6 @@ import org.swmaestro.repl.gifthub.util.JwtProvider;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -86,19 +85,24 @@ public class AuthControllerTest {
 
 	@Test
 	public void validateRefreshTokenTest() throws Exception {
-		String refreshToken = "sampleRefreshToken";
+		//given
+		String refreshToken = "유효하지 않은 Refresh Token";
 		String newAccessToken = "sampleNewAccessToken";
 		String newRefreshToken = "sampleNewRefreshToken";
 		String username = "jinlee1703";
 
-		when(refreshTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken)).thenReturn(newAccessToken);
-		when(refreshTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken)).thenReturn(newRefreshToken);
+		TokenDto tokenDto = TokenDto.builder()
+				.accessToken(newAccessToken)
+				.refreshToken(newRefreshToken)
+				.build();
+
+		when(refreshTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken)).thenReturn(null);
+		when(refreshTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken)).thenReturn(null);
 		when(jwtProvider.getUsername(refreshToken)).thenReturn(username);
+
 
 		mockMvc.perform(post("/auth/refresh")
 						.header("Authorization", refreshToken))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.accessToken").value(newAccessToken))
-				.andExpect(jsonPath("$.refreshToken").value(newRefreshToken));
+				.andExpect(status().isUnauthorized());
 	}
 }

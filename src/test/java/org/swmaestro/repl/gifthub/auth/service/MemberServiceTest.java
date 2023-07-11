@@ -71,7 +71,7 @@ class MemberServiceTest {
 	void passwordEncryption() {
 		// given
 		String testUsername = "jinlee1703";
-		String testPassword = "abc123";
+		String testPassword = "abc12345678!";
 		SignUpDto signUpDto = SignUpDto.builder()
 				.username(testUsername)
 				.password(testPassword)

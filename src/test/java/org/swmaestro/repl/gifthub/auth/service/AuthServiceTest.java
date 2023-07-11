@@ -41,7 +41,7 @@ class AuthServiceTest {
 	 * 비밀번호 검증 로직 성공 테스트
 	 */
 	@Test
-	void verifyPasswordSuccess() {
+	void loginSuccess() {
 		//given
 		String username = "jinlee1703";
 		String password = "abc123##";
@@ -75,10 +75,10 @@ class AuthServiceTest {
 	}
 
 	/*
-	 * 비밀번호 검증 로직 실패 테스트
+	 * 비밀번호 검증 로직 실패 테스트(가입한 회원이 아닌 경우)
 	 */
 	@Test
-	void verifyPasswordFail() {
+	void loginFailByUsername() {
 		//given
 		SignInDto loginDto = SignInDto.builder()
 				.username("jinlee1703")
@@ -92,6 +92,33 @@ class AuthServiceTest {
 
 		// Mocking behavior of the repository
 		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(null);
+
+		// When
+		TokenDto result = authService.signIn(loginDto);
+
+		// Then
+		assertEquals(null, result);
+	}
+
+	/*
+	 * 비밀번호 검증 로직 실패 테스트(비밀번호가 일치하지 않는 경우)
+	 */
+	@Test
+	void loginFailByPassword() {
+		//given
+		SignInDto loginDto = SignInDto.builder()
+				.username("jinlee1703")
+				.password("abc123##")
+				.build();
+		Member member = Member.builder()
+				.username("jinlee1703")
+				.password("abc123##XX")
+				.nickname("이진우")
+				.build();
+
+		// Mocking behavior of the repository
+		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(member);
+		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(false);
 
 		// When
 		TokenDto result = authService.signIn(loginDto);
