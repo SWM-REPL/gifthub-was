@@ -21,6 +21,7 @@ public class MemberServiceImpl implements MemberService {
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
+	private final RefreshTokenService refreshTokenService;
 
 	public Member passwordEncryption(Member member) {
 		return Member.builder()
@@ -31,7 +32,7 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public String create(SignUpDto signUpDTO) {
+	public TokenDto create(SignUpDto signUpDTO) {
 		if (isDuplicateUsername(signUpDTO.getUsername())) {
 			throw new BusinessException("이미 존재하는 아이디입니다.", ErrorCode.EXIST_RESOURCE);
 		}

@@ -28,7 +28,23 @@ public class AuthController {
 	}
 
 	@PostMapping("/auth/sign-in")
-	public String signIn(@RequestBody SignInDto loginDto) {
-		return authService.signIn(loginDto).getUsername();
+	public TokenDto signIn(@RequestBody SignInDto loginDto) {
+		TokenDto tokenDto = authService.signIn(loginDto);
+		return tokenDto;
+	}
+
+	@PostMapping("/auth/refresh")
+	public TokenDto validateRefreshToken(@RequestHeader("Authorization") String refreshToken) {
+		String newAccessToken = refreshTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken);
+		String newRefreshToken = refreshTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken);
+
+		TokenDto tokenDto = TokenDto.builder()
+				.accessToken(newAccessToken)
+				.refreshToken(newRefreshToken)
+				.build();
+
+		refreshToken = refreshToken.substring(7);
+		refreshTokenService.storeRefreshToken(tokenDto, jwtProvider.getUsername(refreshToken));
+		return tokenDto;
 	}
 }

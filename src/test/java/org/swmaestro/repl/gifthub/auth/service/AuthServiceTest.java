@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -42,10 +43,15 @@ class AuthServiceTest {
 	@Test
 	void verifyPasswordSuccess() {
 		//given
+		String username = "jinlee1703";
+		String password = "abc123##";
+		String encodedPassword = "abc123##XX";
+
 		SignInDto loginDto = SignInDto.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.build();
+				.username(username)
+				.password(password)
+				.build();
+
 		Member member = Member.builder()
 				.username(username)
 				.password(password)
@@ -59,7 +65,7 @@ class AuthServiceTest {
 		when(jwtProvider.generateRefreshToken(member.getUsername())).thenReturn("refreshToken");
 
 		// When
-		SignInDto result = authService.signIn(loginDto);
+		TokenDto tokenDto = authService.signIn(loginDto);
 
 		// Assert
 		assertNotNull(tokenDto);
@@ -75,9 +81,9 @@ class AuthServiceTest {
 	void verifyPasswordFail() {
 		//given
 		SignInDto loginDto = SignInDto.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.build();
+				.username("jinlee1703")
+				.password("abc123##")
+				.build();
 		Member member = Member.builder()
 				.username("jinlee1703")
 				.password("abc123##XX")
@@ -88,7 +94,7 @@ class AuthServiceTest {
 		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(null);
 
 		// When
-		SignInDto result = authService.signIn(loginDto);
+		TokenDto result = authService.signIn(loginDto);
 
 		// Then
 		assertEquals(null, result);
