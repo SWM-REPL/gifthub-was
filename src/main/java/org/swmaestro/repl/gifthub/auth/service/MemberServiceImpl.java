@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+import org.swmaestro.repl.gifthub.exception.BusinessException;
+import org.swmaestro.repl.gifthub.exception.ErrorCode;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import java.util.List;
@@ -19,12 +21,6 @@ public class MemberServiceImpl implements MemberService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
 
-//	@Autowired
-//	public MemberServiceImpl(SpringDataJpaMemberRepository memberRepository, PasswordEncoder passwordEncoder) {
-//		this.memberRepository = memberRepository;
-//		this.passwordEncoder = passwordEncoder;
-//	}
-
 	public Member passwordEncryption(Member member) {
 		return Member.builder()
 			.username(member.getUsername())
@@ -35,10 +31,14 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public String create(SignUpDto signUpDTO) {
-		if (isDuplicateUsername(signUpDTO.getUsername()) ||
-			isDuplicateNickname(signUpDTO.getNickname()) ||
-			!isValidatePassword(signUpDTO.getPassword())) {
-			return null;
+		if (isDuplicateUsername(signUpDTO.getUsername())) {
+			throw new BusinessException("이미 존재하는 아이디입니다.", ErrorCode.EXIST_RESOURCE);
+		}
+		if (isDuplicateNickname(signUpDTO.getNickname())) {
+			throw new BusinessException("이미 존재하는 닉네임입니다.", ErrorCode.EXIST_RESOURCE);
+		}
+		if (!isValidatePassword(signUpDTO.getPassword())) {
+			throw new BusinessException("비밀번호는 영문, 숫자, 특수문자를 포함한 8자리 이상이어야 합니다.", ErrorCode.INVALID_INPUT_VALUE);
 		}
 
 		Member member = convertSignUpDTOtoMember(signUpDTO);
