@@ -8,10 +8,10 @@ import lombok.Getter;
 public enum ErrorCode {
 	// Common
 	INVALID_INPUT_VALUE(400, "C001", "Invalid Input Value"),
-	INVALID_AUTHENTICATION(401, "C003", "Invalid Authentication"),
+	INVALID_AUTHENTICATION(401, "C002", "Invalid Authentication"),
 	ACCESS_DENIED(403, "C003", "Access is Denied"),
-	NOT_FOUND_RESOURCE(404, "C002", "Not Found Resource"),
-	EXIST_RESOURCE(409, "C000", "Exist Resource");
+	NOT_FOUND_RESOURCE(404, "C004", "Not Found Resource"),
+	EXIST_RESOURCE(409, "C005", "Exist Resource");
 
 	private final String code;
 	private final String message;
