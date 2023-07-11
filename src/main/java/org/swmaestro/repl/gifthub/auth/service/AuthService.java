@@ -1,7 +1,9 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 
 public interface AuthService {
-	SignInDto signIn(SignInDto loginDto);
+
+	TokenDto signIn(SignInDto loginDto);
 }

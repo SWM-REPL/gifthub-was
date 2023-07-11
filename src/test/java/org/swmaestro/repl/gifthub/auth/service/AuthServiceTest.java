@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -40,12 +41,17 @@ class AuthServiceTest {
 	 * 비밀번호 검증 로직 성공 테스트
 	 */
 	@Test
-	void verifyPasswordSuccess() {
+	void loginSuccess() {
 		//given
+		String username = "jinlee1703";
+		String password = "abc123##";
+		String encodedPassword = "abc123##XX";
+
 		SignInDto loginDto = SignInDto.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.build();
+				.username(username)
+				.password(password)
+				.build();
+
 		Member member = Member.builder()
 				.username(username)
 				.password(password)
@@ -59,7 +65,7 @@ class AuthServiceTest {
 		when(jwtProvider.generateRefreshToken(member.getUsername())).thenReturn("refreshToken");
 
 		// When
-		SignInDto result = authService.signIn(loginDto);
+		TokenDto tokenDto = authService.signIn(loginDto);
 
 		// Assert
 		assertNotNull(tokenDto);
@@ -69,15 +75,15 @@ class AuthServiceTest {
 	}
 
 	/*
-	 * 비밀번호 검증 로직 실패 테스트
+	 * 비밀번호 검증 로직 실패 테스트(가입한 회원이 아닌 경우)
 	 */
 	@Test
-	void verifyPasswordFail() {
+	void loginFailByUsername() {
 		//given
 		SignInDto loginDto = SignInDto.builder()
-			.username("jinlee1703")
-			.password("abc123##")
-			.build();
+				.username("jinlee1703")
+				.password("abc123##")
+				.build();
 		Member member = Member.builder()
 				.username("jinlee1703")
 				.password("abc123##XX")
@@ -88,7 +94,34 @@ class AuthServiceTest {
 		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(null);
 
 		// When
-		SignInDto result = authService.signIn(loginDto);
+		TokenDto result = authService.signIn(loginDto);
+
+		// Then
+		assertEquals(null, result);
+	}
+
+	/*
+	 * 비밀번호 검증 로직 실패 테스트(비밀번호가 일치하지 않는 경우)
+	 */
+	@Test
+	void loginFailByPassword() {
+		//given
+		SignInDto loginDto = SignInDto.builder()
+				.username("jinlee1703")
+				.password("abc123##")
+				.build();
+		Member member = Member.builder()
+				.username("jinlee1703")
+				.password("abc123##XX")
+				.nickname("이진우")
+				.build();
+
+		// Mocking behavior of the repository
+		when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(member);
+		when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(false);
+
+		// When
+		TokenDto result = authService.signIn(loginDto);
 
 		// Then
 		assertEquals(null, result);
