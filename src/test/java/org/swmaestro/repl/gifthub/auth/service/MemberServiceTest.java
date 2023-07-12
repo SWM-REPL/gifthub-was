@@ -117,10 +117,9 @@ class MemberServiceTest {
                 .build();
 
         when(memberRepository.findByUsername(any(String.class))).thenReturn(member);
-        memberService.create(signUpDto);
 
         // then
-        verify(memberRepository, times(0)).save(any(Member.class));
+        Assertions.assertThatThrownBy(() -> memberService.create(signUpDto)).isInstanceOf(BusinessException.class);
     }
 
     /*
