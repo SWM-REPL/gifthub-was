@@ -217,31 +217,9 @@ class MemberServiceTest {
                 .password("password1")
                 .nickname("User 1")
                 .build();
-        memberService.create(signUpDto1);
 
-        SignUpDto signUpDto2 = SignUpDto.builder()
-                .username("user2")
-                .password("password2")
-                .nickname("User 2")
-                .build();
-        memberService.create(signUpDto2);
-
-        SignUpDto signUpDto3 = SignUpDto.builder()
-                .username("user3")
-                .password("password3")
-                .nickname("User 3")
-                .build();
-        memberService.create(signUpDto3);
-
-        // Mock memberRepository.count() to return a fixed count value
-        when(memberRepository.count()).thenReturn(3L);
-
-        // when
-        int count = memberService.count();
-
-        // then
-        assertEquals(3, count);
-        verify(memberRepository, times(1)).count();
+        // Then
+        Assertions.assertThatThrownBy(() -> memberService.create(signUpDto1)).isInstanceOf(BusinessException.class);
     }
 
     /*
