@@ -115,14 +115,11 @@ class AuthServiceTest {
                 .nickname("이진우")
                 .build();
 
-        // Mocking behavior of the repository
+        // When
         when(memberRepository.findByUsername(loginDto.getUsername())).thenReturn(member);
         when(passwordEncoder.matches(loginDto.getPassword(), member.getPassword())).thenReturn(false);
-
-        // When
-        TokenDto result = authService.signIn(loginDto);
-
+		
         // Then
-        assertEquals(null, result);
+        Assertions.assertThatThrownBy(() -> authService.signIn(loginDto)).isInstanceOf(BusinessException.class);
     }
 }
