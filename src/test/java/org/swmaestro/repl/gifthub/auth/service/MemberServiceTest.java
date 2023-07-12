@@ -18,7 +18,8 @@ import org.swmaestro.repl.gifthub.util.JwtProvider;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -87,11 +88,8 @@ class MemberServiceTest {
                 .nickname(signUpDto.getNickname())
                 .build();
 
-        memberService.create(signUpDto);
-        when(memberRepository.findByUsername(any(String.class))).thenReturn(member);
-
         // then
-        assertNotEquals(memberRepository.findByUsername(testUsername).getPassword(), testPassword);
+        Assertions.assertThatThrownBy(() -> memberService.create(signUpDto)).isInstanceOf(BusinessException.class);
     }
 
     /*
