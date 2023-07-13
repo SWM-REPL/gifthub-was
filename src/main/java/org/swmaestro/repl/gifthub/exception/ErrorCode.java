@@ -11,7 +11,8 @@ public enum ErrorCode {
 	INVALID_AUTHENTICATION(401, "C002", "Invalid Authentication"),
 	ACCESS_DENIED(403, "C003", "Access is Denied"),
 	NOT_FOUND_RESOURCE(404, "C004", "Not Found Resource"),
-	EXIST_RESOURCE(409, "C005", "Exist Resource");
+	EXIST_RESOURCE(409, "C005", "Exist Resource"),
+	INTERNAL_SERVER_ERROR(500, "C006", "Internal Server Error");
 
 	private final String code;
 	private final String message;
