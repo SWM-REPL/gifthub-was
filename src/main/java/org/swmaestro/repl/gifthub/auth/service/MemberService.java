@@ -9,6 +9,14 @@ import java.util.List;
 public interface MemberService {
 	TokenDto create(SignUpDto signUpDTO);
 
+	Member convertSignUpDTOtoMember(SignUpDto signUpDTO);
+
+	boolean isDuplicateUsername(String username);
+
+	boolean isDuplicateNickname(String nickname);
+
+	Member passwordEncryption(Member member);
+
 	Member read(SignUpDto signUpDto);
 
 	int count();
