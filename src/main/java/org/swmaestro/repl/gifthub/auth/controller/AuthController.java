@@ -58,9 +58,18 @@ public class AuthController {
 		return tokenDto;
 	}
 
-	@GetMapping("/naver-login")
+	@GetMapping("/sign-in/naver")
 	@Operation(summary = "네이버 로그인 메서드", description = "네이버 로그인을 하기 위한 메서드입니다.")
 	public void naverLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.sendRedirect(naverService.getAuthorizationUrl());
 	}
+
+	@GetMapping("/sign-in/naver/callback")
+	@Operation(summary = "네이버 로그인 콜백 메서드", description = "네이버 로그인 콜백을 하기 위한 메서드입니다.")
+	public TokenDto naverCallback(@RequestParam String code, @RequestParam String state) throws IOException {
+		TokenDto token = naverService.getNaverToken("token", code);
+		naverService.saveNaverUser(naverService.getNaverUserByToken(token));
+		return token;
+	}
+
 }
