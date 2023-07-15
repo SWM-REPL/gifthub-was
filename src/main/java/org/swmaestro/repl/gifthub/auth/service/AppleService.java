@@ -5,6 +5,11 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 @Service
 @PropertySource("classpath:application.yml")
 public class AppleService {
@@ -19,16 +24,28 @@ public class AppleService {
 	public AppleService(MemberService memberService,
 	                    MemberRepository memberRepository,
 	                    @Value("${apple.key-id}") String keyId,
-	                    @Value("${apple.key-path}") String keyPath,
+	                    @Value("${apple.key-id-path}") String keyIdPath,
 	                    @Value("${apple.key}") String key,
 	                    @Value("${apple.team-id}") String teamId,
 	                    @Value("${apple.authorization-uri}") String authorizationUri) {
 		this.memberService = memberService;
 		this.memberRepository = memberRepository;
 		this.keyId = keyId;
-		this.keyPath = keyPath;
+		this.keyPath = keyIdPath;
 		this.key = key;
 		this.teamId = teamId;
 		this.authorizationUri = authorizationUri;
+	}
+
+	public String createPrivateKey() throws IOException {
+		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(keyPath);
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+		String readLine = null;
+		StringBuilder stringBuilder = new StringBuilder();
+		while ((readLine = bufferedReader.readLine()) != null) {
+			stringBuilder.append(readLine);
+			stringBuilder.append("\n");
+		}
+		return stringBuilder.toString();
 	}
 }
