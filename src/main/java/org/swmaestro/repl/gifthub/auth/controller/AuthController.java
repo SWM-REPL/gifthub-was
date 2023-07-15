@@ -2,6 +2,8 @@ package org.swmaestro.repl.gifthub.auth.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
@@ -9,8 +11,11 @@ import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.service.AuthService;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.service.NaverService;
 import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/auth")
@@ -21,6 +26,7 @@ public class AuthController {
 	private final AuthService authService;
 	private final RefreshTokenService refreshTokenService;
 	private final JwtProvider jwtProvider;
+	private final NaverService naverService;
 
 	@PostMapping("/sign-up")
 	@Operation(summary = "회원가입 메서드", description = "사용자가 회원가입을 하기 위한 메서드입니다.")
@@ -51,4 +57,19 @@ public class AuthController {
 		refreshTokenService.storeRefreshToken(tokenDto, jwtProvider.getUsername(refreshToken));
 		return tokenDto;
 	}
+
+	@GetMapping("/sign-in/naver")
+	@Operation(summary = "네이버 로그인 메서드", description = "네이버 로그인을 하기 위한 메서드입니다.")
+	public void naverLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		response.sendRedirect(naverService.getAuthorizationUrl());
+	}
+
+	@GetMapping("/sign-in/naver/callback")
+	@Operation(summary = "네이버 로그인 콜백 메서드", description = "네이버 로그인 콜백을 하기 위한 메서드입니다.")
+	public TokenDto naverCallback(@RequestParam String code, @RequestParam String state) throws IOException {
+		TokenDto token = naverService.getNaverToken("token", code);
+		naverService.saveNaverUser(naverService.getNaverUserByToken(token));
+		return token;
+	}
+
 }
