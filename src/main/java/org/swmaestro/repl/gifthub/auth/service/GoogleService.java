@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
@@ -22,170 +23,188 @@ import java.net.URL;
 @Service
 @PropertySource("classpath:application.yml")
 public class GoogleService {
-	private final MemberService memberService;
-	private final MemberRepository memberRepository;
-	private final RefreshTokenService refreshTokenService;
-	private final JwtProvider jwtProvider;
-	private final String clientId;
-	private final String redirectUri;
-	private final String clientSecret;
+    private final MemberService memberService;
+    private final MemberRepository memberRepository;
+    private final RefreshTokenService refreshTokenService;
+    private final JwtProvider jwtProvider;
+    private final String clientId;
+    private final String redirectUri;
+    private final String clientSecret;
 
-	public GoogleService(MemberService memberService, MemberRepository memberRepository, RefreshTokenService refreshTokenService, JwtProvider jwtProvider,
-	                     @Value("${google.client_id}") String clientId, @Value("${google.client_secret}") String clientSecret, @Value("${google.redirect_uri}") String redirectUri) {
-		this.memberService = memberService;
-		this.memberRepository = memberRepository;
-		this.refreshTokenService = refreshTokenService;
-		this.jwtProvider = jwtProvider;
-		this.clientId = clientId;
-		this.redirectUri = redirectUri;
-		this.clientSecret = clientSecret;
-	}
+    private final String tokenUri;
 
-	public TokenDto getToken(String code) {
-		String reqURL = "https://oauth2.googleapis.com/token";
-		TokenDto tokenDto = null;
+    private final String userInfoUri;
+    private final String authorizationUri;
 
-		try {
-			URL url = new URL(reqURL);
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    public GoogleService(MemberService memberService, MemberRepository memberRepository, RefreshTokenService refreshTokenService, JwtProvider jwtProvider,
+                         @Value("${google.client_id}") String clientId, @Value("${google.client_secret}") String clientSecret, @Value("${google.redirect_uri}") String redirectUri,
+                         @Value("${google.token_uri}") String tokenUri, @Value("${google.user_info_uri}") String userInfoUri, @Value("${google.authorization_uri}") String authorizationUri) {
+        this.memberService = memberService;
+        this.memberRepository = memberRepository;
+        this.refreshTokenService = refreshTokenService;
+        this.jwtProvider = jwtProvider;
+        this.clientId = clientId;
+        this.redirectUri = redirectUri;
+        this.clientSecret = clientSecret;
+        this.tokenUri = tokenUri;
+        this.userInfoUri = userInfoUri;
+        this.authorizationUri = authorizationUri;
+    }
 
-			conn.setRequestMethod("POST");
-			conn.setDoOutput(true);
+    public String getAuthorizationUrl() {
+        return UriComponentsBuilder
+                .fromUriString(authorizationUri)
+                .queryParam("client_id", clientId)
+                .queryParam("redirect_uri", redirectUri)
+                .queryParam("response_type", "code")
+                .queryParam("scope", "email profile")
+                .build()
+                .toString();
+    }
 
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-			StringBuilder sb = new StringBuilder();
+    public TokenDto getToken(String code) {
 
-			sb.append("grant_type=authorization_code");
-			sb.append("&client_id=" + clientId);
-			sb.append("&client_secret=" + clientSecret);
-			sb.append("&redirect_uri=" + redirectUri);
-			sb.append("&code=" + code);
-			bw.write(sb.toString());
-			bw.flush();
+        TokenDto tokenDto = null;
 
-			int responseCode = conn.getResponseCode();
-			System.out.println("responseCode : " + responseCode);
+        try {
+            URL url = new URL(tokenUri);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
 
-			String line = "";
-			String result = "";
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            StringBuilder sb = new StringBuilder();
 
-			while ((line = br.readLine()) != null) {
-				result += line;
-			}
-			System.out.println("response body : " + result);
+            sb.append("grant_type=authorization_code");
+            sb.append("&client_id=" + clientId);
+            sb.append("&client_secret=" + clientSecret);
+            sb.append("&redirect_uri=" + redirectUri);
+            sb.append("&code=" + code);
 
-			JsonParser parser = new JsonParser();
-			JsonElement element = parser.parse(result);
+            bw.write(sb.toString());
+            bw.flush();
 
-			String accessToken = element.getAsJsonObject().get("access_token").getAsString();
+            int responseCode = conn.getResponseCode();
 
-			br.close();
-			bw.close();
-			tokenDto = TokenDto.builder()
-					.accessToken(accessToken)
-					.build();
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
-		} catch (ProtocolException e) {
-			throw new BusinessException("잘못된 프로토콜을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
-		} catch (MalformedURLException e) {
-			throw new BusinessException("잘못된 URL 형식을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
-		} catch (IOException e) {
-			throw new BusinessException("HTTP 연결을 수행하는 동안 입출력 관련 오류가 발생하였습니다.", ErrorCode.INTERNAL_SERVER_ERROR);
-		}
-		return tokenDto;
-	}
+            String line = "";
+            String result = "";
 
-	public GoogleDto getUserInfo(TokenDto tokenDto) {
-		String reqURL = "https://www.googleapis.com/oauth2/v2/userinfo";
+            while ((line = br.readLine()) != null) {
+                result += line;
+            }
 
-		GoogleDto googleDto = null;
+            JsonParser parser = new JsonParser();
+            JsonElement element = parser.parse(result);
 
-		try {
-			URL url = new URL(reqURL);
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            String accessToken = element.getAsJsonObject().get("access_token").getAsString();
 
-			conn.setRequestMethod("GET");
-			conn.setDoOutput(true);
+            br.close();
+            bw.close();
+            tokenDto = TokenDto.builder()
+                    .accessToken(accessToken)
+                    .build();
 
-			conn.setRequestProperty("Authorization", "Bearer " + tokenDto.getAccessToken());
+        } catch (ProtocolException e) {
+            throw new BusinessException("잘못된 프로토콜을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
+        } catch (MalformedURLException e) {
+            throw new BusinessException("잘못된 URL 형식을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
+        } catch (IOException e) {
+            throw new BusinessException("HTTP 연결을 수행하는 동안 입출력 관련 오류가 발생하였습니다.", ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+        return tokenDto;
+    }
 
-			int responseCode = conn.getResponseCode();
+    public GoogleDto getUserInfo(TokenDto tokenDto) {
 
-			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-			String line = "";
-			String result = "";
+        GoogleDto googleDto = null;
 
-			while ((line = br.readLine()) != null) {
-				result += line;
-			}
+        try {
+            URL url = new URL(userInfoUri);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-			JsonParser parser = new JsonParser();
-			JsonElement element = parser.parse(result);
+            conn.setRequestMethod("GET");
+            conn.setDoOutput(true);
 
-			String nickname = element.getAsJsonObject().get("name").getAsString();
-			String email = element.getAsJsonObject().get("email").getAsString();
+            conn.setRequestProperty("Authorization", "Bearer " + tokenDto.getAccessToken());
 
-			br.close();
-			googleDto = GoogleDto.builder()
-					.nickname(nickname)
-					.username(email)
-					.build();
-		} catch (ProtocolException e) {
-			throw new BusinessException("잘못된 프로토콜을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
-		} catch (MalformedURLException e) {
-			throw new BusinessException("잘못된 URL 형식을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
-		} catch (IOException e) {
-			throw new BusinessException("HTTP 연결을 수행하는 동안 입출력 관련 오류가 발생하였습니다.", ErrorCode.INTERNAL_SERVER_ERROR);
-		}
-		return googleDto;
-	}
+            int responseCode = conn.getResponseCode();
 
-	public TokenDto signIn(GoogleDto googleDto) {
-		if (memberService.isDuplicateUsername(googleDto.getUsername())) {
-			TokenDto tokenDto = signInWithExistingMember(googleDto);
-			return tokenDto;
-		}
-		Member member = convertGoogleDtotoMember(googleDto);
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line = "";
+            String result = "";
 
-		memberRepository.save(member);
+            while ((line = br.readLine()) != null) {
+                result += line;
+            }
 
-		String accessToken = jwtProvider.generateToken(member.getUsername());
-		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername());
+            JsonParser parser = new JsonParser();
+            JsonElement element = parser.parse(result);
 
-		TokenDto tokenDto = TokenDto.builder()
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
-				.build();
+            String nickname = element.getAsJsonObject().get("name").getAsString();
+            String email = element.getAsJsonObject().get("email").getAsString();
 
-		refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
+            br.close();
+            googleDto = GoogleDto.builder()
+                    .nickname(nickname)
+                    .username(email)
+                    .build();
+        } catch (ProtocolException e) {
+            throw new BusinessException("잘못된 프로토콜을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
+        } catch (MalformedURLException e) {
+            throw new BusinessException("잘못된 URL 형식을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
+        } catch (IOException e) {
+            throw new BusinessException("HTTP 연결을 수행하는 동안 입출력 관련 오류가 발생하였습니다.", ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+        return googleDto;
+    }
 
-		return tokenDto;
-	}
+    public TokenDto signIn(GoogleDto googleDto) {
+        if (memberService.isDuplicateUsername(googleDto.getUsername())) {
+            TokenDto tokenDto = signInWithExistingMember(googleDto);
+            return tokenDto;
+        }
+        Member member = convertGoogleDtotoMember(googleDto);
 
-	public TokenDto signInWithExistingMember(GoogleDto googleDto) {
-		Member member = memberRepository.findByUsername(googleDto.getUsername());
-		if (member == null) {
-			throw new BusinessException("존재하지 않는 아이디입니다.", ErrorCode.INVALID_INPUT_VALUE);
-		}
-		String accessToken = jwtProvider.generateToken(member.getUsername());
-		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername());
+        memberRepository.save(member);
 
-		TokenDto tokenDto = TokenDto.builder()
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
-				.build();
+        String accessToken = jwtProvider.generateToken(member.getUsername());
+        String refreshToken = jwtProvider.generateRefreshToken(member.getUsername());
 
-		refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
+        TokenDto tokenDto = TokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
 
-		return tokenDto;
-	}
+        refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
 
-	public Member convertGoogleDtotoMember(GoogleDto googleDto) {
-		return Member.builder()
-				.nickname(googleDto.getNickname())
-				.username(googleDto.getUsername())
-				.build();
-	}
+        return tokenDto;
+    }
+
+    public TokenDto signInWithExistingMember(GoogleDto googleDto) {
+        Member member = memberRepository.findByUsername(googleDto.getUsername());
+        if (member == null) {
+            throw new BusinessException("존재하지 않는 아이디입니다.", ErrorCode.INVALID_INPUT_VALUE);
+        }
+        String accessToken = jwtProvider.generateToken(member.getUsername());
+        String refreshToken = jwtProvider.generateRefreshToken(member.getUsername());
+
+        TokenDto tokenDto = TokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
+        refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
+
+        return tokenDto;
+    }
+
+    public Member convertGoogleDtotoMember(GoogleDto googleDto) {
+        return Member.builder()
+                .nickname(googleDto.getNickname())
+                .username(googleDto.getUsername())
+                .build();
+    }
 }
