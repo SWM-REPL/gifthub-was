@@ -36,9 +36,6 @@ public class MemberServiceImpl implements MemberService {
 		if (isDuplicateUsername(signUpDTO.getUsername())) {
 			throw new BusinessException("이미 존재하는 아이디입니다.", ErrorCode.EXIST_RESOURCE);
 		}
-		if (isDuplicateNickname(signUpDTO.getNickname())) {
-			throw new BusinessException("이미 존재하는 닉네임입니다.", ErrorCode.EXIST_RESOURCE);
-		}
 		if (!isValidatePassword(signUpDTO.getPassword())) {
 			throw new BusinessException("비밀번호는 영문, 숫자, 특수문자를 포함한 8자리 이상이어야 합니다.", ErrorCode.INVALID_INPUT_VALUE);
 		}
@@ -71,10 +68,6 @@ public class MemberServiceImpl implements MemberService {
 
 	public boolean isDuplicateUsername(String username) {
 		return memberRepository.findByUsername(username) != null;
-	}
-
-	public boolean isDuplicateNickname(String nickname) {
-		return memberRepository.findByNickname(nickname) != null;
 	}
 
 	public boolean isValidatePassword(String password) {
