@@ -7,7 +7,10 @@ import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 
@@ -108,5 +111,28 @@ public class AppleService {
 			.setSubject(key)
 			.signWith(SignatureAlgorithm.ES256, privateKey)
 			.compact();
+	}
+
+	public String getToken(String clientSecretKey, String code) throws IOException {
+		WebClient webClient = WebClient.builder()
+			.baseUrl(baseUrl)
+			.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+			.build();
+
+		Map<String, Object> tokenResponse =
+			webClient
+				.post()
+				.uri(uriBuilder -> uriBuilder
+					.path("/auth/token")
+					.queryParam("grant_type", "authorization_code")
+					.queryParam("client_id", key)
+					.queryParam("client_secret", clientSecretKey)
+					.queryParam("code", code)
+					.build())
+				.retrieve()
+				.bodyToMono(Map.class)
+				.block();
+
+		return (String) tokenResponse.get("id_token");
 	}
 }
