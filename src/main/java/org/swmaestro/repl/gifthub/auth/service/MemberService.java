@@ -13,8 +13,6 @@ public interface MemberService {
 
 	boolean isDuplicateUsername(String username);
 
-	boolean isDuplicateNickname(String nickname);
-
 	Member passwordEncryption(Member member);
 
 	Member read(SignUpDto signUpDto);

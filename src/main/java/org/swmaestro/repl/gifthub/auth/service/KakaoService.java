@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
@@ -28,23 +29,39 @@ public class KakaoService {
 	private final String clientId;
 	private final String redirectUri;
 	private final JwtProvider jwtProvider;
+	private final String authorizationUri;
+	private final String tokenUri;
+	private final String userInfoUri;
 
 	public KakaoService(MemberService memberService, MemberRepository memberRepository, RefreshTokenService refreshTokenService,
-	                    JwtProvider jwtProvider, @Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri) {
+	                    JwtProvider jwtProvider, @Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri,
+	                    @Value("${kakao.authorization_uri}") String authorizationUri, @Value("${kakao.user_info_uri}") String userInfoUri, @Value("${kakao.token_uri}") String tokenUri) {
 		this.memberService = memberService;
 		this.memberRepository = memberRepository;
 		this.refreshTokenService = refreshTokenService;
 		this.jwtProvider = jwtProvider;
 		this.clientId = clientId;
 		this.redirectUri = redirectUri;
+		this.authorizationUri = authorizationUri;
+		this.userInfoUri = userInfoUri;
+		this.tokenUri = tokenUri;
 	}
 
-	public TokenDto getToken(String code) {
-		String reqURL = "https://kauth.kakao.com/oauth/token";
-		TokenDto tokenDto = null;
+	public String getAuthorizationUrl() {
+		return UriComponentsBuilder
+				.fromUriString(authorizationUri)
+				.queryParam("client_id", clientId)
+				.queryParam("redirect_uri", redirectUri)
+				.queryParam("response_type", "code")
+				.build()
+				.toString();
+	}
 
+	public TokenDto getToken(String code) throws MalformedURLException {
+
+		TokenDto tokenDto = null;
 		try {
-			URL url = new URL(reqURL);
+			URL url = new URL(tokenUri);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
 			conn.setRequestMethod("POST");
@@ -90,16 +107,17 @@ public class KakaoService {
 		} catch (IOException e) {
 			throw new BusinessException("HTTP 연결을 수행하는 동안 입출력 관련 오류가 발생하였습니다.", ErrorCode.INTERNAL_SERVER_ERROR);
 		}
+
 		return tokenDto;
 	}
 
 	public KakaoDto getUserInfo(TokenDto tokenDto) {
-		String reqURL = "https://kapi.kakao.com/v2/user/me";
 
 		KakaoDto kakaoDto = null;
 
 		try {
-			URL url = new URL(reqURL);
+			URL url = new URL(userInfoUri);
+
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
 			conn.setRequestMethod("POST");

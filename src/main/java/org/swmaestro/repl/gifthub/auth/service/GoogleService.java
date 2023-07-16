@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
@@ -30,8 +31,14 @@ public class GoogleService {
 	private final String redirectUri;
 	private final String clientSecret;
 
+	private final String tokenUri;
+
+	private final String userInfoUri;
+	private final String authorizationUri;
+
 	public GoogleService(MemberService memberService, MemberRepository memberRepository, RefreshTokenService refreshTokenService, JwtProvider jwtProvider,
-	                     @Value("${google.client_id}") String clientId, @Value("${google.client_secret}") String clientSecret, @Value("${google.redirect_uri}") String redirectUri) {
+	                     @Value("${google.client_id}") String clientId, @Value("${google.client_secret}") String clientSecret, @Value("${google.redirect_uri}") String redirectUri,
+	                     @Value("${google.token_uri}") String tokenUri, @Value("${google.user_info_uri}") String userInfoUri, @Value("${google.authorization_uri}") String authorizationUri) {
 		this.memberService = memberService;
 		this.memberRepository = memberRepository;
 		this.refreshTokenService = refreshTokenService;
@@ -39,14 +46,28 @@ public class GoogleService {
 		this.clientId = clientId;
 		this.redirectUri = redirectUri;
 		this.clientSecret = clientSecret;
+		this.tokenUri = tokenUri;
+		this.userInfoUri = userInfoUri;
+		this.authorizationUri = authorizationUri;
+	}
+
+	public String getAuthorizationUrl() {
+		return UriComponentsBuilder
+				.fromUriString(authorizationUri)
+				.queryParam("client_id", clientId)
+				.queryParam("redirect_uri", redirectUri)
+				.queryParam("response_type", "code")
+				.queryParam("scope", "email profile")
+				.build()
+				.toString();
 	}
 
 	public TokenDto getToken(String code) {
-		String reqURL = "https://oauth2.googleapis.com/token";
+
 		TokenDto tokenDto = null;
 
 		try {
-			URL url = new URL(reqURL);
+			URL url = new URL(tokenUri);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
 			conn.setRequestMethod("POST");
@@ -60,11 +81,11 @@ public class GoogleService {
 			sb.append("&client_secret=" + clientSecret);
 			sb.append("&redirect_uri=" + redirectUri);
 			sb.append("&code=" + code);
+
 			bw.write(sb.toString());
 			bw.flush();
 
 			int responseCode = conn.getResponseCode();
-			System.out.println("responseCode : " + responseCode);
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
@@ -74,7 +95,6 @@ public class GoogleService {
 			while ((line = br.readLine()) != null) {
 				result += line;
 			}
-			System.out.println("response body : " + result);
 
 			JsonParser parser = new JsonParser();
 			JsonElement element = parser.parse(result);
@@ -98,12 +118,11 @@ public class GoogleService {
 	}
 
 	public GoogleDto getUserInfo(TokenDto tokenDto) {
-		String reqURL = "https://www.googleapis.com/oauth2/v2/userinfo";
 
 		GoogleDto googleDto = null;
 
 		try {
-			URL url = new URL(reqURL);
+			URL url = new URL(userInfoUri);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
 			conn.setRequestMethod("GET");
