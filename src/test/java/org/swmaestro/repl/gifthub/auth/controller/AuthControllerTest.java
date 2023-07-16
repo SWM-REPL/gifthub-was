@@ -12,13 +12,13 @@ import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.service.AuthService;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
-import org.swmaestro.repl.gifthub.auth.service.NaverService;
-import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
+import org.swmaestro.repl.gifthub.auth.service.*;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
+import java.security.PrivateKey;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -48,6 +48,9 @@ public class AuthControllerTest {
 
 	@MockBean
 	private NaverService naverService;
+
+	@MockBean
+	private AppleService appleService;
 
 	@Test
 	public void signUpTest() throws Exception {
@@ -134,5 +137,31 @@ public class AuthControllerTest {
 				.queryParam("state", state)
 				.header("Authorization", "Bearer " + accesstoken))
 			.andExpect(status().isOk());
+	}
+
+	@Test
+	public void appleSignInCallbackTest() throws Exception {
+		String keyPath = "my_awesome_key_path";
+		String clientSecretKey = "my_awesome_client_secret_key";
+		String idToken = "my_awesome_id_token";
+		String accesstoken = "my_awesome_access_token";
+		String refreshToken = "my_awesome_refresh_token";
+		PrivateKey privateKey = mock(PrivateKey.class);
+
+		TokenDto token = TokenDto.builder()
+			.accessToken(accesstoken)
+			.refreshToken(refreshToken)
+			.build();
+
+		when(appleService.readKeyPath()).thenReturn(keyPath);
+		when(appleService.craetePrivateKey(keyPath)).thenReturn(privateKey);
+		when(appleService.createClientSecretKey(privateKey)).thenReturn(clientSecretKey);
+		when(appleService.getIdToken(clientSecretKey, "my_awesome_code")).thenReturn(idToken);
+		when(appleService.getToken(idToken)).thenReturn(token);
+
+		mockMvc.perform(post("/auth/sign-in/apple/callback")
+				.requestAttr("code", "my_awesome_code")
+				.header("Authorization", "Bearer " + accesstoken))
+			.andExpect(status().isBadRequest());
 	}
 }
