@@ -50,6 +50,9 @@ dependencies {
 
     // encryption algorithm
     implementation group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: '1.72'
+
+    // web client
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.named('test') {
