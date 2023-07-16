@@ -1,5 +1,6 @@
 package org.swmaestro.repl.gifthub.auth.controller;
 
+import com.nimbusds.jose.JOSEException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,8 @@ import org.swmaestro.repl.gifthub.auth.service.*;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import java.io.IOException;
+import java.security.PrivateKey;
+import java.text.ParseException;
 
 @RestController
 @RequestMapping("/auth")
@@ -76,9 +79,13 @@ public class AuthController {
 		response.sendRedirect(appleService.getAuthorizationUrl());
 	}
 
-	@GetMapping("/sign-in/apple/callback")
+	@PostMapping("/sign-in/apple/callback")
 	@Operation(summary = "애플 로그인 콜백 메서드", description = "애플 로그인 콜백을 하기 위한 메서드입니다.")
-	public TokenDto appleCallback(@RequestParam String code, @RequestParam String state) throws IOException {
-		return null;
+	public TokenDto appleCallback(@RequestBody String code) throws IOException, ParseException, JOSEException {
+		String keyPath = appleService.readKeyPath();
+		PrivateKey privateKey = appleService.craetePrivateKey(keyPath);
+		String clientSecretKey = appleService.createClientSecretKey(privateKey);
+		String idToken = appleService.getIdToken(code, clientSecretKey);
+		return appleService.getToken(idToken);
 	}
 }
