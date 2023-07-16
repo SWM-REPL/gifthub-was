@@ -1,5 +1,7 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -11,6 +13,9 @@ import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 
 import java.io.*;
 import java.security.PrivateKey;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @PropertySource("classpath:application.yml")
@@ -27,6 +32,7 @@ public class AppleService {
 	private final String scope;
 	private final String clientId;
 	private final String redirectUri;
+	private final String baseUrl;
 
 	public AppleService(MemberService memberService,
 	                    MemberRepository memberRepository,
@@ -39,7 +45,8 @@ public class AppleService {
 	                    @Value("${apple.response-type}") String responseType,
 	                    @Value("${apple.response-mode}") String responseMode,
 	                    @Value("${apple.scope}") String scope,
-	                    @Value("${apple.redirect-uri}") String redirectUri) {
+	                    @Value("${apple.redirect-uri}") String redirectUri,
+	                    @Value("${apple.base-url}") String baseUrl) {
 		this.memberService = memberService;
 		this.memberRepository = memberRepository;
 		this.keyId = keyId;
@@ -52,6 +59,7 @@ public class AppleService {
 		this.scope = scope;
 		this.clientId = clientId;
 		this.redirectUri = redirectUri;
+		this.baseUrl = baseUrl;
 	}
 
 	public String getAuthorizationUrl() {
@@ -85,5 +93,20 @@ public class AppleService {
 		return jcaPEMKeyConverter.getPrivateKey(privateKeyInfo);
 	}
 
+	public String createClientSecretKey(PrivateKey privateKey) {
+		Map<String, Object> headerParamsMap = new HashMap<>();
+		headerParamsMap.put("kid", keyId);
+		headerParamsMap.put("alg", "ES256");
 
+		return Jwts
+			.builder()
+			.setHeaderParams(headerParamsMap)
+			.setIssuer(teamId)
+			.setIssuedAt(new Date(System.currentTimeMillis()))
+			.setExpiration(new Date(System.currentTimeMillis() + 1000 * 30)) // 만료 시간 (30초)
+			.setAudience(baseUrl)
+			.setSubject(key)
+			.signWith(SignatureAlgorithm.ES256, privateKey)
+			.compact();
+	}
 }
