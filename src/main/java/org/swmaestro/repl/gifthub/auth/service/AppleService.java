@@ -16,7 +16,7 @@ public class AppleService {
 	private final MemberService memberService;
 	private final MemberRepository memberRepository;
 	private final String keyId;
-	private final String keyPath;
+	private final String keyIdPath;
 	private final String key;
 	private final String teamId;
 	private final String authorizationUri;
@@ -31,14 +31,14 @@ public class AppleService {
 		this.memberService = memberService;
 		this.memberRepository = memberRepository;
 		this.keyId = keyId;
-		this.keyPath = keyIdPath;
+		this.keyIdPath = keyIdPath;
 		this.key = key;
 		this.teamId = teamId;
 		this.authorizationUri = authorizationUri;
 	}
 
 	public String createPrivateKey() throws IOException {
-		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(keyPath);
+		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(keyIdPath);
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 		String readLine = null;
 		StringBuilder stringBuilder = new StringBuilder();
