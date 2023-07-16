@@ -75,4 +75,10 @@ public class AuthController {
 	public void appleLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.sendRedirect(appleService.getAuthorizationUrl());
 	}
+
+	@GetMapping("/sign-in/apple/callback")
+	@Operation(summary = "애플 로그인 콜백 메서드", description = "애플 로그인 콜백을 하기 위한 메서드입니다.")
+	public TokenDto appleCallback(@RequestParam String code, @RequestParam String state) throws IOException {
+		return null;
+	}
 }
