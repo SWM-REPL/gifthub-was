@@ -72,9 +72,7 @@ public class AuthController {
 
 	@GetMapping("/sign-in/apple")
 	@Operation(summary = "애플 로그인 메서드", description = "애플 로그인을 하기 위한 메서드입니다.")
-	public String appleLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
-//		response.sendRedirect(naverService.getAppleAuthorizationUrl());
-		String keyPath = appleService.readKeyPath();
-		return appleService.craetePrivateKey(keyPath).getEncoded().toString();
+	public void appleLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		response.sendRedirect(appleService.getAuthorizationUrl());
 	}
 }
