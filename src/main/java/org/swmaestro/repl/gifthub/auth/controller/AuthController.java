@@ -9,10 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
-import org.swmaestro.repl.gifthub.auth.service.AuthService;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
-import org.swmaestro.repl.gifthub.auth.service.NaverService;
-import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
+import org.swmaestro.repl.gifthub.auth.service.*;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import java.io.IOException;
@@ -27,6 +24,7 @@ public class AuthController {
 	private final RefreshTokenService refreshTokenService;
 	private final JwtProvider jwtProvider;
 	private final NaverService naverService;
+	private final AppleService appleService;
 
 	@PostMapping("/sign-up")
 	@Operation(summary = "회원가입 메서드", description = "사용자가 회원가입을 하기 위한 메서드입니다.")
@@ -72,4 +70,11 @@ public class AuthController {
 		return token;
 	}
 
+	@GetMapping("/sign-in/apple")
+	@Operation(summary = "애플 로그인 메서드", description = "애플 로그인을 하기 위한 메서드입니다.")
+	public String appleLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+//		response.sendRedirect(naverService.getAppleAuthorizationUrl());
+		String keyPath = appleService.readKeyPath();
+		return appleService.craetePrivateKey(keyPath).getEncoded().toString();
+	}
 }

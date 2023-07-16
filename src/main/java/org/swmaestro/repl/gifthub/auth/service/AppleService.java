@@ -37,7 +37,7 @@ public class AppleService {
 		this.authorizationUri = authorizationUri;
 	}
 
-	public String createPrivateKey() throws IOException {
+	public String readKeyPath() throws IOException {
 		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(keyIdPath);
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 		String readLine = null;
