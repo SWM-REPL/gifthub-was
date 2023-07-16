@@ -1,5 +1,13 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jwt.SignedJWT;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -12,13 +20,16 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
+import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import java.io.*;
 import java.security.PrivateKey;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
+import java.util.*;
 
 @Service
 @PropertySource("classpath:application.yml")
@@ -36,9 +47,11 @@ public class AppleService {
 	private final String clientId;
 	private final String redirectUri;
 	private final String baseUrl;
+	private final JwtProvider jwtProvider;
 
 	public AppleService(MemberService memberService,
 	                    MemberRepository memberRepository,
+	                    JwtProvider jwtProvider,
 	                    @Value("${apple.client-id}") String clientId,
 	                    @Value("${apple.key-id}") String keyId,
 	                    @Value("${apple.key-id-path}") String keyIdPath,
@@ -63,6 +76,7 @@ public class AppleService {
 		this.clientId = clientId;
 		this.redirectUri = redirectUri;
 		this.baseUrl = baseUrl;
+		this.jwtProvider = jwtProvider;
 	}
 
 	public String getAuthorizationUrl() {
@@ -113,7 +127,7 @@ public class AppleService {
 			.compact();
 	}
 
-	public String getToken(String clientSecretKey, String code) throws IOException {
+	public String getIdToken(String clientSecretKey, String code) throws IOException {
 		WebClient webClient = WebClient.builder()
 			.baseUrl(baseUrl)
 			.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -134,5 +148,57 @@ public class AppleService {
 				.block();
 
 		return (String) tokenResponse.get("id_token");
+	}
+
+	public TokenDto getToken(String idToken) throws ParseException, JsonProcessingException, JOSEException {
+		WebClient webClient = WebClient.builder()
+			.baseUrl(baseUrl)
+			.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+			.build();
+
+		Map<String, Object> keyReponse =
+			webClient
+				.get()
+				.uri(uriBuilder -> uriBuilder
+					.path("/auth/keys")
+					.build())
+				.retrieve()
+				.bodyToMono(Map.class)
+				.block();
+
+		List<Map<String, Object>> keys = (List<Map<String, Object>>) keyReponse.get("keys");
+
+		SignedJWT signedJWT = SignedJWT.parse(idToken);
+		for (Map<String, Object> key : keys) {
+			RSAKey rsaKey = (RSAKey) JWK.parse(new ObjectMapper().writeValueAsString(key));
+			RSAPublicKey rsaPublicKey = rsaKey.toRSAPublicKey();
+			JWSVerifier jwsVerifier = new RSASSAVerifier(rsaPublicKey);
+
+			// idToken을 암호화한 key인 경우
+			if (signedJWT.verify(jwsVerifier)) {
+				// jwt를 .으로 나눴을때 가운데에 있는 payload 확인
+				String payload = idToken.split("[.]")[1];
+				// public key로 idToken 복호화
+				Map<String, Object> payloadMap = new ObjectMapper().readValue(new String(Base64.getDecoder().decode(payload)), Map.class);
+				// 사용자 이메일 정보 추출
+				String email = payloadMap.get("email").toString();
+				String name = payloadMap.get("name").toString();
+
+				Member member = Member.builder()
+					.username(email)
+					.nickname(name)
+					.build();
+
+				if (!memberService.isDuplicateUsername(member.getUsername())) {
+					memberRepository.save(member);
+				}
+
+				return TokenDto.builder()
+					.accessToken(jwtProvider.generateToken(member.getUsername()))
+					.refreshToken(jwtProvider.generateRefreshToken(member.getUsername()))
+					.build();
+			}
+		}
+		return null;
 	}
 }
