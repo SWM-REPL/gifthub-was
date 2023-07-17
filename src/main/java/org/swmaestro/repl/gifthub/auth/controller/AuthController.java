@@ -27,7 +27,7 @@ public class AuthController {
 	private final NaverService naverService;
 	private final KakaoService kakaoService;
 	private final GoogleService googleService;
-  private final AppleService appleService;
+	private final AppleService appleService;
 
 	@PostMapping("/sign-up")
 	@Operation(summary = "회원가입 메서드", description = "사용자가 회원가입을 하기 위한 메서드입니다.")
@@ -102,8 +102,8 @@ public class AuthController {
 		TokenDto tokenDto = googleService.signIn(googleDto);
 		return tokenDto;
 	}
-  
-  @GetMapping("/sign-in/apple")
+
+	@GetMapping("/sign-in/apple")
 	@Operation(summary = "애플 로그인 메서드", description = "애플 로그인을 하기 위한 메서드입니다.")
 	public void appleLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.sendRedirect(appleService.getAuthorizationUrl());
@@ -117,4 +117,5 @@ public class AuthController {
 		String clientSecretKey = appleService.createClientSecretKey(privateKey);
 		String idToken = appleService.getIdToken(code, clientSecretKey);
 		return appleService.getToken(idToken);
+	}
 }
