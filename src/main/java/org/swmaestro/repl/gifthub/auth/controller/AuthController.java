@@ -1,5 +1,6 @@
 package org.swmaestro.repl.gifthub.auth.controller;
 
+import com.nimbusds.jose.JOSEException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,8 @@ import org.swmaestro.repl.gifthub.auth.service.*;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import java.io.IOException;
+import java.security.PrivateKey;
+import java.text.ParseException;
 
 @RestController
 @RequestMapping("/auth")
@@ -24,6 +27,7 @@ public class AuthController {
 	private final NaverService naverService;
 	private final KakaoService kakaoService;
 	private final GoogleService googleService;
+  private final AppleService appleService;
 
 	@PostMapping("/sign-up")
 	@Operation(summary = "회원가입 메서드", description = "사용자가 회원가입을 하기 위한 메서드입니다.")
@@ -98,4 +102,19 @@ public class AuthController {
 		TokenDto tokenDto = googleService.signIn(googleDto);
 		return tokenDto;
 	}
+  
+  @GetMapping("/sign-in/apple")
+	@Operation(summary = "애플 로그인 메서드", description = "애플 로그인을 하기 위한 메서드입니다.")
+	public void appleLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		response.sendRedirect(appleService.getAuthorizationUrl());
+	}
+
+	@PostMapping("/sign-in/apple/callback")
+	@Operation(summary = "애플 로그인 콜백 메서드", description = "애플 로그인 콜백을 하기 위한 메서드입니다.")
+	public TokenDto appleCallback(@RequestBody String code) throws IOException, ParseException, JOSEException {
+		String keyPath = appleService.readKeyPath();
+		PrivateKey privateKey = appleService.craetePrivateKey(keyPath);
+		String clientSecretKey = appleService.createClientSecretKey(privateKey);
+		String idToken = appleService.getIdToken(code, clientSecretKey);
+		return appleService.getToken(idToken);
 }

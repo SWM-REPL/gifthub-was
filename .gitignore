@@ -36,4 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
+# Application Properties
 /src/main/resources/application.yml
+
+# Key Files
+/src/main/resources/keys/
