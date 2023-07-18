@@ -41,3 +41,7 @@ out/
 
 # Key Files
 /src/main/resources/keys/
+
+# Desktop Services Store
+.DS_Store
+src/.DS_Store
