@@ -1,8 +1,8 @@
 package org.swmaestro.repl.gifthub.vouchers.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 
-public interface VoucherRepository extends JpaRepository<Member, Long> {
+public interface VoucherRepository extends JpaRepository<Voucher, Long> {
 
 }
