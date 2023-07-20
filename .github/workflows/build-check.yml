@@ -18,5 +18,6 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+        ref: ${{ github.head_ref }}
     - name: Build with Gradle
       run: ./gradlew clean build
