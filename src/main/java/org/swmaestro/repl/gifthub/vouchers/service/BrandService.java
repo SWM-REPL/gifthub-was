@@ -12,6 +12,6 @@ public class BrandService {
 	private final BrandRepository brandRepository;
 
 	public Brand read(String brandName) {
-		return brandRepository.findByBrandName(brandName);
+		return brandRepository.findByName(brandName);
 	}
 }

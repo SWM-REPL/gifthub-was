@@ -12,6 +12,6 @@ public class ProductService {
 	private final ProductRepository productRepository;
 
 	public Product read(String productName) {
-		return productRepository.findByProductName(productName);
+		return productRepository.findByName(productName);
 	}
 }
