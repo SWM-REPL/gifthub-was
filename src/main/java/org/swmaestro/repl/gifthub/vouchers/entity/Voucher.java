@@ -45,7 +45,8 @@ public class Voucher extends BaseTimeEntity {
 	private String imageUrl;
 
 	@Builder
-	public Voucher(Long id, Brand brand, Product product, String barcode, int balance, LocalDateTime expiresAt) {
+	public Voucher(Long id, Brand brand, Product product, String barcode, int balance, LocalDateTime expiresAt,
+		String imageUrl) {
 		this.id = id;
 		this.brand = brand;
 		this.product = product;

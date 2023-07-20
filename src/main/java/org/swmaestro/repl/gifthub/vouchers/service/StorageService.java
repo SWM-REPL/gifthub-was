@@ -22,7 +22,7 @@ public class StorageService {
 	private String bucketName;
 	private final AmazonS3Client amazonS3Client;
 
-	public S3FileDto uploadFile(String dirName, String fileName, MultipartFile multipartFile) throws IOException {
+	public S3FileDto save(String dirName, MultipartFile multipartFile) throws IOException {
 		String originalFileName = multipartFile.getOriginalFilename();
 		String uploadFilePath = dirName + "/";
 		String uploadFileName = getUUidFileName(originalFileName);
