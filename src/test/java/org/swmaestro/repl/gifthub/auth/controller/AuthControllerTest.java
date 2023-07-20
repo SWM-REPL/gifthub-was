@@ -1,6 +1,12 @@
 package org.swmaestro.repl.gifthub.auth.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.security.PrivateKey;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -8,19 +14,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.swmaestro.repl.gifthub.auth.dto.*;
+import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
+import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
+import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
+import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.service.*;
+import org.swmaestro.repl.gifthub.auth.service.AppleService;
+import org.swmaestro.repl.gifthub.auth.service.AuthService;
+import org.swmaestro.repl.gifthub.auth.service.GoogleService;
+import org.swmaestro.repl.gifthub.auth.service.KakaoService;
+import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.service.NaverService;
+import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
-import java.security.PrivateKey;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -59,41 +68,44 @@ public class AuthControllerTest {
 	@Test
 	public void signUpTest() throws Exception {
 		SignUpDto signUpDto = SignUpDto.builder()
-				.username("jinlee1703")
-				.password("abc123##")
-				.nickname("이진우")
-				.build();
+			.username("jinlee1703")
+			.password("abc123##")
+			.nickname("이진우")
+			.build();
 
 		TokenDto tokenDto = TokenDto.builder()
-				.accessToken("myawesomejwt")
-				.refreshToken("myawesomejwt")
-				.build();
+			.accessToken("myawesomejwt")
+			.refreshToken("myawesomejwt")
+			.build();
 
+		// when
+		when(memberService.create(signUpDto)).thenReturn(tokenDto);
 
+		// then
 		mockMvc.perform(post("/auth/sign-up")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(signUpDto)))
-				.andExpect(status().isOk());
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(signUpDto)))
+			.andExpect(status().isOk());
 	}
 
 	@Test
 	public void signInTest() throws Exception {
 		SignInDto loginDto = SignInDto.builder()
-				.username("jinlee1703")
-				.password("abc123##")
-				.build();
+			.username("jinlee1703")
+			.password("abc123##")
+			.build();
 
 		TokenDto tokenDto = TokenDto.builder()
-				.accessToken("myawesomejwt")
-				.refreshToken("myawesomejwt")
-				.build();
+			.accessToken("myawesomejwt")
+			.refreshToken("myawesomejwt")
+			.build();
 
 		when(authService.signIn(any(SignInDto.class))).thenReturn(tokenDto);
 
 		mockMvc.perform(post("/auth/sign-up")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(loginDto)))
-				.andExpect(status().isOk());
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(loginDto)))
+			.andExpect(status().isOk());
 	}
 
 	@Test
@@ -105,18 +117,17 @@ public class AuthControllerTest {
 		String username = "jinlee1703";
 
 		TokenDto tokenDto = TokenDto.builder()
-				.accessToken(newAccessToken)
-				.refreshToken(newRefreshToken)
-				.build();
+			.accessToken(newAccessToken)
+			.refreshToken(newRefreshToken)
+			.build();
 
 		when(refreshTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken)).thenReturn(null);
 		when(refreshTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken)).thenReturn(null);
 		when(jwtProvider.getUsername(refreshToken)).thenReturn(username);
 
-
 		mockMvc.perform(post("/auth/refresh")
-						.header("Authorization", refreshToken))
-				.andExpect(status().isUnauthorized());
+				.header("Authorization", refreshToken))
+			.andExpect(status().isUnauthorized());
 	}
 
 	@Test
@@ -126,29 +137,29 @@ public class AuthControllerTest {
 		String state = "myawesome_state";
 
 		TokenDto kakaoTokenDto = TokenDto.builder()
-				.accessToken("myawesomeKakaojwt")
-				.refreshToken("myawesomeKakaojwt")
-				.build();
+			.accessToken("myawesomeKakaojwt")
+			.refreshToken("myawesomeKakaojwt")
+			.build();
 
 		TokenDto tokenDto = TokenDto.builder()
-				.accessToken("myawesomejwt")
-				.refreshToken("myawesomejwt")
-				.build();
+			.accessToken("myawesomejwt")
+			.refreshToken("myawesomejwt")
+			.build();
 
 		KakaoDto kakaoDto = KakaoDto.builder()
-				.nickname("정인희")
-				.username("dls@gmail.com")
-				.build();
+			.nickname("정인희")
+			.username("dls@gmail.com")
+			.build();
 
 		when(kakaoService.getToken(code)).thenReturn(tokenDto);
 		when(kakaoService.getUserInfo(tokenDto)).thenReturn(kakaoDto);
 		when(kakaoService.signIn(kakaoDto)).thenReturn(tokenDto);
 
 		mockMvc.perform(get("/auth/sign-in/naver/callback")
-						.queryParam("code", code)
-						.queryParam("state", state)
-						.header("Authorization", "Bearer " + accesstoken))
-				.andExpect(status().isOk());
+				.queryParam("code", code)
+				.queryParam("state", state)
+				.header("Authorization", "Bearer " + accesstoken))
+			.andExpect(status().isOk());
 	}
 
 	@Test
@@ -158,29 +169,29 @@ public class AuthControllerTest {
 		String state = "myawesome_state";
 
 		TokenDto googleTokenDto = TokenDto.builder()
-				.accessToken("myawesomeKakaojwt")
-				.refreshToken("myawesomeKakaojwt")
-				.build();
+			.accessToken("myawesomeKakaojwt")
+			.refreshToken("myawesomeKakaojwt")
+			.build();
 
 		TokenDto tokenDto = TokenDto.builder()
-				.accessToken("myawesomejwt")
-				.refreshToken("myawesomejwt")
-				.build();
+			.accessToken("myawesomejwt")
+			.refreshToken("myawesomejwt")
+			.build();
 
 		GoogleDto googleDto = GoogleDto.builder()
-				.nickname("정인희")
-				.username("dls@gmail.com")
-				.build();
+			.nickname("정인희")
+			.username("dls@gmail.com")
+			.build();
 
 		when(googleService.getToken(code)).thenReturn(tokenDto);
 		when(googleService.getUserInfo(tokenDto)).thenReturn(googleDto);
 		when(googleService.signIn(googleDto)).thenReturn(tokenDto);
 
 		mockMvc.perform(get("/auth/sign-in/naver/callback")
-						.queryParam("code", code)
-						.queryParam("state", state)
-						.header("Authorization", "Bearer " + accesstoken))
-				.andExpect(status().isOk());
+				.queryParam("code", code)
+				.queryParam("state", state)
+				.header("Authorization", "Bearer " + accesstoken))
+			.andExpect(status().isOk());
 	}
 
 	@Test
@@ -189,22 +200,22 @@ public class AuthControllerTest {
 		String code = "myawesome_code";
 		String state = "myawesome_state";
 		TokenDto token = TokenDto.builder()
-				.accessToken(accesstoken)
-				.refreshToken(accesstoken)
-				.build();
+			.accessToken(accesstoken)
+			.refreshToken(accesstoken)
+			.build();
 		Member member = Member.builder()
-				.username("jinlee1703@naver.com")
-				.nickname("이진우")
-				.build();
+			.username("jinlee1703@naver.com")
+			.nickname("이진우")
+			.build();
 
 		when(naverService.getNaverToken("token", code)).thenReturn(token);
 		when(naverService.getNaverUserByToken(token)).thenReturn(member);
 
 		mockMvc.perform(get("/auth/sign-in/naver/callback")
-						.queryParam("code", code)
-						.queryParam("state", state)
-						.header("Authorization", "Bearer " + accesstoken))
-				.andExpect(status().isOk());
+				.queryParam("code", code)
+				.queryParam("state", state)
+				.header("Authorization", "Bearer " + accesstoken))
+			.andExpect(status().isOk());
 	}
 
 	@Test
