@@ -8,6 +8,7 @@ import org.swmaestro.repl.gifthub.util.ISO8601Converter;
 import org.swmaestro.repl.gifthub.vouchers.dto.S3FileDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherDto;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
+import org.swmaestro.repl.gifthub.vouchers.repository.VoucherRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,8 +20,9 @@ public class VoucherService {
 	private final StorageService storageService;
 	private final BrandService brandService;
 	private final ProductService productService;
+	private final VoucherRepository voucherRepository;
 
-	public Voucher save(VoucherDto voucherDto) throws IOException {
+	public Long save(VoucherDto voucherDto) throws IOException {
 		S3FileDto s3FileDto = storageService.save(voucherDirName, voucherDto.getImageFile());
 		Voucher voucher = Voucher.builder()
 			.brand(brandService.read(voucherDto.getBrandName()))
@@ -30,7 +32,7 @@ public class VoucherService {
 			.imageUrl(s3FileDto.getUploadFileUrl())
 			.build();
 
-		return voucher;
+		return voucherRepository.save(voucher).getId();
 	}
 
 }
