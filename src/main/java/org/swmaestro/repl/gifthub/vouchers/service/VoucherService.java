@@ -60,7 +60,7 @@ public class VoucherService {
 	사용자 별 기프티콘 목록 조회 메서드
 	 */
 	public List<Voucher> list(String username) {
-		List<Voucher> vouchers = voucherRepository.findByMember_Username(username);
+		List<Voucher> vouchers = voucherRepository.findByMemberUsername(username);
 		if (vouchers == null) {
 			throw new BusinessException("존재하지 않는 사용자 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
 		}
@@ -71,7 +71,7 @@ public class VoucherService {
 	사용자, 브랜드 별 기프티콘 목록 조회 메서드
 	 */
 	public List<Voucher> listByBrand(String username, String brandName) {
-		List<Voucher> vouchers = voucherRepository.findByMember_UsernameAndBrand_Name(username, brandName);
+		List<Voucher> vouchers = voucherRepository.findByMemberUsernameAndBrandName(username, brandName);
 		if (vouchers == null) {
 			throw new BusinessException("존재하지 않는 사용자 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
 		}
