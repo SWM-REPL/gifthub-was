@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -39,4 +40,18 @@ public class Voucher extends BaseTimeEntity {
 
 	@Column(nullable = false)
 	private LocalDateTime expiresAt;
+
+	@Column(length = 100)
+	private String imageUrl;
+
+	@Builder
+	public Voucher(Long id, Brand brand, Product product, String barcode, int balance, LocalDateTime expiresAt,
+		String imageUrl) {
+		this.id = id;
+		this.brand = brand;
+		this.product = product;
+		this.barcode = barcode;
+		this.balance = balance;
+		this.expiresAt = expiresAt;
+	}
 }
