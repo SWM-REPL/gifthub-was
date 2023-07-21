@@ -79,8 +79,8 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public Member read(SignUpDto signUpDto) {
-		Member member = memberRepository.findByUsername(signUpDto.getUsername());
+	public Member read(String username) {
+		Member member = memberRepository.findByUsername(username);
 		if (member == null) {
 			return null;
 		}

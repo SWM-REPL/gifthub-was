@@ -61,8 +61,3 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-// do not run tests on build (to be deleted)
-tasks.withType(Test) {
-    enabled = false
-}
