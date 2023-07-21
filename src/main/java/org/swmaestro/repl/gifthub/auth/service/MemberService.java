@@ -15,7 +15,7 @@ public interface MemberService {
 
 	Member passwordEncryption(Member member);
 
-	Member read(SignUpDto signUpDto);
+	Member read(String username);
 
 	int count();
 

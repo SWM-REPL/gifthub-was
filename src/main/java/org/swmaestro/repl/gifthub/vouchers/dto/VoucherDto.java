@@ -16,5 +16,4 @@ public class VoucherDto {
 	private String productName;
 	private String brandName;
 	private MultipartFile imageFile;
-	private String username;
 }
