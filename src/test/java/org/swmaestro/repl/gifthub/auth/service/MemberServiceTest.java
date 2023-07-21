@@ -165,7 +165,7 @@ class MemberServiceTest {
 		when(memberRepository.findByUsername(signUpDto.getUsername())).thenReturn(member);
 
 		// when
-		Member result = memberService.read(signUpDto);
+		Member result = memberService.read(signUpDto.getUsername());
 
 		// then
 		verify(memberRepository, times(2)).findByUsername(any(String.class));
