@@ -57,6 +57,7 @@ dependencies {
 
     // aws - s3
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws', version: '2.2.6.RELEASE'
+    testImplementation group: 'io.findify', name: 's3mock_2.12', version: '0.2.6'
 }
 
 tasks.named('test') {
