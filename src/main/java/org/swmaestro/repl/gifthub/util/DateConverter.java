@@ -1,12 +1,13 @@
 package org.swmaestro.repl.gifthub.util;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class ISO8601Converter {
-	public static LocalDateTime stringToLocalDateTime(String dateStr) {
+public class DateConverter {
+	public static LocalDate stringToLocalDate(String dateStr) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		return LocalDateTime.parse(dateStr, formatter);
+		return LocalDate.parse(dateStr, formatter);
 	}
 
 	public static LocalDateTime iso8601ToLocalDateTime(String iso8601) {
