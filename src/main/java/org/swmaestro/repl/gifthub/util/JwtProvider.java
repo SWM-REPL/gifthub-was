@@ -1,9 +1,9 @@
 package org.swmaestro.repl.gifthub.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,9 +15,10 @@ import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.exception.ErrorCode;
 import org.swmaestro.repl.gifthub.security.JpaUserDetailsService;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Component
 @PropertySource("classpath:application.yml")
@@ -28,7 +29,9 @@ public class JwtProvider {
 	private final JpaUserDetailsService userDetailsService;
 	private final RefreshTokenRepository refreshTokenRepository;
 
-	public JwtProvider(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration, @Value("${issuer}") String issuer, JpaUserDetailsService userDetailsService, RefreshTokenRepository refreshTokenRepository) {
+	public JwtProvider(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration,
+		@Value("${issuer}") String issuer, JpaUserDetailsService userDetailsService,
+		RefreshTokenRepository refreshTokenRepository) {
 		this.secretKey = secretKey;
 		this.expiration = expiration;
 		this.issuer = issuer;
@@ -44,12 +47,12 @@ public class JwtProvider {
 	 */
 	public String generateToken(String username) {
 		return io.jsonwebtoken.Jwts.builder()
-				.setSubject(username)
-				.setIssuer(issuer)
-				.setIssuedAt(new java.util.Date(System.currentTimeMillis()))
-				.setExpiration(new java.util.Date(System.currentTimeMillis() + expiration))
-				.signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, secretKey.getBytes())
-				.compact();
+			.setSubject(username)
+			.setIssuer(issuer)
+			.setIssuedAt(new java.util.Date(System.currentTimeMillis()))
+			.setExpiration(new java.util.Date(System.currentTimeMillis() + expiration))
+			.signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, secretKey.getBytes())
+			.compact();
 	}
 
 	/**
@@ -103,11 +106,11 @@ public class JwtProvider {
 	 */
 	public String getUsername(String token) {
 		return Jwts.parserBuilder()
-				.setSigningKey(secretKey.getBytes())
-				.build()
-				.parseClaimsJws(token)
-				.getBody()
-				.getSubject();
+			.setSigningKey(secretKey.getBytes())
+			.build()
+			.parseClaimsJws(token)
+			.getBody()
+			.getSubject();
 	}
 
 	/**
@@ -118,12 +121,12 @@ public class JwtProvider {
 	 */
 	public String generateRefreshToken(String username) {
 		return io.jsonwebtoken.Jwts.builder()
-				.setSubject(username)
-				.setIssuer(issuer)
-				.setIssuedAt(new java.util.Date(System.currentTimeMillis()))
-				.setExpiration(Date.from(Instant.now().plus(15, ChronoUnit.DAYS)))
-				.signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, secretKey.getBytes())
-				.compact();
+			.setSubject(username)
+			.setIssuer(issuer)
+			.setIssuedAt(new java.util.Date(System.currentTimeMillis()))
+			.setExpiration(Date.from(Instant.now().plus(15, ChronoUnit.DAYS)))
+			.signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, secretKey.getBytes())
+			.compact();
 	}
 
 	/**
