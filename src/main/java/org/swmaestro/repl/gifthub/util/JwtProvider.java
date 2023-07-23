@@ -11,6 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.swmaestro.repl.gifthub.auth.repository.RefreshTokenRepository;
+import org.swmaestro.repl.gifthub.exception.BusinessException;
+import org.swmaestro.repl.gifthub.exception.ErrorCode;
 import org.swmaestro.repl.gifthub.security.JpaUserDetailsService;
 
 import java.time.Instant;
@@ -135,7 +137,7 @@ public class JwtProvider {
 		String storedRefreshToken = refreshTokenRepository.findByUsername(username).get().getRefreshToken();
 
 		if (!refreshToken.equals(storedRefreshToken)) {
-			throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+			throw new BusinessException("RefreshToken이 유효하지 않습니다.", ErrorCode.INVALID_AUTHENTICATION);
 		}
 		return generateToken(username);
 	}

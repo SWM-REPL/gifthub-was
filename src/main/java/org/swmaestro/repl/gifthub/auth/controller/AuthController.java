@@ -44,18 +44,17 @@ public class AuthController {
 	}
 
 	@PostMapping("/refresh")
-	@Operation(summary = "Refresh Token 재발급 메서드", description = "Refresh Token을 재발급 받기 위한 메서드입니다.")
-	public TokenDto validateRefreshToken(@RequestHeader("Authorization") String refreshToken) {
+	@Operation(summary = "Refresh Token을 이용한 Access Token 재발급 메서드", description = "Refresh Token을 이용하여 Access Token을 재발급 받기 위한 메서드입니다.")
+	public TokenDto reissueAccessToken(@RequestHeader("Authorization") String refreshToken) {
 		String newAccessToken = refreshTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken);
-		String newRefreshToken = refreshTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken);
+
+		refreshToken = refreshToken.substring(7);
 
 		TokenDto tokenDto = TokenDto.builder()
 				.accessToken(newAccessToken)
-				.refreshToken(newRefreshToken)
+				.refreshToken(refreshToken)
 				.build();
 
-		refreshToken = refreshToken.substring(7);
-		refreshTokenService.storeRefreshToken(tokenDto, jwtProvider.getUsername(refreshToken));
 		return tokenDto;
 	}
 
