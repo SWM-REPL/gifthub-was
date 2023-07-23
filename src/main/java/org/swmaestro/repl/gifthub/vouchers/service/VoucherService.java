@@ -4,14 +4,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.exception.ErrorCode;
-import org.swmaestro.repl.gifthub.util.ISO8601Converter;
-import org.swmaestro.repl.gifthub.vouchers.dto.S3FileDto;
-import org.swmaestro.repl.gifthub.vouchers.dto.VoucherDto;
+import org.swmaestro.repl.gifthub.util.DateConverter;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 import org.swmaestro.repl.gifthub.vouchers.repository.VoucherRepository;
@@ -21,8 +19,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class VoucherService {
-	@Value("${cloud.aws.s3.voucher-dir-name}")
-	private String voucherDirName;
 	private final StorageService storageService;
 	private final BrandService brandService;
 	private final ProductService productService;
@@ -32,15 +28,15 @@ public class VoucherService {
 	/*
 		기프티콘 저장 메서드
 	 */
-	public VoucherSaveResponseDto save(VoucherDto voucherDto) throws IOException {
-		S3FileDto s3FileDto = storageService.save(voucherDirName, voucherDto.getImageFile());
+	public VoucherSaveResponseDto save(String username, VoucherSaveRequestDto voucherSaveRequestDto) throws
+		IOException {
 		Voucher voucher = Voucher.builder()
-			.brand(brandService.read(voucherDto.getBrandName()))
-			.product(productService.read(voucherDto.getProductName()))
-			.barcode(voucherDto.getBarcode())
-			.expiresAt(ISO8601Converter.iso8601ToLocalDateTime(voucherDto.getExpiresAt()))
-			.imageUrl(s3FileDto.getUploadFileUrl())
-			.member(memberService.read(voucherDto.getUsername()))
+			.brand(brandService.read(voucherSaveRequestDto.getBrandName()))
+			.product(productService.read(voucherSaveRequestDto.getProductName()))
+			.barcode(voucherSaveRequestDto.getBarcode())
+			.expiresAt(DateConverter.stringToLocalDate(voucherSaveRequestDto.getExpiresAt()))
+			.imageUrl(voucherSaveRequestDto.getImageUrl())
+			.member(memberService.read(username))
 			.build();
 
 		return VoucherSaveResponseDto.builder()
