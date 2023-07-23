@@ -36,7 +36,7 @@ public class Product {
 	@Column(nullable = false)
 	private int price;
 
-	@Column(length = 100)
+	@Column(length = 200)
 	private String imageUrl;
 
 	@Builder

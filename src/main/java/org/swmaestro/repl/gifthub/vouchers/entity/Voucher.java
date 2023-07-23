@@ -42,7 +42,7 @@ public class Voucher extends BaseTimeEntity {
 	@Column(nullable = false)
 	private LocalDate expiresAt;
 
-	@Column(length = 100)
+	@Column(length = 200)
 	private String imageUrl;
 
 	@ManyToOne
@@ -59,5 +59,6 @@ public class Voucher extends BaseTimeEntity {
 		this.balance = balance;
 		this.expiresAt = expiresAt;
 		this.member = member;
+		this.imageUrl = imageUrl;
 	}
 }
