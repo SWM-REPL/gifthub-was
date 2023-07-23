@@ -4,6 +4,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class ISO8601Converter {
+	public static LocalDateTime stringToLocalDateTime(String dateStr) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		return LocalDateTime.parse(dateStr, formatter);
+	}
+
 	public static LocalDateTime iso8601ToLocalDateTime(String iso8601) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		return LocalDateTime.parse(iso8601, formatter);

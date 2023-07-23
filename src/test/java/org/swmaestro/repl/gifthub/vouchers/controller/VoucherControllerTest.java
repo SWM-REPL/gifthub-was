@@ -12,7 +12,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.swmaestro.repl.gifthub.vouchers.dto.VoucherDto;
+import org.swmaestro.repl.gifthub.util.JwtProvider;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
 
@@ -30,17 +31,19 @@ class VoucherControllerTest {
 	@MockBean
 	private VoucherService voucherService;
 
+	@MockBean
+	private JwtProvider jwtProvider;
+
 	@Test
 	@WithMockUser(username = "이진우", roles = "USER")
 	void saveVoucher() throws Exception {
 		// given
-		VoucherDto voucher = VoucherDto.builder()
-			.username("이진우")
+		VoucherSaveRequestDto voucher = VoucherSaveRequestDto.builder()
 			.brandName("스타벅스")
 			.productName("아이스 아메리카노 T")
 			.barcode("012345678910")
-			.expiresAt("2023-06-15T05:34:55.746Z")
-			.imageFile(null)
+			.expiresAt("2023-06-15")
+			.imageUrl("https://s3.ap-northeast-2.amazonaws.com/gifthub-voucher/1623777600000_스타벅스_아이스아메리카노T.png")
 			.build();
 
 		VoucherSaveResponseDto voucherSaveResponseDto = VoucherSaveResponseDto.builder()
@@ -48,11 +51,13 @@ class VoucherControllerTest {
 			.build();
 
 		// when
-		when(voucherService.save(voucher)).thenReturn(voucherSaveResponseDto);
+		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
+		when(jwtProvider.getUsername(anyString())).thenReturn("이진우");
+		when(voucherService.save(anyString(), any(VoucherSaveRequestDto.class))).thenReturn(voucherSaveResponseDto);
 
 		// then
 		mockMvc.perform(post("/vouchers")
-				.header("Authorization", "my_awesome_access_token")
+				.header("Authorization", "Bearer my_awesome_access_token")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(voucher)))
 			.andExpect(status().isOk());
