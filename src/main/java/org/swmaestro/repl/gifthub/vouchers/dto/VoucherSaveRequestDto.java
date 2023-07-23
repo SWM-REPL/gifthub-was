@@ -2,17 +2,19 @@ package org.swmaestro.repl.gifthub.vouchers.dto;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 @Getter
-@Setter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class VoucherSaveRequestDto implements Serializable {
 	private String barcode;
 	private String expiresAt;
