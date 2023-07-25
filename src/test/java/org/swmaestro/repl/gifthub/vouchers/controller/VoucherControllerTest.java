@@ -15,8 +15,12 @@ import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -83,5 +87,36 @@ class VoucherControllerTest {
 
 		// then
 		assertEquals(voucherId, result.getId());
+	}
+
+	/*
+	기프티콘 목록 조회 테스트
+	 */
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	void listVoucherTest() throws Exception {
+		String accessToken = "my_awesome_access_token";
+		String username = "이진우";
+
+		List<VoucherReadResponseDto> voucherReadResponseDtos = new ArrayList<>();
+		voucherReadResponseDtos.add(VoucherReadResponseDto.builder()
+				.id(1L)
+				.barcode("012345678910")
+				.expiresAt("2023-06-15")
+				.build());
+
+		voucherReadResponseDtos.add(VoucherReadResponseDto.builder()
+				.id(2L)
+				.barcode("012345678911")
+				.expiresAt("2023-06-16")
+				.build());
+		
+		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
+		when(jwtProvider.getUsername(anyString())).thenReturn(username);
+		when(voucherService.list(username)).thenReturn(voucherReadResponseDtos);
+
+		mockMvc.perform(get("/vouchers")
+						.header("Authorization", "Bearer " + accessToken))
+				.andExpect(status().isOk());
 	}
 }

@@ -16,6 +16,7 @@ import org.swmaestro.repl.gifthub.vouchers.service.StorageService;
 import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/vouchers")
@@ -46,5 +47,12 @@ public class VoucherController {
 	@Operation(summary = "Voucher 상세 조회 메서드", description = "클라이언트에서 요청한 기프티콘 상세 정보를 조회하기 위한 메서드입니다.")
 	public VoucherReadResponseDto readVoucher(@PathVariable Long voucherId) throws IOException {
 		return voucherService.read(voucherId);
+	}
+
+	@GetMapping
+	@Operation(summary = "Voucher 목록 조회 메서드", description = "클라이언트에서 요청한 사용자 별 기프티콘 목록 정보를 조회하기 위한 메서드입니다.")
+	public List<VoucherReadResponseDto> listVoucher(HttpServletRequest request) {
+		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
+		return voucherService.list(username);
 	}
 }

@@ -13,6 +13,7 @@ import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 import org.swmaestro.repl.gifthub.vouchers.repository.VoucherRepository;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,35 +54,36 @@ public class VoucherService {
 		if (voucher == null) {
 			throw new BusinessException("존재하지 않는 상품권 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
 		}
-		VoucherReadResponseDto voucherReadResponseDto = VoucherReadResponseDto.builder()
-				.id(voucher.get().getId())
-				.barcode(voucher.get().getBarcode())
-				.expiresAt(voucher.get().getExpiresAt().toString())
-				.product(voucher.get().getProduct())
-				.username(voucher.get().getMember().getUsername())
-				.build();
+		VoucherReadResponseDto voucherReadResponseDto = mapToDto(voucher.get());
 		return voucherReadResponseDto;
 	}
 
 	/*
 	사용자 별 기프티콘 목록 조회 메서드
 	 */
-	public List<Voucher> list(String username) {
+	public List<VoucherReadResponseDto> list(String username) {
 		List<Voucher> vouchers = voucherRepository.findByMemberUsername(username);
 		if (vouchers == null) {
 			throw new BusinessException("존재하지 않는 사용자 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
 		}
-		return vouchers;
+		List<VoucherReadResponseDto> voucherReadResponseDtos = new ArrayList<>();
+		for (Voucher voucher : vouchers) {
+			voucherReadResponseDtos.add(mapToDto(voucher));
+		}
+		return voucherReadResponseDtos;
 	}
 
 	/*
-	사용자, 브랜드 별 기프티콘 목록 조회 메서드
+	Entity를 Dto로 변환하는 메서드
 	 */
-	public List<Voucher> listByBrand(String username, String brandName) {
-		List<Voucher> vouchers = voucherRepository.findByMemberUsernameAndBrandName(username, brandName);
-		if (vouchers == null) {
-			throw new BusinessException("존재하지 않는 사용자 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
-		}
-		return vouchers;
+	public VoucherReadResponseDto mapToDto(Voucher voucher) {
+		VoucherReadResponseDto voucherReadResponseDto = VoucherReadResponseDto.builder()
+				.id(voucher.getId())
+				.barcode(voucher.getBarcode())
+				.expiresAt(voucher.getExpiresAt().toString())
+				.product(voucher.getProduct())
+				.username(voucher.getMember().getUsername())
+				.build();
+		return voucherReadResponseDto;
 	}
 }
