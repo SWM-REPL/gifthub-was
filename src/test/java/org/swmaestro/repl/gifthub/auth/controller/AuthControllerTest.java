@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.swmaestro.repl.gifthub.auth.dto.*;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
@@ -231,5 +232,20 @@ public class AuthControllerTest {
 						.requestAttr("code", "my_awesome_code")
 						.header("Authorization", "Bearer " + accesstoken))
 				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	public void signOutTest() throws Exception {
+		String username = "jinlee1703";
+		String accessToken = "my_awesome_access_token";
+
+		when(jwtProvider.getUsername(accessToken)).thenReturn(username);
+		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
+
+		mockMvc.perform(post("/auth/sign-out")
+						.header("Authorization", "Bearer " + accessToken))
+				.andExpect(status().isOk());
+
 	}
 }
