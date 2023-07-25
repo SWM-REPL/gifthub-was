@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
 	public void signOut(String username) {
 		Member member = memberRepository.findByUsername(username);
 		if (member == null) {
-			throw new BusinessException("존재하지 않는 아이디입니다.", ErrorCode.INVALID_INPUT_VALUE);
+			throw new BusinessException("존재하지 않는 사용자입니다.", ErrorCode.INVALID_AUTHENTICATION);
 		}
 		refreshTokenService.deleteRefreshToken(username);
 	}
