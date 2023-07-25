@@ -1,17 +1,20 @@
 package org.swmaestro.repl.gifthub.vouchers.dto;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 @Getter
-@Setter
 @ToString
-@Builder
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class S3FileDto {
-	private String originalFileName;
 	private String uploadFileName;
-	private String uploadFilePath;
-	private String uploadFileUrl;
+
+	@Builder
+	public S3FileDto(String uploadFileName) {
+		this.uploadFileName = uploadFileName;
+	}
 }
