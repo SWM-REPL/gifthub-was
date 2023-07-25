@@ -6,4 +6,6 @@ import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 public interface AuthService {
 
 	TokenDto signIn(SignInDto loginDto);
+
+	void signOut(String username);
 }

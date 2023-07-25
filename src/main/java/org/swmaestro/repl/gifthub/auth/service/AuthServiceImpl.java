@@ -1,5 +1,6 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,14 @@ public class AuthServiceImpl implements AuthService {
 		refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
 
 		return tokenDto;
+	}
 
+	@Transactional
+	public void signOut(String username) {
+		Member member = memberRepository.findByUsername(username);
+		if (member == null) {
+			throw new BusinessException("존재하지 않는 아이디입니다.", ErrorCode.INVALID_INPUT_VALUE);
+		}
+		refreshTokenService.deleteRefreshToken(username);
 	}
 }
