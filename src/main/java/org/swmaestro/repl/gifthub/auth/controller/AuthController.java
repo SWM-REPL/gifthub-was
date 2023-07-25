@@ -119,4 +119,11 @@ public class AuthController {
 		String idToken = appleService.getIdToken(code, clientSecretKey);
 		return appleService.getToken(idToken);
 	}
+
+	@PostMapping("/sign-out")
+	@Operation(summary = "로그아웃 메서드", description = "사용자가 로그아웃을 하기 위한 메서드입니다.")
+	public void signOut(HttpServletRequest request) {
+		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
+		authService.signOut(username);
+	}
 }
