@@ -1,6 +1,11 @@
 package org.swmaestro.repl.gifthub.vouchers.service;
 
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -12,14 +17,13 @@ import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 import org.swmaestro.repl.gifthub.vouchers.repository.VoucherRepository;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class VoucherService {
+	@Value("${cloud.aws.s3.voucher-dir-name}")
+	private String voucherDirName;
 	private final StorageService storageService;
 	private final BrandService brandService;
 	private final ProductService productService;
@@ -30,19 +34,19 @@ public class VoucherService {
 		기프티콘 저장 메서드
 	 */
 	public VoucherSaveResponseDto save(String username, VoucherSaveRequestDto voucherSaveRequestDto) throws
-			IOException {
+		IOException {
 		Voucher voucher = Voucher.builder()
-				.brand(brandService.read(voucherSaveRequestDto.getBrandName()))
-				.product(productService.read(voucherSaveRequestDto.getProductName()))
-				.barcode(voucherSaveRequestDto.getBarcode())
-				.expiresAt(DateConverter.stringToLocalDate(voucherSaveRequestDto.getExpiresAt()))
-				.imageUrl(voucherSaveRequestDto.getImageUrl())
-				.member(memberService.read(username))
-				.build();
+			.brand(brandService.read(voucherSaveRequestDto.getBrandName()))
+			.product(productService.read(voucherSaveRequestDto.getProductName()))
+			.barcode(voucherSaveRequestDto.getBarcode())
+			.expiresAt(DateConverter.stringToLocalDate(voucherSaveRequestDto.getExpiresAt()))
+			.imageUrl(storageService.getBucketAddress(voucherDirName) + voucherSaveRequestDto.getImageUrl())
+			.member(memberService.read(username))
+			.build();
 
 		return VoucherSaveResponseDto.builder()
-				.id(voucherRepository.save(voucher).getId())
-				.build();
+			.id(voucherRepository.save(voucher).getId())
+			.build();
 	}
 
 	/*
@@ -78,12 +82,12 @@ public class VoucherService {
 	 */
 	public VoucherReadResponseDto mapToDto(Voucher voucher) {
 		VoucherReadResponseDto voucherReadResponseDto = VoucherReadResponseDto.builder()
-				.id(voucher.getId())
-				.barcode(voucher.getBarcode())
-				.expiresAt(voucher.getExpiresAt().toString())
-				.product(voucher.getProduct())
-				.username(voucher.getMember().getUsername())
-				.build();
+			.id(voucher.getId())
+			.barcode(voucher.getBarcode())
+			.expiresAt(voucher.getExpiresAt().toString())
+			.product(voucher.getProduct())
+			.username(voucher.getMember().getUsername())
+			.build();
 		return voucherReadResponseDto;
 	}
 }
