@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 public class StorageService {
 	@Value("${cloud.aws.s3.bucket}")
 	private String bucketName;
+	@Value("${cloud.aws.region.static}")
+	private String bucketRegion;
 	private final AmazonS3Client amazonS3Client;
 
 	public S3FileDto save(String dirName, MultipartFile multipartFile) throws IOException {
@@ -38,11 +40,12 @@ public class StorageService {
 
 		String uploadFileUrl = amazonS3Client.getUrl(bucketName, keyName).toString();
 		return S3FileDto.builder()
-			.originalFileName(originalFileName)
 			.uploadFileName(uploadFileName)
-			.uploadFilePath(uploadFilePath)
-			.uploadFileUrl(uploadFileUrl)
 			.build();
+	}
+
+	public String getBucketAddress(String dirName) {
+		return "https://" + bucketName + ".s3." + bucketRegion + ".amazonaws.com/" + dirName + "/";
 	}
 
 	private String getUUidFileName(String fileName) {
