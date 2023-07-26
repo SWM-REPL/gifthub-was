@@ -6,8 +6,6 @@ import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 import java.util.List;
 
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
-	List<Voucher> findByMemberUsername(String username);
-
-	List<Voucher> findByMemberUsernameAndBrandName(String username, String brandName);
+	List<Voucher> findAllByMemberUsername(String username);
 
 }
