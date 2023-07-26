@@ -23,8 +23,9 @@ public class RefreshTokenService {
 	@Transactional
 	public void storeRefreshToken(TokenDto tokenDto, String username) {
 		RefreshToken refreshToken = RefreshToken.builder()
-				.refreshToken(tokenDto.getRefreshToken())
+				.token(tokenDto.getRefreshToken())
 				.username(username)
+				.createdAt(jwtProvider.getIssuedAt(tokenDto.getRefreshToken()))
 				.build();
 
 		if (refreshTokenRepository.findByUsername(username).isPresent()) {
