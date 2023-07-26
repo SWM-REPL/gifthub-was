@@ -14,6 +14,7 @@ import org.swmaestro.repl.gifthub.util.DateConverter;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 import org.swmaestro.repl.gifthub.vouchers.repository.VoucherRepository;
 
@@ -75,6 +76,27 @@ public class VoucherService {
 			voucherReadResponseDtos.add(mapToDto(voucher));
 		}
 		return voucherReadResponseDtos;
+	}
+
+	/*
+	기프티콘 정보 수정 메서드
+	 */
+	public VoucherSaveResponseDto update(Long voucherId, VoucherUpdateRequestDto voucherUpdateRequestDto) {
+		Voucher voucher = voucherRepository.findById(voucherId)
+			.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", ErrorCode.NOT_FOUND_RESOURCE));
+
+		voucher.setBarcode(
+			voucherUpdateRequestDto.getBarcode() == null ? voucher.getBarcode() : voucherUpdateRequestDto.getBarcode());
+		voucher.setBrand(voucherUpdateRequestDto.getBrandName() == null ? voucher.getBrand() :
+			brandService.read(voucherUpdateRequestDto.getBrandName()));
+		voucher.setProduct(voucherUpdateRequestDto.getProductName() == null ? voucher.getProduct() :
+			productService.read(voucherUpdateRequestDto.getProductName()));
+		voucher.setExpiresAt(voucherUpdateRequestDto.getExpiresAt() == null ? voucher.getExpiresAt() :
+			DateConverter.stringToLocalDate(voucherUpdateRequestDto.getExpiresAt()));
+
+		return VoucherSaveResponseDto.builder()
+			.id(voucherId)
+			.build();
 	}
 
 	/*
