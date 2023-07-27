@@ -1,6 +1,13 @@
 package org.swmaestro.repl.gifthub.vouchers.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,16 +17,15 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
-import org.swmaestro.repl.gifthub.vouchers.dto.*;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -72,15 +78,16 @@ class VoucherControllerTest {
 	void readVoucherTest() throws Exception {
 		// given
 		Long voucherId = 1L;
+		String username = "user11";
 		VoucherReadResponseDto voucherReadResponseDto = VoucherReadResponseDto.builder()
 				.id(1L)
 				.barcode("012345678910")
 				.expiresAt("2023-06-15")
 				.build();
 
-		when(voucherService.read(voucherId)).thenReturn(voucherReadResponseDto);
+		when(voucherService.read(voucherId, username)).thenReturn(voucherReadResponseDto);
 		//when
-		VoucherReadResponseDto result = voucherService.read(voucherId);
+		VoucherReadResponseDto result = voucherService.read(voucherId, username);
 
 		// then
 		assertEquals(voucherId, result.getId());
