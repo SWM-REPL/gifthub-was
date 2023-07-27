@@ -1,24 +1,30 @@
 package org.swmaestro.repl.gifthub.vouchers.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
-import org.swmaestro.repl.gifthub.exception.BusinessException;
-import org.swmaestro.repl.gifthub.exception.ErrorCode;
-import org.swmaestro.repl.gifthub.util.DateConverter;
-import org.swmaestro.repl.gifthub.vouchers.dto.*;
-import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
-import org.swmaestro.repl.gifthub.vouchers.entity.VoucherUsageHistory;
-import org.swmaestro.repl.gifthub.vouchers.repository.VoucherRepository;
-import org.swmaestro.repl.gifthub.vouchers.repository.VoucherUsageHistoryRepository;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.exception.BusinessException;
+import org.swmaestro.repl.gifthub.exception.ErrorCode;
+import org.swmaestro.repl.gifthub.util.DateConverter;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
+import org.swmaestro.repl.gifthub.vouchers.entity.VoucherUsageHistory;
+import org.swmaestro.repl.gifthub.vouchers.repository.VoucherRepository;
+import org.swmaestro.repl.gifthub.vouchers.repository.VoucherUsageHistoryRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -54,12 +60,17 @@ public class VoucherService {
 	/*
 	기프티콘 상세 조회 메서드
 	 */
-	public VoucherReadResponseDto read(Long id) {
+	public VoucherReadResponseDto read(Long id, String username) {
 		Optional<Voucher> voucher = voucherRepository.findById(id);
+		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
 
-		if (voucher == null) {
+		if (voucher.isEmpty()) {
 			throw new BusinessException("존재하지 않는 상품권 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
 		}
+		if (!vouchers.contains(voucher.get())) {
+			throw new BusinessException("상품권을 조회할 권한이 없습니다.", ErrorCode.ACCESS_DENIED);
+		}
+
 		VoucherReadResponseDto voucherReadResponseDto = mapToDto(voucher.get());
 		return voucherReadResponseDto;
 	}
@@ -87,7 +98,8 @@ public class VoucherService {
 				.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", ErrorCode.NOT_FOUND_RESOURCE));
 
 		voucher.setBarcode(
-				voucherUpdateRequestDto.getBarcode() == null ? voucher.getBarcode() : voucherUpdateRequestDto.getBarcode());
+				voucherUpdateRequestDto.getBarcode() == null ? voucher.getBarcode() :
+						voucherUpdateRequestDto.getBarcode());
 		voucher.setBrand(voucherUpdateRequestDto.getBrandName() == null ? voucher.getBrand() :
 				brandService.read(voucherUpdateRequestDto.getBrandName()));
 		voucher.setProduct(voucherUpdateRequestDto.getProductName() == null ? voucher.getProduct() :
@@ -134,7 +146,6 @@ public class VoucherService {
 		if (voucher.get().getExpiresAt().isBefore(LocalDate.now())) {
 			throw new BusinessException("유효기간이 만료된 상품권 입니다.", ErrorCode.EXIST_RESOURCE);
 		}
-
 
 		VoucherUsageHistory voucherUsageHistory = VoucherUsageHistory.builder()
 				.member(memberService.read(username))
