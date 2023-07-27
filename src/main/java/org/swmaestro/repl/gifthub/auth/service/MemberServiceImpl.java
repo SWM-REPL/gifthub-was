@@ -7,9 +7,9 @@ import java.util.regex.Pattern;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
-import org.swmaestro.repl.gifthub.auth.dto.UserDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -106,13 +106,14 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public UserDeleteResponseDto delete(Long id) {
+	public MemberDeleteResponseDto delete(Long id) {
 		Member member = memberRepository.findById(id)
 			.orElseThrow(() -> new BusinessException("존재하지 않는 회원입니다.", ErrorCode.NOT_FOUND_RESOURCE));
 
 		member.setDeletedAt(LocalDateTime.now());
+		memberRepository.save(member);
 
-		return UserDeleteResponseDto.builder()
+		return MemberDeleteResponseDto.builder()
 			.id(id)
 			.build();
 	}

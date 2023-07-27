@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.swmaestro.repl.gifthub.auth.dto.UserDeleteResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
@@ -31,7 +31,7 @@ class UserControllerTest {
 	@WithMockUser(username = "이진우", roles = "USER")
 	void deleteMember() throws Exception {
 		// given
-		UserDeleteResponseDto userDeleteResponseDto = UserDeleteResponseDto.builder()
+		MemberDeleteResponseDto userDeleteResponseDto = MemberDeleteResponseDto.builder()
 			.id(1L)
 			.build();
 

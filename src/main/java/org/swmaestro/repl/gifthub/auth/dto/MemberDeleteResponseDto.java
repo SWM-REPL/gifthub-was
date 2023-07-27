@@ -11,11 +11,11 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserDeleteResponseDto implements Serializable {
+public class MemberDeleteResponseDto implements Serializable {
 	private Long id;
 
 	@Builder
-	public UserDeleteResponseDto(Long id) {
+	public MemberDeleteResponseDto(Long id) {
 		this.id = id;
 	}
 }
