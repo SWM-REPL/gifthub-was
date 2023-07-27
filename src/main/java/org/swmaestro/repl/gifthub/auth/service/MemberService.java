@@ -1,10 +1,11 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
+import java.util.List;
+
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
-
-import java.util.List;
 
 public interface MemberService {
 	TokenDto create(SignUpDto signUpDTO);
@@ -23,5 +24,5 @@ public interface MemberService {
 
 	Long update(Long id, Member member);
 
-	Long delete(Long id);
+	UserDeleteResponseDto delete(Long id);
 }
