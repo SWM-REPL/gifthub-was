@@ -1,8 +1,13 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
@@ -11,9 +16,7 @@ import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.exception.ErrorCode;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -25,10 +28,10 @@ public class MemberServiceImpl implements MemberService {
 
 	public Member passwordEncryption(Member member) {
 		return Member.builder()
-				.username(member.getUsername())
-				.password(passwordEncoder.encode(member.getPassword()))
-				.nickname(member.getNickname())
-				.build();
+			.username(member.getUsername())
+			.password(passwordEncoder.encode(member.getPassword()))
+			.nickname(member.getNickname())
+			.build();
 	}
 
 	@Override
@@ -49,9 +52,9 @@ public class MemberServiceImpl implements MemberService {
 		String refreshToken = jwtProvider.generateRefreshToken(encodedMember.getUsername());
 
 		TokenDto tokenDto = TokenDto.builder()
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
-				.build();
+			.accessToken(accessToken)
+			.refreshToken(refreshToken)
+			.build();
 
 		refreshTokenService.storeRefreshToken(tokenDto, encodedMember.getUsername());
 
@@ -60,10 +63,10 @@ public class MemberServiceImpl implements MemberService {
 
 	public Member convertSignUpDTOtoMember(SignUpDto signUpDTO) {
 		return Member.builder()
-				.username(signUpDTO.getUsername())
-				.password(signUpDTO.getPassword())
-				.nickname(signUpDTO.getNickname())
-				.build();
+			.username(signUpDTO.getUsername())
+			.password(signUpDTO.getPassword())
+			.nickname(signUpDTO.getNickname())
+			.build();
 	}
 
 	public boolean isDuplicateUsername(String username) {
@@ -89,7 +92,7 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public int count() {
-		return (int) memberRepository.count();
+		return (int)memberRepository.count();
 	}
 
 	@Override
@@ -103,7 +106,15 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public Long delete(Long id) {
-		return null;
+	public MemberDeleteResponseDto delete(Long id) {
+		Member member = memberRepository.findById(id)
+			.orElseThrow(() -> new BusinessException("존재하지 않는 회원입니다.", ErrorCode.NOT_FOUND_RESOURCE));
+
+		member.setDeletedAt(LocalDateTime.now());
+		memberRepository.save(member);
+
+		return MemberDeleteResponseDto.builder()
+			.id(id)
+			.build();
 	}
 }

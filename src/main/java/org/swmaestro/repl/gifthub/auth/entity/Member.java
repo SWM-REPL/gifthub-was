@@ -1,5 +1,7 @@
 package org.swmaestro.repl.gifthub.auth.entity;
 
+import java.time.LocalDateTime;
+
 import org.swmaestro.repl.gifthub.util.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -30,6 +32,9 @@ public class Member extends BaseTimeEntity {
 
 	@Column(length = 12, nullable = false)
 	private String nickname;
+
+	@Column
+	private LocalDateTime deletedAt;
 
 	@Builder
 	public Member(Long id, String username, String password, String nickname) {
