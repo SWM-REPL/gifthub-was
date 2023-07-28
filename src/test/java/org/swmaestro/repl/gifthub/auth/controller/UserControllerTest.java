@@ -9,11 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
+import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateResponseDto;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -27,13 +32,16 @@ class UserControllerTest {
 	@MockBean
 	private JwtProvider jwtProvider;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	@Test
 	@WithMockUser(username = "이진우", roles = "USER")
 	void deleteMember() throws Exception {
 		// given
 		MemberDeleteResponseDto userDeleteResponseDto = MemberDeleteResponseDto.builder()
-			.id(1L)
-			.build();
+				.id(1L)
+				.build();
 
 		// when
 		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
@@ -42,8 +50,35 @@ class UserControllerTest {
 
 		// then
 		mockMvc.perform(delete("/users/1")
-				.header("Authorization", "Bearer my_awesome_access_token"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.id").value(1L));
+						.header("Authorization", "Bearer my_awesome_access_token"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(1L));
+	}
+
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	void updateMember() throws Exception {
+		//given
+		String username = "이진우";
+		Long userId = 1L;
+		MemberUpdateRequestDto memberUpdateRequestDto = MemberUpdateRequestDto.builder()
+				.nickname("이진우11")
+				.password("1234")
+				.build();
+		MemberUpdateResponseDto memberUpdateResponseDto = MemberUpdateResponseDto.builder()
+				.id(1L)
+				.nickname("이진우11")
+				.build();
+		//when
+		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
+		when(jwtProvider.getUsername(anyString())).thenReturn("이진우");
+		when(memberService.update(anyString(), anyLong(), any(MemberUpdateRequestDto.class))).thenReturn(memberUpdateResponseDto);
+
+		//then
+		mockMvc.perform(patch("/users/1")
+						.header("Authorization", "Bearer my_awesome_access_token")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(memberUpdateResponseDto)))
+				.andExpect(status().isOk());
 	}
 }

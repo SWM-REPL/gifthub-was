@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
+import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
@@ -28,10 +30,10 @@ public class MemberServiceImpl implements MemberService {
 
 	public Member passwordEncryption(Member member) {
 		return Member.builder()
-			.username(member.getUsername())
-			.password(passwordEncoder.encode(member.getPassword()))
-			.nickname(member.getNickname())
-			.build();
+				.username(member.getUsername())
+				.password(passwordEncoder.encode(member.getPassword()))
+				.nickname(member.getNickname())
+				.build();
 	}
 
 	@Override
@@ -52,9 +54,9 @@ public class MemberServiceImpl implements MemberService {
 		String refreshToken = jwtProvider.generateRefreshToken(encodedMember.getUsername());
 
 		TokenDto tokenDto = TokenDto.builder()
-			.accessToken(accessToken)
-			.refreshToken(refreshToken)
-			.build();
+				.accessToken(accessToken)
+				.refreshToken(refreshToken)
+				.build();
 
 		refreshTokenService.storeRefreshToken(tokenDto, encodedMember.getUsername());
 
@@ -63,10 +65,10 @@ public class MemberServiceImpl implements MemberService {
 
 	public Member convertSignUpDTOtoMember(SignUpDto signUpDTO) {
 		return Member.builder()
-			.username(signUpDTO.getUsername())
-			.password(signUpDTO.getPassword())
-			.nickname(signUpDTO.getNickname())
-			.build();
+				.username(signUpDTO.getUsername())
+				.password(signUpDTO.getPassword())
+				.nickname(signUpDTO.getNickname())
+				.build();
 	}
 
 	public boolean isDuplicateUsername(String username) {
@@ -101,20 +103,48 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public Long update(Long id, Member member) {
-		return null;
+	public MemberUpdateResponseDto update(String username, Long userId, MemberUpdateRequestDto memberUpdateRequestDto) {
+		Member member = memberRepository.findByUsername(username);
+		if (member == null) {
+			throw new BusinessException("존재하지 않는 회원입니다.", ErrorCode.NOT_FOUND_RESOURCE);
+		}
+		if (!member.getId().equals(userId)) {
+			throw new BusinessException("수정 권한이 없습니다.", ErrorCode.ACCESS_DENIED);
+		}
+		if (memberUpdateRequestDto.getNickname() != null) {
+			if (isDuplicateNickname(memberUpdateRequestDto.getNickname())) {
+				throw new BusinessException("이미 존재하는 닉네임입니다.", ErrorCode.EXIST_RESOURCE);
+			}
+			member.setNickname(memberUpdateRequestDto.getNickname());
+		}
+		if (memberUpdateRequestDto.getPassword() != null) {
+			if (!isValidatePassword(memberUpdateRequestDto.getPassword())) {
+				throw new BusinessException("비밀번호는 영문, 숫자, 특수문자를 포함한 8자리 이상이어야 합니다.", ErrorCode.INVALID_INPUT_VALUE);
+			}
+			member.setPassword(passwordEncoder.encode(memberUpdateRequestDto.getPassword()));
+		}
+		memberRepository.save(member);
+		return MemberUpdateResponseDto.builder()
+				.id(member.getId())
+				.nickname(member.getNickname())
+				.build();
+	}
+
+	public boolean isDuplicateNickname(String nickname) {
+		return memberRepository.findByNickname(nickname) != null;
 	}
 
 	@Override
 	public MemberDeleteResponseDto delete(Long id) {
 		Member member = memberRepository.findById(id)
-			.orElseThrow(() -> new BusinessException("존재하지 않는 회원입니다.", ErrorCode.NOT_FOUND_RESOURCE));
+				.orElseThrow(() -> new BusinessException("존재하지 않는 회원입니다.", ErrorCode.NOT_FOUND_RESOURCE));
 
 		member.setDeletedAt(LocalDateTime.now());
 		memberRepository.save(member);
 
 		return MemberDeleteResponseDto.builder()
-			.id(id)
-			.build();
+				.id(id)
+				.build();
 	}
+
 }
