@@ -1,0 +1,61 @@
+name: Deploy Gifthub WAS
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deployment:
+    name: 'Build and Deploy'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Create private key file
+        shell: bash
+        run: |
+          echo "PRIVATE_KEYFILE=$(mktemp)" >> $GITHUB_ENV
+      - name: Write SSH key
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          echo '${{ secrets.SERVER_KEY }}' > $PRIVATE_KEYFILE
+          chmod 400 $PRIVATE_KEYFILE
+      - name: Scan AWS host
+        shell: bash
+        run: |
+          ssh-keyscan -H '${{ secrets.SERVER_HOST }}' > ~/.ssh/known_hosts
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: oracle
+      - name: Write application.yml
+        shell: bash
+        run: |
+          mkdir -p ./src/main/resources
+          echo '${{ secrets.APPLICATION_YML }}' > ./src/main/resources/application.yml
+      - name: Build and Copy
+        shell: bash
+        run: |
+          chmod u+x gradlew
+          ./gradlew build -x test
+          cp $(find ./build/libs -name '*.jar' -not -name '*plain.jar') gifthub.jar
+          scp -i $PRIVATE_KEYFILE -P ${{ secrets.SERVER_SSH_PORT }} gifthub.jar ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }}:/home/${{ secrets.SERVER_USERNAME }}
+      - name: Deploy
+        shell: bash
+        run: |
+          ssh -i $PRIVATE_KEYFILE ${{ secrets.SERVER_USERNAME }}@${{ secrets.SERVER_HOST }} -p ${{ secrets.SERVER_SSH_PORT }} <<EOF
+            echo '${{ secrets.SERVER_KEY }}' > privkey.pem
+            chmod 400 privkey.pem
+            scp -i privkey.pem gifthub.jar ${{ secrets.SERVER_USERNAME }}@10.42.1.128:/home/${{ secrets.SERVER_USERNAME }}
+            ssh -i privkey.pem ${{ secrets.SERVER_USERNAME }}@10.42.1.128 <<EOC
+              nohup java -jar /home/${{ secrets.SERVER_USERNAME }}/gifthub.jar &
+          EOC
+            rm -rf privkey.pem
+          EOF
+      - name: Delete SSH key
+        shell: bash
+        run: |
+          rm -rf $PRIVATE_KEYFILE
