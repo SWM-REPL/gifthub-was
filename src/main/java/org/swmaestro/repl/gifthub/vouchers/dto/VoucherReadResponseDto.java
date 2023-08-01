@@ -18,7 +18,7 @@ import lombok.ToString;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class VoucherReadResponseDto {
 	private Long id;
-	private Long product_id;
+	private Long productId;
 	private String barcode;
 	private String expiresAt;
 }

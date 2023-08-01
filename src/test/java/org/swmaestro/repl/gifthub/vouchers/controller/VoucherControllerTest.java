@@ -82,7 +82,7 @@ class VoucherControllerTest {
 		String username = "user11";
 		VoucherReadResponseDto voucherReadResponseDto = VoucherReadResponseDto.builder()
 				.id(1L)
-				.product_id(1L)
+				.productId(1L)
 				.barcode("012345678910")
 				.expiresAt("2023-06-15")
 				.build();

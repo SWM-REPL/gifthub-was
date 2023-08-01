@@ -32,7 +32,7 @@ public class ProductService {
 	public ProductReadResponseDto mapToDto(Product product) {
 		ProductReadResponseDto productReadResponseDto = ProductReadResponseDto.builder()
 				.id(product.getId())
-				.brand_id(product.getBrand().getId())
+				.brandId(product.getBrand().getId())
 				.name(product.getName())
 				.description(product.getDescription())
 				.isReusable(product.getIsReusable())

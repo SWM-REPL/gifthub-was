@@ -38,7 +38,7 @@ public class ProductControllerTest {
 		// given
 		ProductReadResponseDto productReadResponseDto = ProductReadResponseDto.builder()
 				.id(1L)
-				.brand_id(1L)
+				.brandId(1L)
 				.name("아이스 아메리카노")
 				.price(4500)
 				.imageUrl("https://스타벅스_아이스아메리카노T.png")

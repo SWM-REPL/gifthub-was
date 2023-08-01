@@ -170,7 +170,7 @@ public class VoucherService {
 	public VoucherReadResponseDto mapToDto(Voucher voucher) {
 		VoucherReadResponseDto voucherReadResponseDto = VoucherReadResponseDto.builder()
 				.id(voucher.getId())
-				.product_id(voucher.getProduct().getId())
+				.productId(voucher.getProduct().getId())
 				.barcode(voucher.getBarcode())
 				.expiresAt(voucher.getExpiresAt().toString())
 				.build();

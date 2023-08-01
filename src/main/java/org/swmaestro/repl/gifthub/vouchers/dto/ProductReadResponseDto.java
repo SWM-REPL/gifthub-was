@@ -15,7 +15,7 @@ import lombok.ToString;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class ProductReadResponseDto {
 	private Long id;
-	private Long brand_id;
+	private Long brandId;
 	private String name;
 	private String description;
 	private int isReusable;
@@ -23,9 +23,9 @@ public class ProductReadResponseDto {
 	private String imageUrl;
 
 	@Builder
-	public ProductReadResponseDto(Long id, Long brand_id, String name, String description, int isReusable, int price, String imageUrl) {
+	public ProductReadResponseDto(Long id, Long brandId, String name, String description, int isReusable, int price, String imageUrl) {
 		this.id = id;
-		this.brand_id = brand_id;
+		this.brandId = brandId;
 		this.name = name;
 		this.description = description;
 		this.isReusable = isReusable;
