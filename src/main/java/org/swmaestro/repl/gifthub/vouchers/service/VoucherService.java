@@ -78,16 +78,16 @@ public class VoucherService {
 	/*
 	사용자 별 기프티콘 목록 조회 메서드
 	 */
-	public List<VoucherReadResponseDto> list(String username) {
+	public List<Long> list(String username) {
 		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
 		if (vouchers == null) {
 			throw new BusinessException("존재하지 않는 사용자 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
 		}
-		List<VoucherReadResponseDto> voucherReadResponseDtos = new ArrayList<>();
+		List<Long> voucherIdList = new ArrayList<>();
 		for (Voucher voucher : vouchers) {
-			voucherReadResponseDtos.add(mapToDto(voucher));
+			voucherIdList.add(voucher.getId());
 		}
-		return voucherReadResponseDtos;
+		return voucherIdList;
 	}
 
 	/*
