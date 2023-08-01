@@ -1,6 +1,5 @@
 package org.swmaestro.repl.gifthub.vouchers.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -75,22 +74,29 @@ class VoucherControllerTest {
 	기프티콘 상세 조회 테스트
 	 */
 	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
 	void readVoucherTest() throws Exception {
 		// given
 		Long voucherId = 1L;
+		String accessToken = "my_awesome_access_token";
 		String username = "user11";
 		VoucherReadResponseDto voucherReadResponseDto = VoucherReadResponseDto.builder()
 				.id(1L)
+				.productId(1L)
 				.barcode("012345678910")
 				.expiresAt("2023-06-15")
 				.build();
-
-		when(voucherService.read(voucherId, username)).thenReturn(voucherReadResponseDto);
 		//when
-		VoucherReadResponseDto result = voucherService.read(voucherId, username);
+		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
+		when(jwtProvider.getUsername(anyString())).thenReturn(username);
+		when(voucherService.read(voucherId, username)).thenReturn(voucherReadResponseDto);
 
 		// then
-		assertEquals(voucherId, result.getId());
+		mockMvc.perform(get("/vouchers/1")
+						.header("Authorization", "Bearer my_awesome_access_token")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(voucherReadResponseDto)))
+				.andExpect(status().isOk());
 	}
 
 	/*
