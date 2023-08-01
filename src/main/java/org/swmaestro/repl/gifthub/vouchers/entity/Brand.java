@@ -6,13 +6,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Brand {
 	@Id
@@ -24,5 +23,12 @@ public class Brand {
 
 	@Column(length = 200, nullable = false)
 	private String imageUrl;
+
+	@Builder
+	public Brand(Long id, String name, String imageUrl) {
+		this.id = id;
+		this.name = name;
+		this.imageUrl = imageUrl;
+	}
 }
 
