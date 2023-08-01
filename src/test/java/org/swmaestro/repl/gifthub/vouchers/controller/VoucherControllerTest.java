@@ -102,22 +102,13 @@ class VoucherControllerTest {
 		String accessToken = "my_awesome_access_token";
 		String username = "이진우";
 
-		List<VoucherReadResponseDto> voucherReadResponseDtos = new ArrayList<>();
-		voucherReadResponseDtos.add(VoucherReadResponseDto.builder()
-				.id(1L)
-				.barcode("012345678910")
-				.expiresAt("2023-06-15")
-				.build());
-
-		voucherReadResponseDtos.add(VoucherReadResponseDto.builder()
-				.id(2L)
-				.barcode("012345678911")
-				.expiresAt("2023-06-16")
-				.build());
+		List<Long> voucherIdList = new ArrayList<>();
+		voucherIdList.add(1L);
+		voucherIdList.add(2L);
 
 		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
 		when(jwtProvider.getUsername(anyString())).thenReturn(username);
-		when(voucherService.list(username)).thenReturn(voucherReadResponseDtos);
+		when(voucherService.list(username)).thenReturn(voucherIdList);
 
 		mockMvc.perform(get("/vouchers")
 						.header("Authorization", "Bearer " + accessToken))
