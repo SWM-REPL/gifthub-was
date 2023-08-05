@@ -38,6 +38,8 @@ out/
 
 # Application Properties
 /src/main/resources/application.yml
+/src/main/resources/application-dev.yml
+/src/main/resources/application-prod.yml
 
 # Key Files
 /src/main/resources/keys/
