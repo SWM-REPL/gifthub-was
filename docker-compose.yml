@@ -2,7 +2,7 @@ version: '3'
 services:
   was:
     container_name: gifthub-was
-    image: jinlee1703/gifthub-was
+    image: repl4242/gifthub-was
     expose:
       - 8080
     ports:
