@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.exception.ErrorCode;
 import org.swmaestro.repl.gifthub.vouchers.dto.ProductReadResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.entity.Brand;
 import org.swmaestro.repl.gifthub.vouchers.entity.Product;
 import org.swmaestro.repl.gifthub.vouchers.repository.ProductRepository;
 
@@ -27,6 +28,23 @@ public class ProductService {
 		}
 		ProductReadResponseDto productReadResponseDto = mapToDto(product.get());
 		return productReadResponseDto;
+	}
+
+	public Product save(String productName) {
+		Product product = Product.builder()
+				.name(productName)
+				.build();
+
+		return productRepository.save(product);
+	}
+
+	public Product save(String productName, Brand brand) {
+		Product product = Product.builder()
+				.name(productName)
+				.brand(brand)
+				.build();
+
+		return productRepository.save(product);
 	}
 
 	public ProductReadResponseDto mapToDto(Product product) {
