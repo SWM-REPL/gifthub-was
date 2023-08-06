@@ -26,4 +26,12 @@ public class BrandService {
 		}
 		return brand.get();
 	}
+
+	public Brand save(String brandName) {
+		Brand brand = Brand.builder()
+				.name(brandName)
+				.build();
+
+		return brandRepository.save(brand);
+	}
 }
