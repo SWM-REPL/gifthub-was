@@ -50,6 +50,7 @@ public class VoucherService {
 
 		if (brand == null) {
 			brand = brandService.save(voucherSaveRequestDto.getBrandName());
+			product = productService.save(voucherSaveRequestDto.getProductName(), brand);
 		}
 		if (product == null) {
 			product = productService.save(voucherSaveRequestDto.getProductName(), brand);
