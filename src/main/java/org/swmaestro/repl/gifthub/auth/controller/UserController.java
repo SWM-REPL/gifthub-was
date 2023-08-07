@@ -3,6 +3,7 @@ package org.swmaestro.repl.gifthub.auth.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,4 +59,17 @@ public class UserController {
 		);
 	}
 
+	@GetMapping("/{userId}")
+	@Operation(summary = "User 정보 조회 메서드", description = "클라이언트에서 요청한 사용자 정보를 조회하기 위한 메서드입니다. 응답으로 회원 id와 nickname을 반환합니다.")
+	public ResponseEntity<Message> readMember(@PathVariable Long userId) {
+		return new ResponseEntity<>(
+				Message.builder()
+						.status(StatusEnum.OK)
+						.message("성공적으로 조호되었습니다!")
+						.data(memberService.read(userId))
+						.build(),
+				new HttpJsonHeaders(),
+				HttpStatus.OK
+		);
+	}
 }
