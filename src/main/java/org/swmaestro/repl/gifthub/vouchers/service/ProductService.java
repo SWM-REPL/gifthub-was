@@ -30,14 +30,6 @@ public class ProductService {
 		return productReadResponseDto;
 	}
 
-	public Product save(String productName) {
-		Product product = Product.builder()
-				.name(productName)
-				.build();
-
-		return productRepository.save(product);
-	}
-
 	public Product save(String productName, Brand brand) {
 		Product product = Product.builder()
 				.name(productName)
