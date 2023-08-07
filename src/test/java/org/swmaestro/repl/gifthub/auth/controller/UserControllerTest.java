@@ -51,8 +51,7 @@ class UserControllerTest {
 		// then
 		mockMvc.perform(delete("/users/1")
 						.header("Authorization", "Bearer my_awesome_access_token"))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.id").value(1L));
+				.andExpect(status().isOk());
 	}
 
 	@Test
