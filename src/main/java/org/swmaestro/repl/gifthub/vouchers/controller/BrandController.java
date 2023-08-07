@@ -29,7 +29,7 @@ public class BrandController {
 	public ResponseEntity<Message> readBrand(@PathVariable Long brandId) throws IOException {
 		return new ResponseEntity<>(
 				Message.builder()
-						.status(StatusEnum.OK.OK)
+						.status(StatusEnum.OK)
 						.message("성공적으로 조회되었습니다!")
 						.data(brandService.readById(brandId))
 						.build(),
