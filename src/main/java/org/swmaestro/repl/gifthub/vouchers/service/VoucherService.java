@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
-import org.swmaestro.repl.gifthub.exception.ErrorCode;
 import org.swmaestro.repl.gifthub.util.DateConverter;
+import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
@@ -78,10 +78,10 @@ public class VoucherService {
 		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
 
 		if (voucher.isEmpty()) {
-			throw new BusinessException("존재하지 않는 상품권 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
+			throw new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND);
 		}
 		if (!vouchers.contains(voucher.get())) {
-			throw new BusinessException("상품권을 조회할 권한이 없습니다.", ErrorCode.ACCESS_DENIED);
+			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.NOT_FOUND);
 		}
 
 		VoucherReadResponseDto voucherReadResponseDto = mapToDto(voucher.get());
@@ -94,7 +94,7 @@ public class VoucherService {
 	public List<Long> list(String username) {
 		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
 		if (vouchers == null) {
-			throw new BusinessException("존재하지 않는 사용자 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
+			throw new BusinessException("존재하지 않는 사용자 입니다.", StatusEnum.NOT_FOUND);
 		}
 		List<Long> voucherIdList = new ArrayList<>();
 		for (Voucher voucher : vouchers) {
@@ -108,7 +108,7 @@ public class VoucherService {
 	 */
 	public VoucherSaveResponseDto update(Long voucherId, VoucherUpdateRequestDto voucherUpdateRequestDto) {
 		Voucher voucher = voucherRepository.findById(voucherId)
-				.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", ErrorCode.NOT_FOUND_RESOURCE));
+				.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND));
 
 		voucher.setBarcode(
 				voucherUpdateRequestDto.getBarcode() == null ? voucher.getBarcode() :
@@ -134,10 +134,10 @@ public class VoucherService {
 		List<VoucherUsageHistory> voucherUsageHistories = voucherUsageHistoryRepository.findAllByVoucherId(voucherId);
 
 		if (voucher.isEmpty()) {
-			throw new BusinessException("존재하지 않는 상품권 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
+			throw new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND);
 		}
 		if (!vouchers.contains(voucher.get())) {
-			throw new BusinessException("상품권을 사용할 권한이 없습니다.", ErrorCode.ACCESS_DENIED);
+			throw new BusinessException("상품권을 사용할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
 		int totalUsageAmount = voucherUsageHistories.stream()
 				.mapToInt(VoucherUsageHistory::getAmount)
@@ -146,18 +146,18 @@ public class VoucherService {
 		totalUsageAmount = Math.max(totalUsageAmount, 0);
 
 		if (totalUsageAmount == voucher.get().getBalance()) {
-			throw new BusinessException("이미 사용된 상품권 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
+			throw new BusinessException("이미 사용된 상품권 입니다.", StatusEnum.NOT_FOUND);
 		}
 
 		int remainingBalance = voucher.get().getBalance() - totalUsageAmount;
 		int requestedAmount = voucherUseRequestDto.getAmount();
 
 		if (requestedAmount > remainingBalance) {
-			throw new BusinessException("잔액이 부족합니다.", ErrorCode.EXIST_RESOURCE);
+			throw new BusinessException("잔액이 부족합니다.", StatusEnum.CONFLICT);
 		}
 
 		if (voucher.get().getExpiresAt().isBefore(LocalDate.now())) {
-			throw new BusinessException("유효기간이 만료된 상품권 입니다.", ErrorCode.EXIST_RESOURCE);
+			throw new BusinessException("유효기간이 만료된 상품권 입니다.", StatusEnum.CONFLICT);
 		}
 
 		VoucherUsageHistory voucherUsageHistory = VoucherUsageHistory.builder()

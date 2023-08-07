@@ -15,8 +15,8 @@ import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
-import org.swmaestro.repl.gifthub.exception.ErrorCode;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
+import org.swmaestro.repl.gifthub.util.StatusEnum;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,10 +39,10 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	public TokenDto create(SignUpDto signUpDTO) {
 		if (isDuplicateUsername(signUpDTO.getUsername())) {
-			throw new BusinessException("이미 존재하는 아이디입니다.", ErrorCode.EXIST_RESOURCE);
+			throw new BusinessException("이미 존재하는 아이디입니다.", StatusEnum.CONFLICT);
 		}
 		if (!isValidatePassword(signUpDTO.getPassword())) {
-			throw new BusinessException("비밀번호는 영문, 숫자, 특수문자를 포함한 8자리 이상이어야 합니다.", ErrorCode.INVALID_INPUT_VALUE);
+			throw new BusinessException("비밀번호는 영문, 숫자, 특수문자를 포함한 8자리 이상이어야 합니다.", StatusEnum.BAD_REQUEST);
 		}
 
 		Member member = convertSignUpDTOtoMember(signUpDTO);
@@ -106,20 +106,20 @@ public class MemberServiceImpl implements MemberService {
 	public MemberUpdateResponseDto update(String username, Long userId, MemberUpdateRequestDto memberUpdateRequestDto) {
 		Member member = memberRepository.findByUsername(username);
 		if (member == null) {
-			throw new BusinessException("존재하지 않는 회원입니다.", ErrorCode.NOT_FOUND_RESOURCE);
+			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
 		if (!member.getId().equals(userId)) {
-			throw new BusinessException("수정 권한이 없습니다.", ErrorCode.ACCESS_DENIED);
+			throw new BusinessException("수정 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
 		if (memberUpdateRequestDto.getNickname() != null) {
 			if (isDuplicateNickname(memberUpdateRequestDto.getNickname())) {
-				throw new BusinessException("이미 존재하는 닉네임입니다.", ErrorCode.EXIST_RESOURCE);
+				throw new BusinessException("이미 존재하는 닉네임입니다.", StatusEnum.CONFLICT);
 			}
 			member.setNickname(memberUpdateRequestDto.getNickname());
 		}
 		if (memberUpdateRequestDto.getPassword() != null) {
 			if (!isValidatePassword(memberUpdateRequestDto.getPassword())) {
-				throw new BusinessException("비밀번호는 영문, 숫자, 특수문자를 포함한 8자리 이상이어야 합니다.", ErrorCode.INVALID_INPUT_VALUE);
+				throw new BusinessException("비밀번호는 영문, 숫자, 특수문자를 포함한 8자리 이상이어야 합니다.", StatusEnum.BAD_REQUEST);
 			}
 			member.setPassword(passwordEncoder.encode(memberUpdateRequestDto.getPassword()));
 		}
@@ -137,7 +137,11 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	public MemberDeleteResponseDto delete(Long id) {
 		Member member = memberRepository.findById(id)
-				.orElseThrow(() -> new BusinessException("존재하지 않는 회원입니다.", ErrorCode.NOT_FOUND_RESOURCE));
+				.orElseThrow(() -> new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND));
+
+		if (!member.getDeletedAt().equals(null)) {
+			throw new BusinessException("이미 삭제된 회원입니다.", StatusEnum.NOT_FOUND);
+		}
 
 		member.setDeletedAt(LocalDateTime.now());
 		memberRepository.save(member);

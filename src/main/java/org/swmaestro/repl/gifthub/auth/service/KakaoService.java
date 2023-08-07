@@ -1,7 +1,15 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
@@ -11,14 +19,11 @@ import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
-import org.swmaestro.repl.gifthub.exception.ErrorCode;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
+import org.swmaestro.repl.gifthub.util.StatusEnum;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 @Service
 @PropertySource("classpath:application.yml")
@@ -34,8 +39,9 @@ public class KakaoService {
 	private final String userInfoUri;
 
 	public KakaoService(MemberService memberService, MemberRepository memberRepository, RefreshTokenService refreshTokenService,
-	                    JwtProvider jwtProvider, @Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri,
-	                    @Value("${kakao.authorization_uri}") String authorizationUri, @Value("${kakao.user_info_uri}") String userInfoUri, @Value("${kakao.token_uri}") String tokenUri) {
+			JwtProvider jwtProvider, @Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri,
+			@Value("${kakao.authorization_uri}") String authorizationUri, @Value("${kakao.user_info_uri}") String userInfoUri,
+			@Value("${kakao.token_uri}") String tokenUri) {
 		this.memberService = memberService;
 		this.memberRepository = memberRepository;
 		this.refreshTokenService = refreshTokenService;
@@ -62,7 +68,7 @@ public class KakaoService {
 		TokenDto tokenDto = null;
 		try {
 			URL url = new URL(tokenUri);
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
@@ -101,11 +107,11 @@ public class KakaoService {
 					.refreshToken(refreshToken)
 					.build();
 		} catch (ProtocolException e) {
-			throw new BusinessException("잘못된 프로토콜을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
+			throw new BusinessException("잘못된 프로토콜을 사용하였습니다.", StatusEnum.BAD_REQUEST);
 		} catch (MalformedURLException e) {
-			throw new BusinessException("잘못된 URL 형식을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
+			throw new BusinessException("잘못된 URL 형식을 사용하였습니다.", StatusEnum.BAD_REQUEST);
 		} catch (IOException e) {
-			throw new BusinessException("HTTP 연결을 수행하는 동안 입출력 관련 오류가 발생하였습니다.", ErrorCode.INTERNAL_SERVER_ERROR);
+			throw new BusinessException("HTTP 연결을 수행하는 동안 입출력 관련 오류가 발생하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		}
 
 		return tokenDto;
@@ -118,7 +124,7 @@ public class KakaoService {
 		try {
 			URL url = new URL(userInfoUri);
 
-			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
@@ -151,11 +157,11 @@ public class KakaoService {
 					.username(email)
 					.build();
 		} catch (ProtocolException e) {
-			throw new BusinessException("잘못된 프로토콜을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
+			throw new BusinessException("잘못된 프로토콜을 사용하였습니다.", StatusEnum.BAD_REQUEST);
 		} catch (MalformedURLException e) {
-			throw new BusinessException("잘못된 URL 형식을 사용하였습니다.", ErrorCode.INVALID_INPUT_VALUE);
+			throw new BusinessException("잘못된 URL 형식을 사용하였습니다.", StatusEnum.BAD_REQUEST);
 		} catch (IOException e) {
-			throw new BusinessException("HTTP 연결을 수행하는 동안 입출력 관련 오류가 발생하였습니다.", ErrorCode.INTERNAL_SERVER_ERROR);
+			throw new BusinessException("HTTP 연결을 수행하는 동안 입출력 관련 오류가 발생하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		}
 		return kakaoDto;
 	}
@@ -185,7 +191,7 @@ public class KakaoService {
 	public TokenDto signInWithExistingMember(KakaoDto kakaoDto) {
 		Member member = memberRepository.findByUsername(kakaoDto.getUsername());
 		if (member == null) {
-			throw new BusinessException("존재하지 않는 아이디입니다.", ErrorCode.INVALID_INPUT_VALUE);
+			throw new BusinessException("존재하지 않는 아이디입니다.", StatusEnum.NOT_FOUND);
 		}
 		String accessToken = jwtProvider.generateToken(member.getUsername());
 		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername());
