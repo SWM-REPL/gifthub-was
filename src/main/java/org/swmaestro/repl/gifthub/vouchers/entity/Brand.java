@@ -21,7 +21,7 @@ public class Brand {
 	@Column(length = 40, nullable = false, unique = true)
 	private String name;
 
-	@Column(length = 200, nullable = false)
+	@Column(length = 200)
 	private String imageUrl;
 
 	@Builder

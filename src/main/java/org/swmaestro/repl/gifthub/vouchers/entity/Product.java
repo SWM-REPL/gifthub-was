@@ -1,5 +1,7 @@
 package org.swmaestro.repl.gifthub.vouchers.entity;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +33,7 @@ public class Product {
 	private String description;
 
 	@Column(columnDefinition = "TINYINT", nullable = false)
+	@ColumnDefault("0")
 	private int isReusable;
 
 	@Column(nullable = false)

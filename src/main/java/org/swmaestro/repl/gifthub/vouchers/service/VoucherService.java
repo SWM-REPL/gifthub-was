@@ -19,6 +19,8 @@ import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.entity.Brand;
+import org.swmaestro.repl.gifthub.vouchers.entity.Product;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 import org.swmaestro.repl.gifthub.vouchers.entity.VoucherUsageHistory;
 import org.swmaestro.repl.gifthub.vouchers.repository.VoucherRepository;
@@ -43,9 +45,20 @@ public class VoucherService {
 	 */
 	public VoucherSaveResponseDto save(String username, VoucherSaveRequestDto voucherSaveRequestDto) throws
 			IOException {
+		Brand brand = brandService.read(voucherSaveRequestDto.getBrandName());
+		Product product = productService.read(voucherSaveRequestDto.getProductName());
+
+		if (brand == null) {
+			brand = brandService.save(voucherSaveRequestDto.getBrandName());
+			product = productService.save(voucherSaveRequestDto.getProductName(), brand);
+		}
+		if (product == null) {
+			product = productService.save(voucherSaveRequestDto.getProductName(), brand);
+		}
+
 		Voucher voucher = Voucher.builder()
-				.brand(brandService.read(voucherSaveRequestDto.getBrandName()))
-				.product(productService.read(voucherSaveRequestDto.getProductName()))
+				.brand(brand)
+				.product(product)
 				.barcode(voucherSaveRequestDto.getBarcode())
 				.expiresAt(DateConverter.stringToLocalDate(voucherSaveRequestDto.getExpiresAt()))
 				.imageUrl(storageService.getBucketAddress(voucherDirName) + voucherSaveRequestDto.getImageUrl())
