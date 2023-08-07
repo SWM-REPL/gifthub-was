@@ -98,7 +98,7 @@ public class MemberServiceImpl implements MemberService {
 	public MemberReadResponseDto read(Long id) {
 		Optional<Member> member = memberRepository.findById(id);
 		if (member.isEmpty()) {
-			throw new BusinessException("존재하지 않는 회원입니다.", ErrorCode.NOT_FOUND_RESOURCE);
+			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
 		return MemberReadResponseDto.builder()
 				.id(member.get().getId())
