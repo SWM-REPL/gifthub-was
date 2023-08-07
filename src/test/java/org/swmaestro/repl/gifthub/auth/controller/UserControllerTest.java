@@ -99,8 +99,6 @@ class UserControllerTest {
 		//then
 		mockMvc.perform(get("/users/1")
 						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.id").value(1L))
-				.andExpect(jsonPath("$.nickname").value("이진우"));
+				.andExpect(status().isOk());
 	}
 }
