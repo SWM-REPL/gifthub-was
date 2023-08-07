@@ -2,11 +2,15 @@ package org.swmaestro.repl.gifthub.vouchers.controller;
 
 import java.io.IOException;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.swmaestro.repl.gifthub.vouchers.dto.ProductReadResponseDto;
+import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
+import org.swmaestro.repl.gifthub.util.Message;
+import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.service.ProductService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,7 +26,15 @@ public class ProductController {
 
 	@GetMapping("/{productId}")
 	@Operation(summary = "상품 상세 조회 메서드", description = "클라이언트에서 요청한 상품 상세 정보를 조회하기 위한 메서드입니다. 응답으로 product-response-dto를 반환합니다.")
-	public ProductReadResponseDto readProduct(@PathVariable Long productId) throws IOException {
-		return productService.readById(productId);
+	public ResponseEntity<Message> readProduct(@PathVariable Long productId) throws IOException {
+		return new ResponseEntity<>(
+				Message.builder()
+						.status(StatusEnum.OK)
+						.message("성공적으로 조회되었습니다!")
+						.data(productService.readById(productId))
+						.build(),
+				new HttpJsonHeaders(),
+				HttpStatus.OK
+		);
 	}
 }
