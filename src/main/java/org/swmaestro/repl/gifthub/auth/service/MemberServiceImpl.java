@@ -2,12 +2,14 @@ package org.swmaestro.repl.gifthub.auth.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
@@ -90,6 +92,18 @@ public class MemberServiceImpl implements MemberService {
 			return null;
 		}
 		return member;
+	}
+
+	@Override
+	public MemberReadResponseDto read(Long id) {
+		Optional<Member> member = memberRepository.findById(id);
+		if (member.isEmpty()) {
+			throw new BusinessException("존재하지 않는 회원입니다.", ErrorCode.NOT_FOUND_RESOURCE);
+		}
+		return MemberReadResponseDto.builder()
+				.id(member.get().getId())
+				.nickname(member.get().getNickname())
+				.build();
 	}
 
 	@Override

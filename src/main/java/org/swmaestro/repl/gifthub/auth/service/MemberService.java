@@ -3,6 +3,7 @@ package org.swmaestro.repl.gifthub.auth.service;
 import java.util.List;
 
 import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
@@ -19,6 +20,8 @@ public interface MemberService {
 	Member passwordEncryption(Member member);
 
 	Member read(String username);
+
+	MemberReadResponseDto read(Long id);
 
 	int count();
 
