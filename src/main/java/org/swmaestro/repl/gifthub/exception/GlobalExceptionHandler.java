@@ -1,9 +1,11 @@
-package org.swmaestro.repl.gifthub.exception;
+package org.swmaestro.repl.gifthub.util.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.swmaestro.repl.gifthub.util.Message;
+import org.swmaestro.repl.gifthub.util.StatusEnum;
 
 import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GlobalExceptionHandler {
 	@ExceptionHandler(BusinessException.class)
-	protected ResponseEntity<ErrorResponse> handleBusinessException(final BusinessException e) {
+	protected ResponseEntity<Message> handleBusinessException(final BusinessException e) {
 		log.error("handleEntityNotFoundException", e);
 		Sentry.captureException(e);
+		Message.builder()
+
+				.status(StatusEnum
+				.build();
 		final ErrorCode errorCode = e.getErrorCode();
 		final ErrorResponse response = ErrorResponse.of(errorCode);
 		return new ResponseEntity<>(response, HttpStatus.valueOf(errorCode.getStatus()));

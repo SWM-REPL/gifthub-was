@@ -1,14 +1,16 @@
-package org.swmaestro.repl.gifthub.exception;
+package org.swmaestro.repl.gifthub.util.exception;
+
+import org.swmaestro.repl.gifthub.util.StatusEnum;
 
 public class BusinessException extends RuntimeException {
-	private ErrorCode errorCode;
+	private int statusCode;
 
-	public BusinessException(String message, ErrorCode errorCode) {
+	public BusinessException(String message, StatusEnum status) {
 		super(message);
-		this.errorCode = errorCode;
+		this.statusCode = status.statusCode;
 	}
 
-	public BusinessException(ErrorCode errorCode) {
+	public BusinessException(StatusEnum status) {
 		super(errorCode.getMessage());
 		this.errorCode = errorCode;
 	}
