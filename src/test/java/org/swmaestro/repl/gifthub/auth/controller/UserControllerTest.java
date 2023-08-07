@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateResponseDto;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
@@ -80,5 +81,26 @@ class UserControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(memberUpdateResponseDto)))
 				.andExpect(status().isOk());
+	}
+
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	void readMember() throws Exception {
+		//given
+		String username = "이진우";
+		Long userId = 1L;
+		MemberReadResponseDto memberReadResponseDto = MemberReadResponseDto.builder()
+				.id(1L)
+				.nickname("이진우")
+				.build();
+		//when
+		when(memberService.read(anyLong())).thenReturn(memberReadResponseDto);
+
+		//then
+		mockMvc.perform(get("/users/1")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(1L))
+				.andExpect(jsonPath("$.nickname").value("이진우"));
 	}
 }
