@@ -46,6 +46,9 @@ public class MemberServiceImpl implements MemberService {
 		if (!isValidatePassword(signUpDTO.getPassword())) {
 			throw new BusinessException("비밀번호는 영문, 숫자, 특수문자를 포함한 8자리 이상이어야 합니다.", StatusEnum.BAD_REQUEST);
 		}
+		if (signUpDTO.getNickname().length() >= 12) {
+			throw new BusinessException("닉네임은 12자리 이하이어야 합니다.", StatusEnum.BAD_REQUEST);
+		}
 
 		Member member = convertSignUpDTOtoMember(signUpDTO);
 		Member encodedMember = passwordEncryption(member);
