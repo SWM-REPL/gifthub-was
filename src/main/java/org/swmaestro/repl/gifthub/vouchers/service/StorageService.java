@@ -23,6 +23,8 @@ public class StorageService {
 	@Value("${cloud.aws.region.static}")
 	private String bucketRegion;
 	private final AmazonS3Client amazonS3Client;
+	@Value("${cloud.aws.s3.default-image-file}")
+	private String defaultImageFile;
 
 	public S3FileDto save(String dirName, MultipartFile multipartFile) throws IOException {
 		String originalFileName = multipartFile.getOriginalFilename();
@@ -40,16 +42,20 @@ public class StorageService {
 
 		String uploadFileUrl = amazonS3Client.getUrl(bucketName, keyName).toString();
 		return S3FileDto.builder()
-			.uploadFileName(uploadFileName)
-			.build();
+				.uploadFileName(uploadFileName)
+				.build();
 	}
 
 	public String getBucketAddress(String dirName) {
-		return "https://" + bucketName + ".s3." + bucketRegion + ".amazonaws.com/" + dirName + "/";
+		return "https://" + bucketName + "/" + dirName + "/";
 	}
 
 	private String getUUidFileName(String fileName) {
 		String ext = fileName.substring(fileName.lastIndexOf(".") + 1);
 		return UUID.randomUUID().toString() + "." + ext;
+	}
+
+	public String getDefaultImagePath(String dirName) {
+		return "http://" + bucketName + "/" + dirName + "/" + defaultImageFile;
 	}
 }
