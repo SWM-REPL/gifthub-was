@@ -47,6 +47,7 @@ public class VoucherService {
 			IOException {
 		Brand brand = brandService.read(voucherSaveRequestDto.getBrandName());
 		Product product = productService.read(voucherSaveRequestDto.getProductName());
+		String imageUrl = voucherSaveRequestDto.getImageUrl();
 
 		if (brand == null) {
 			brand = brandService.save(voucherSaveRequestDto.getBrandName());
@@ -55,13 +56,18 @@ public class VoucherService {
 		if (product == null) {
 			product = productService.save(voucherSaveRequestDto.getProductName(), brand);
 		}
+		if (imageUrl == null) {
+			imageUrl = storageService.getDefaultImagePath(voucherDirName);
+		} else {
+			imageUrl = storageService.getBucketAddress(voucherDirName) + voucherSaveRequestDto.getImageUrl();
+		}
 
 		Voucher voucher = Voucher.builder()
 				.brand(brand)
 				.product(product)
 				.barcode(voucherSaveRequestDto.getBarcode())
 				.expiresAt(DateConverter.stringToLocalDate(voucherSaveRequestDto.getExpiresAt()))
-				.imageUrl(storageService.getBucketAddress(voucherDirName) + voucherSaveRequestDto.getImageUrl())
+				.imageUrl(imageUrl)
 				.member(memberService.read(username))
 				.build();
 
