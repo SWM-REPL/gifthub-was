@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
-import org.swmaestro.repl.gifthub.exception.ErrorCode;
+import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.dto.ProductReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.entity.Brand;
 import org.swmaestro.repl.gifthub.vouchers.entity.Product;
@@ -24,7 +24,7 @@ public class ProductService {
 	public ProductReadResponseDto readById(Long id) {
 		Optional<Product> product = productRepository.findById(id);
 		if (product.isEmpty()) {
-			throw new BusinessException("존재하지 않는 상품 입니다.", ErrorCode.NOT_FOUND_RESOURCE);
+			throw new BusinessException("존재하지 않는 상품 입니다.", StatusEnum.NOT_FOUND);
 		}
 		ProductReadResponseDto productReadResponseDto = mapToDto(product.get());
 		return productReadResponseDto;

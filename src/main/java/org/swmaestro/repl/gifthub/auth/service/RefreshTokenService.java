@@ -1,17 +1,18 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.RefreshToken;
 import org.swmaestro.repl.gifthub.auth.repository.RefreshTokenRepository;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
-import org.swmaestro.repl.gifthub.exception.ErrorCode;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
+import org.swmaestro.repl.gifthub.util.StatusEnum;
 
-import java.util.Optional;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +56,7 @@ public class RefreshTokenService {
 		if (refreshToken.isPresent()) {
 			refreshTokenRepository.delete(refreshToken.get());
 		} else {
-			throw new BusinessException("존재하지 않는 사용자 입니다.", ErrorCode.INVALID_AUTHENTICATION);
+			throw new BusinessException("존재하지 않는 사용자 입니다.", StatusEnum.UNAUTHORIZED);
 		}
 	}
 }

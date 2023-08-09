@@ -1,9 +1,10 @@
 package org.swmaestro.repl.gifthub.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,13 +13,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.swmaestro.repl.gifthub.auth.repository.RefreshTokenRepository;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
-import org.swmaestro.repl.gifthub.exception.ErrorCode;
 import org.swmaestro.repl.gifthub.security.JpaUserDetailsService;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Component
 @PropertySource("classpath:application.yml")
@@ -30,8 +30,8 @@ public class JwtProvider {
 	private final RefreshTokenRepository refreshTokenRepository;
 
 	public JwtProvider(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration,
-	                   @Value("${issuer}") String issuer, JpaUserDetailsService userDetailsService,
-	                   RefreshTokenRepository refreshTokenRepository) {
+			@Value("${issuer}") String issuer, JpaUserDetailsService userDetailsService,
+			RefreshTokenRepository refreshTokenRepository) {
 		this.secretKey = secretKey;
 		this.expiration = expiration;
 		this.issuer = issuer;
@@ -140,7 +140,7 @@ public class JwtProvider {
 		String storedRefreshToken = refreshTokenRepository.findByUsername(username).get().getToken();
 
 		if (!refreshToken.equals(storedRefreshToken)) {
-			throw new BusinessException("RefreshToken이 유효하지 않습니다.", ErrorCode.INVALID_AUTHENTICATION);
+			throw new BusinessException("RefreshToken이 유효하지 않습니다.", StatusEnum.UNAUTHORIZED);
 		}
 		return generateToken(username);
 	}
