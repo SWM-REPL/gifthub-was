@@ -1,10 +1,10 @@
-package org.swmaestro.repl.gifthub.notification.entity;
+package org.swmaestro.repl.gifthub.notifications.entity;
 
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.notification.NotificationType;
+import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 
 import jakarta.persistence.Column;
@@ -49,7 +49,7 @@ public class Notification {
 
 	@Builder
 	public Notification(Long id, Member receiver, Voucher voucher, NotificationType type, String message,
-		LocalDateTime createdAt, LocalDateTime deletedAt) {
+			LocalDateTime createdAt, LocalDateTime deletedAt) {
 		this.id = id;
 		this.receiver = receiver;
 		this.voucher = voucher;

@@ -1,4 +1,4 @@
-package org.swmaestro.repl.gifthub.notification;
+package org.swmaestro.repl.gifthub.notifications;
 
 import lombok.Getter;
 
