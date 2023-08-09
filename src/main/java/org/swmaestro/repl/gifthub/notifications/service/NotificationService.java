@@ -26,9 +26,6 @@ public class NotificationService {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
 		List<Notification> notifications = notificationRepository.findAllByReceiverUsername(username);
-		if (notifications == null) {
-			throw new BusinessException("해당 회원의 알림이 없습니다.", StatusEnum.NOT_FOUND);
-		}
 
 		List<NotificationReadResponseDto> notificationReadResponseDtos = new ArrayList<>();
 
@@ -39,7 +36,7 @@ public class NotificationService {
 	}
 
 	/*
-	Etity를 Dto로 변환하는 메서드
+	Entity를 Dto로 변환하는 메서드
 	 */
 	public NotificationReadResponseDto mapToDto(Notification notification) {
 		NotificationReadResponseDto notificationReadResponseDto = NotificationReadResponseDto.builder()
