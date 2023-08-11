@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/brand")
+@RequestMapping("/brands")
 @RequiredArgsConstructor
 @Tag(name = "Brand", description = "브랜드 관련 API")
 public class BrandController {

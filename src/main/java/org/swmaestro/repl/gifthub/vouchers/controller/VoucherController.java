@@ -40,7 +40,7 @@ public class VoucherController {
 	private final StorageService storageService;
 	private final JwtProvider jwtProvider;
 
-	@PostMapping("/image")
+	@PostMapping("/images")
 	@Operation(summary = "Voucher 이미지 등록 메서드", description = "클라이언트에서 요청한 기프티콘 이미지를 Amazon S3에 저장하기 위한 메서드입니다.")
 	public ResponseEntity<Message> saveVoucherImage(@RequestPart("image_file") MultipartFile imageFile) throws IOException {
 		return new ResponseEntity<>(
