@@ -44,7 +44,7 @@ public class BrandControllerTest {
 		// when
 		when(brandService.readById(1L)).thenReturn(brand);
 		// then
-		mockMvc.perform(get("/brand/1")
+		mockMvc.perform(get("/brands/1")
 						.header("Authorization", "Bearer my_awesome_access_token")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(brand)))
