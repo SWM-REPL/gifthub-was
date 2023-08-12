@@ -46,7 +46,20 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 6. Docker 이미지 build 및 push
+      # yml 파일 생성
+      - name: Set up application.yml
+        run: |
+          mkdir ./src/main/resources
+          cd ./src/main/resources
+          touch ./application.yml
+          echo "${{ secrets.APPLICATION }}" > ./application.yml
+          touch ./application-dev.yml
+          echo "${{ secrets.APPLICATION_DEV }}" > ./application-dev.yml
+          touch ./application-prod.yml
+          echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
+        shell: bash
+
+      # Docker 이미지 build 및 push
       - name: docker build and push
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
@@ -69,5 +82,5 @@ jobs:
           command: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker pull repl4242/gifthub-was:${{env.IMAGE_TAG}}
-            docker run -p 8080:8080 -d --name gifthub repl4242/gifthub-was:${{env.IMAGE_TAG}}
+            docker run -p 8080:8080 -d repl4242/gifthub-was:${{env.IMAGE_TAG}}
 
