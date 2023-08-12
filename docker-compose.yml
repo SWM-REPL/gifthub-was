@@ -3,7 +3,6 @@ services:
   was:
     container_name: gifthub-was
     image: repl4242/gifthub-was:${IMAGE_TAG}
-
     expose:
       - 8080
     ports:
