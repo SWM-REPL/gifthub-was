@@ -31,6 +31,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       IMAGE_TAG: ${{github.sha}}
+
     steps:
       # 1. Compare branch 코드 내려 받기
       - name: Checkout PR
@@ -67,6 +68,7 @@ jobs:
           instance-ids: ${{ secrets.INSTANCE_ID }}
           working-directory: /home/ubuntu
           command: |
+            
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker pull repl4242/gifthub-was:$IMAGE_TAG
+            docker pull repl4242/gifthub-was:${{env.IMAGE_TAG}}
             docker-compose up
