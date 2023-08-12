@@ -1,10 +1,18 @@
+FROM openjdk:17 AS builder
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle .
+COPY settings.gradle .
+COPY src src
+RUN chmod +x ./gradlew
+RUN microdnf install findutils
+RUN ./gradlew build -x test --no-daemon
+
 # base-image
 FROM openjdk:17
 # build file path
-ARG JAR_FILE=build/libs/*.jar
+RUN mkdir /opt/app
 # copy jar file to container
-COPY ${JAR_FILE} app.jar
-# copy application.properties to container
-VOLUME ["./src/main/resources/application.yml", "/src/main/resources/application-prod.yml"]
+COPY --from=builder build/libs/gifthub-0.0.1-SNAPSHOT.jar /opt/app/app.jar
 # run jar file
-ENTRYPOINT ["java","-jar","/app.jar", "--spring.profiles.active=prod"]
+ENTRYPOINT ["java","-jar","/opt/app/app.jar", "--spring.profiles.active=prod"]

@@ -35,7 +35,7 @@ jobs:
       - name: Checkout PR
         uses: actions/checkout@v3
         with:
-          path: dev
+          ref: ${{ github.event.push.base_ref }}
 
       # 2. 자바 환경 설정
       - name: Set up JDK 17
@@ -44,10 +44,24 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # 6. Docker 이미지 build 및 push
+      - name: docker build and push
+        env:
+          IMAGE_TAG: ${{github.sha}}
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          pwd
+          ls -al
+          docker build -t gifthub-was .
+          docker tag gifthub-was:$IMAGE_TAG repl4242/gifthub-was:$IMAGE_TAG
+          docker push repl4242/gifthub-was:$IMAGE_TAG
+
       # AWS SSM을 통한 Run-Command (Docker 이미지 pull 후 docker-compose를 통한 실행)
       - name: AWS SSM Send-Command
         uses: peterkimzz/aws-ssm-send-command@master
         id: ssm
+        env:
+          IMAGE_TAG: ${{github.sha}}
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -56,5 +70,5 @@ jobs:
           working-directory: /home/ubuntu
           command: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker pull repl4242/gifthub-was:latest
+            docker pull repl4242/gifthub-was:$IMAGE_TAG
             docker-compose up
