@@ -52,9 +52,8 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           pwd
           ls -al
-          docker build -t gifthub-was .
-          docker tag gifthub-was:latest repl4242/gifthub-was:$IMAGE_TAG
-          docker push repl4242/gifthub-was:$IMAGE_TAG
+          docker build -t repl4242/gifthub-was:${{env.IMAGE_TAG}} .
+          docker push repl4242/gifthub-was:${{env.IMAGE_TAG}}
 
       # AWS SSM을 통한 Run-Command (Docker 이미지 pull 후 docker-compose를 통한 실행)
       - name: AWS SSM Send-Command
@@ -70,5 +69,5 @@ jobs:
           command: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker pull repl4242/gifthub-was:${{env.IMAGE_TAG}}
-            docker run -p 8080:8080 -e PROFILE=prod -d --restart always --name gifthub repl4242/gifthub-was:${{env.IMAGE_TAG}}
+            docker run -p 8080:8080 -d --name gifthub repl4242/gifthub-was:${{env.IMAGE_TAG}}
 
