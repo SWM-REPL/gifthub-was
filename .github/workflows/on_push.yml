@@ -29,7 +29,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-22.04
-
+    env:
+      IMAGE_TAG: ${{github.sha}}
     steps:
       # 1. Compare branch 코드 내려 받기
       - name: Checkout PR
@@ -46,8 +47,6 @@ jobs:
 
       # 6. Docker 이미지 build 및 push
       - name: docker build and push
-        env:
-          IMAGE_TAG: ${{github.sha}}
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           pwd
@@ -60,8 +59,7 @@ jobs:
       - name: AWS SSM Send-Command
         uses: peterkimzz/aws-ssm-send-command@master
         id: ssm
-        env:
-          IMAGE_TAG: ${{github.sha}}
+
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
