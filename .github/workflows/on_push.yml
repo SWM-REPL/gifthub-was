@@ -70,5 +70,5 @@ jobs:
           command: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker pull repl4242/gifthub-was:${{env.IMAGE_TAG}}
-            docker run -p 8080:8080 -d -v resources:/opt/app  repl4242/gifthub-was:${{env.IMAGE_TAG}}
+            docker run -p 8080:8080 -e PROFILE=prod -d --restart always --name gifthub repl4242/gifthub-was:${{env.IMAGE_TAG}}
 

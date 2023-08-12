@@ -13,6 +13,7 @@ FROM openjdk:17
 # build file path
 RUN mkdir /opt/app
 # copy jar file to container
-COPY --from=builder build/libs/*.jar /opt/app/app.jar
+COPY --from=builder build/libs/*.jar /opt/app/spring-boot-application.jar
+EXPOSE 8080
 # run jar file
-ENTRYPOINT ["java","-jar","/opt/app/app.jar","--spring.profiles.active=prod"]
+ENTRYPOINT ["java","-jar","-Dspring.profiles.active=prod","/opt/app/spring-boot-application.jar",]
