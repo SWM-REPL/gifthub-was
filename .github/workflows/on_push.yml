@@ -52,7 +52,7 @@ jobs:
           pwd
           ls -al
           docker build -t gifthub-was .
-          docker tag gifthub-was:$IMAGE_TAG repl4242/gifthub-was:$IMAGE_TAG
+          docker tag gifthub-was:latest repl4242/gifthub-was:$IMAGE_TAG
           docker push repl4242/gifthub-was:$IMAGE_TAG
 
       # AWS SSM을 통한 Run-Command (Docker 이미지 pull 후 docker-compose를 통한 실행)
