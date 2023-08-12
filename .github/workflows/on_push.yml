@@ -70,5 +70,4 @@ jobs:
           command: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker pull repl4242/gifthub-was:${{env.IMAGE_TAG}}
-            export IMAGE_TAG=${{env.IMAGE_TAG}}
-            docker-compose up
+            docker-compose up IMAGE_TAG=${{env.IMAGE_TAG}}
