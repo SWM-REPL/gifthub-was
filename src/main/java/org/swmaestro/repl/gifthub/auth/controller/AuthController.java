@@ -15,16 +15,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
 import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
+import org.swmaestro.repl.gifthub.auth.dto.NaverDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
+import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.service.AppleService;
 import org.swmaestro.repl.gifthub.auth.service.AuthService;
 import org.swmaestro.repl.gifthub.auth.service.GoogleService;
 import org.swmaestro.repl.gifthub.auth.service.KakaoService;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.auth.service.NaverService;
+import org.swmaestro.repl.gifthub.auth.service.OAuthService;
 import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
+import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.Message;
@@ -51,6 +55,7 @@ public class AuthController {
 	private final KakaoService kakaoService;
 	private final GoogleService googleService;
 	private final AppleService appleService;
+	private final OAuthService oAuthService;
 
 	@PostMapping("/sign-up")
 	@Operation(summary = "회원가입 메서드", description = "사용자가 회원가입을 하기 위한 메서드입니다.")
@@ -117,7 +122,9 @@ public class AuthController {
 	@Operation(summary = "네이버 로그인 콜백 메서드", description = "네이버 로그인 콜백을 하기 위한 메서드입니다.")
 	public ResponseEntity<Message> naverCallback(@RequestParam String code, @RequestParam String state) throws IOException {
 		TokenDto token = naverService.getNaverToken("token", code);
-		naverService.saveNaverUser(naverService.getNaverUserByToken(token));
+		NaverDto naverDto = naverService.getUserInfo(token);
+		Member member = naverService.signUp(naverDto);
+		oAuthService.save(member, OAuthPlatform.NAVER, naverDto.getId());
 		return new ResponseEntity<Message>(
 				Message.builder()
 						.status(StatusEnum.OK)

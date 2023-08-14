@@ -126,6 +126,8 @@ public class VoucherService {
 		voucher.setExpiresAt(voucherUpdateRequestDto.getExpiresAt() == null ? voucher.getExpiresAt() :
 				DateConverter.stringToLocalDate(voucherUpdateRequestDto.getExpiresAt()));
 
+		voucherRepository.save(voucher);
+
 		return VoucherSaveResponseDto.builder()
 				.id(voucherId)
 				.build();

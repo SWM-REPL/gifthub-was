@@ -1,20 +1,23 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.swmaestro.repl.gifthub.auth.dto.NaverDto;
+import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
+import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 @Service
 @PropertySource("classpath:application.yml")
@@ -31,17 +34,16 @@ public class NaverService {
 	private final String userInfoUri;
 	private final JsonParser parser = new JsonParser();
 
-
 	public NaverService(MemberService memberService,
-	                    MemberRepository memberRepository,
-	                    @Value("${naver.client-id}") String clientId,
-	                    @Value("${naver.state}") String state,
-	                    @Value("${naver.response-type}") String responseType,
-	                    @Value("${naver.authorization-uri}") String authorizationUri,
-	                    @Value("${naver.redirect-uri}") String redirectUri,
-	                    @Value("${naver.client-secret}") String clientSecret,
-	                    @Value("${naver.token-uri}") String tokenUri,
-	                    @Value("${naver.user-info-uri}") String userInfoUri) {
+			MemberRepository memberRepository,
+			@Value("${naver.client-id}") String clientId,
+			@Value("${naver.state}") String state,
+			@Value("${naver.response-type}") String responseType,
+			@Value("${naver.authorization-uri}") String authorizationUri,
+			@Value("${naver.redirect-uri}") String redirectUri,
+			@Value("${naver.client-secret}") String clientSecret,
+			@Value("${naver.token-uri}") String tokenUri,
+			@Value("${naver.user-info-uri}") String userInfoUri) {
 		this.memberService = memberService;
 		this.memberRepository = memberRepository;
 		this.clientId = clientId;
@@ -56,25 +58,25 @@ public class NaverService {
 
 	public String getAuthorizationUrl() {
 		return UriComponentsBuilder
-			.fromUriString(authorizationUri)
-			.queryParam("client_id", clientId)
-			.queryParam("response_type", responseType)
-			.queryParam("redirect_uri", redirectUri)
-			.queryParam("state", state)
-			.build().toString();
+				.fromUriString(authorizationUri)
+				.queryParam("client_id", clientId)
+				.queryParam("response_type", responseType)
+				.queryParam("redirect_uri", redirectUri)
+				.queryParam("state", state)
+				.build().toString();
 	}
 
 	public TokenDto getNaverToken(String type, String code) throws IOException {
 		URL url = new URL(UriComponentsBuilder
-			.fromUriString(tokenUri)
-			.queryParam("grant_type", "authorization_code")
-			.queryParam("client_id", clientId)
-			.queryParam("client_secret", clientSecret)
-			.queryParam("code", code)
-			.build()
-			.toString());
+				.fromUriString(tokenUri)
+				.queryParam("grant_type", "authorization_code")
+				.queryParam("client_id", clientId)
+				.queryParam("client_secret", clientSecret)
+				.queryParam("code", code)
+				.build()
+				.toString());
 
-		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		HttpURLConnection con = (HttpURLConnection)url.openConnection();
 		con.setRequestMethod("GET");
 
 		int responseCode = con.getResponseCode();
@@ -97,16 +99,16 @@ public class NaverService {
 		JsonElement element = parser.parse(response.toString());
 
 		return TokenDto.builder()
-			.accessToken(element.getAsJsonObject().get("access_token").getAsString())
-			.refreshToken(element.getAsJsonObject().get("refresh_token").getAsString())
-			.build();
+				.accessToken(element.getAsJsonObject().get("access_token").getAsString())
+				.refreshToken(element.getAsJsonObject().get("refresh_token").getAsString())
+				.build();
 	}
 
-	public Member getNaverUserByToken(TokenDto token) throws IOException {
+	public NaverDto getUserInfo(TokenDto token) throws IOException {
 		String accessToken = token.getAccessToken();
 
 		URL url = new URL(userInfoUri);
-		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		HttpURLConnection con = (HttpURLConnection)url.openConnection();
 		con.setRequestMethod("GET");
 		con.setRequestProperty("Authorization", "Bearer " + accessToken);
 
@@ -129,15 +131,24 @@ public class NaverService {
 
 		JsonElement element = parser.parse(response.toString());
 
-		return Member.builder()
-			.username(element.getAsJsonObject().get("response").getAsJsonObject().get("email").getAsString())
-			.nickname(element.getAsJsonObject().get("response").getAsJsonObject().get("nickname").getAsString())
-			.build();
+		return NaverDto.builder()
+				.id(element.getAsJsonObject().get("response").getAsJsonObject().get("id").getAsString())
+				.email(element.getAsJsonObject().get("response").getAsJsonObject().get("email").getAsString())
+				.nickname(element.getAsJsonObject().get("response").getAsJsonObject().get("nickname").getAsString())
+				.build();
 	}
 
-	public void saveNaverUser(Member member) {
-		if (!memberService.isDuplicateUsername(member.getUsername())) {
-			memberRepository.save(member);
+	public Member signUp(NaverDto naverDto) {
+		SignUpDto signUpDto = SignUpDto.builder()
+				.username(naverDto.getEmail())
+				.nickname(naverDto.getNickname())
+				.password(naverDto.getId())
+				.build();
+
+		if (!memberService.isDuplicateUsername(naverDto.getEmail())) {
+			memberService.create(signUpDto);
 		}
+
+		return memberService.read(naverDto.getEmail());
 	}
 }
