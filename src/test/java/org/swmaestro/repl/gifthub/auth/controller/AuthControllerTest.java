@@ -1,6 +1,12 @@
 package org.swmaestro.repl.gifthub.auth.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.security.PrivateKey;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,19 +15,25 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.swmaestro.repl.gifthub.auth.dto.*;
+import org.swmaestro.repl.gifthub.auth.dto.AppleDto;
+import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
+import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
+import org.swmaestro.repl.gifthub.auth.dto.NaverDto;
+import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
+import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.service.*;
+import org.swmaestro.repl.gifthub.auth.service.AppleService;
+import org.swmaestro.repl.gifthub.auth.service.AuthService;
+import org.swmaestro.repl.gifthub.auth.service.GoogleService;
+import org.swmaestro.repl.gifthub.auth.service.KakaoService;
+import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.service.NaverService;
+import org.swmaestro.repl.gifthub.auth.service.OAuthService;
+import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
-import java.security.PrivateKey;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -56,6 +68,9 @@ public class AuthControllerTest {
 
 	@MockBean
 	private AppleService appleService;
+
+	@MockBean
+	private OAuthService oAuthService;
 
 	@Test
 	public void signUpTest() throws Exception {
@@ -141,11 +156,18 @@ public class AuthControllerTest {
 				.username("dls@gmail.com")
 				.build();
 
-		when(kakaoService.getToken(code)).thenReturn(tokenDto);
-		when(kakaoService.getUserInfo(tokenDto)).thenReturn(kakaoDto);
+		Member member = Member.builder()
+				.username(kakaoDto.getUsername())
+				.nickname(kakaoDto.getNickname())
+				.build();
+
+		when(kakaoService.getToken(code)).thenReturn(kakaoTokenDto);
+		when(kakaoService.getUserInfo(kakaoTokenDto)).thenReturn(kakaoDto);
+		when(memberService.read(kakaoDto.getUsername())).thenReturn(member);
+
 		when(kakaoService.signIn(kakaoDto)).thenReturn(tokenDto);
 
-		mockMvc.perform(get("/auth/sign-in/naver/callback")
+		mockMvc.perform(get("/auth/sign-in/kakao/callback")
 						.queryParam("code", code)
 						.queryParam("state", state)
 						.header("Authorization", "Bearer " + accesstoken))
@@ -177,7 +199,7 @@ public class AuthControllerTest {
 		when(googleService.getUserInfo(tokenDto)).thenReturn(googleDto);
 		when(googleService.signIn(googleDto)).thenReturn(tokenDto);
 
-		mockMvc.perform(get("/auth/sign-in/naver/callback")
+		mockMvc.perform(get("/auth/sign-in/google/callback")
 						.queryParam("code", code)
 						.queryParam("state", state)
 						.header("Authorization", "Bearer " + accesstoken))
@@ -197,9 +219,14 @@ public class AuthControllerTest {
 				.username("jinlee1703@naver.com")
 				.nickname("이진우")
 				.build();
+		NaverDto naverDto = NaverDto.builder()
+				.email(member.getUsername())
+				.nickname(member.getNickname())
+				.build();
 
 		when(naverService.getNaverToken("token", code)).thenReturn(token);
-		when(naverService.getNaverUserByToken(token)).thenReturn(member);
+		when(naverService.getUserInfo(token)).thenReturn(naverDto);
+		when(naverService.signIn(naverDto)).thenReturn(token);
 
 		mockMvc.perform(get("/auth/sign-in/naver/callback")
 						.queryParam("code", code)
@@ -222,11 +249,16 @@ public class AuthControllerTest {
 				.refreshToken(refreshToken)
 				.build();
 
+		AppleDto appleDto = AppleDto.builder()
+				.email("binarywooo@gmail.com")
+				.nickname("이진우")
+				.build();
+
 		when(appleService.readKeyPath()).thenReturn(keyPath);
 		when(appleService.craetePrivateKey(keyPath)).thenReturn(privateKey);
 		when(appleService.createClientSecretKey(privateKey)).thenReturn(clientSecretKey);
 		when(appleService.getIdToken(clientSecretKey, "my_awesome_code")).thenReturn(idToken);
-		when(appleService.getToken(idToken)).thenReturn(token);
+		when(appleService.getUserInfo(idToken)).thenReturn(appleDto);
 
 		mockMvc.perform(post("/auth/sign-in/apple/callback")
 						.requestAttr("code", "my_awesome_code")

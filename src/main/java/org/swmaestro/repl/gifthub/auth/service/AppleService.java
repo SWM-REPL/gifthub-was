@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.swmaestro.repl.gifthub.auth.dto.AppleDto;
+import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -222,5 +223,12 @@ public class AppleService {
 		}
 
 		return member;
+	}
+
+	public TokenDto signIn(AppleDto appleDto) {
+		return TokenDto.builder()
+				.accessToken(jwtProvider.generateToken(appleDto.getEmail()))
+				.refreshToken(jwtProvider.generateRefreshToken(appleDto.getEmail()))
+				.build();
 	}
 }

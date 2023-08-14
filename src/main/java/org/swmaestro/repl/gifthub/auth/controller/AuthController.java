@@ -204,11 +204,12 @@ public class AuthController {
 		AppleDto appleDto = appleService.getUserInfo(idToken);
 		Member member = appleService.signUp(appleDto);
 		oAuthService.save(member, OAuthPlatform.APPLE, appleDto.getId());
+		TokenDto tokenDto = appleService.signIn(appleDto);
 		return new ResponseEntity<Message>(
 				Message.builder()
 						.status(StatusEnum.OK)
 						.message("애플 로그인 성공!")
-						.data(idToken)
+						.data(tokenDto)
 						.build(),
 				new HttpJsonHeaders(),
 				HttpStatus.OK
