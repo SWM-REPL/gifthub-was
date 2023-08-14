@@ -174,6 +174,8 @@ public class AuthController {
 		TokenDto googleTokenDto = googleService.getToken(code);
 		GoogleDto googleDto = googleService.getUserInfo(googleTokenDto);
 		TokenDto tokenDto = googleService.signIn(googleDto);
+		Member member = memberService.read(googleDto.getUsername());
+		oAuthService.save(member, OAuthPlatform.GOOGLE, googleDto.getId());
 		return new ResponseEntity<Message>(
 				Message.builder()
 						.status(StatusEnum.OK)
