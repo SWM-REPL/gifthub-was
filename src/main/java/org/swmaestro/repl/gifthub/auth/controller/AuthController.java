@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.swmaestro.repl.gifthub.auth.dto.AppleDto;
 import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
 import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
 import org.swmaestro.repl.gifthub.auth.dto.NaverDto;
@@ -200,6 +201,9 @@ public class AuthController {
 		PrivateKey privateKey = appleService.craetePrivateKey(keyPath);
 		String clientSecretKey = appleService.createClientSecretKey(privateKey);
 		String idToken = appleService.getIdToken(code, clientSecretKey);
+		AppleDto appleDto = appleService.getUserInfo(idToken);
+		Member member = appleService.signUp(appleDto);
+		oAuthService.save(member, OAuthPlatform.APPLE, appleDto.getId());
 		return new ResponseEntity<Message>(
 				Message.builder()
 						.status(StatusEnum.OK)
