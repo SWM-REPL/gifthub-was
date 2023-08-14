@@ -109,7 +109,7 @@ public class VoucherController {
 		return new ResponseEntity<>(
 				Message.builder()
 						.status(StatusEnum.OK)
-						.message("기프티콘 목록이 성공적으로 조회되었습니다!")
+						.message("기프티콘 목록이 성공적으로 수정되었습니다!")
 						.data(voucherService.update(voucherId, voucherUpdateRequestDto))
 						.build(),
 				new HttpJsonHeaders(),
