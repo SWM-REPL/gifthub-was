@@ -15,46 +15,38 @@ import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 @PropertySource("classpath:application.yml")
 public class NaverService {
 	private final MemberService memberService;
 	private final MemberRepository memberRepository;
-	private final String clientId;
-	private final String state;
-	private final String responseType;
-	private final String authorizationUri;
-	private final String redirectUri;
-	private final String clientSecret;
-	private final String tokenUri;
-	private final String userInfoUri;
+	@Value("${naver.client-id}")
+	private String clientId;
+	@Value("${naver.state}")
+	private String state;
+	@Value("${naver.response-type}")
+	private String responseType;
+	@Value("${naver.authorization-uri}")
+	private String authorizationUri;
+	@Value("${naver.redirect-uri}")
+	private String redirectUri;
+	@Value("${naver.client-secret}")
+	private String clientSecret;
+	@Value("${naver.token-uri}")
+	private String tokenUri;
+	@Value("${naver.user-info-uri}")
+	private String userInfoUri;
 	private final JsonParser parser = new JsonParser();
-
-	public NaverService(MemberService memberService,
-			MemberRepository memberRepository,
-			@Value("${naver.client-id}") String clientId,
-			@Value("${naver.state}") String state,
-			@Value("${naver.response-type}") String responseType,
-			@Value("${naver.authorization-uri}") String authorizationUri,
-			@Value("${naver.redirect-uri}") String redirectUri,
-			@Value("${naver.client-secret}") String clientSecret,
-			@Value("${naver.token-uri}") String tokenUri,
-			@Value("${naver.user-info-uri}") String userInfoUri) {
-		this.memberService = memberService;
-		this.memberRepository = memberRepository;
-		this.clientId = clientId;
-		this.state = state;
-		this.responseType = responseType;
-		this.authorizationUri = authorizationUri;
-		this.redirectUri = redirectUri;
-		this.clientSecret = clientSecret;
-		this.tokenUri = tokenUri;
-		this.userInfoUri = userInfoUri;
-	}
+	private final JwtProvider jwtProvider;
+	private final RefreshTokenService refreshTokenService;
 
 	public String getAuthorizationUrl() {
 		return UriComponentsBuilder
@@ -150,5 +142,19 @@ public class NaverService {
 		}
 
 		return memberService.read(naverDto.getEmail());
+	}
+
+	public TokenDto signIn(NaverDto naverDto) {
+		String accessToken = jwtProvider.generateToken(naverDto.getEmail());
+		String refreshToken = jwtProvider.generateRefreshToken(naverDto.getEmail());
+
+		TokenDto tokenDto = TokenDto.builder()
+				.accessToken(accessToken)
+				.refreshToken(refreshToken)
+				.build();
+
+		refreshTokenService.storeRefreshToken(tokenDto, naverDto.getEmail());
+
+		return tokenDto;
 	}
 }

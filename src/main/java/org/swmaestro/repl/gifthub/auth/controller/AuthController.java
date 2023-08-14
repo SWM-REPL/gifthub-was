@@ -125,11 +125,12 @@ public class AuthController {
 		NaverDto naverDto = naverService.getUserInfo(token);
 		Member member = naverService.signUp(naverDto);
 		oAuthService.save(member, OAuthPlatform.NAVER, naverDto.getId());
+		TokenDto tokenDto = naverService.signIn(naverDto);
 		return new ResponseEntity<Message>(
 				Message.builder()
 						.status(StatusEnum.OK)
 						.message("네이버 로그인 성공!")
-						.data(token)
+						.data(tokenDto)
 						.build(),
 				new HttpJsonHeaders(),
 				HttpStatus.OK
