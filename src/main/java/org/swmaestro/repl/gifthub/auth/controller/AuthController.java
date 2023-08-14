@@ -148,6 +148,8 @@ public class AuthController {
 	public ResponseEntity<Message> kakaoCallback(@RequestParam String code) throws IOException {
 		TokenDto kakaoTokenDto = kakaoService.getToken(code);
 		KakaoDto kakaoDto = kakaoService.getUserInfo(kakaoTokenDto);
+		Member member = memberService.read(kakaoDto.getUsername());
+		oAuthService.save(member, OAuthPlatform.KAKAO, kakaoDto.getId());
 		TokenDto tokenDto = kakaoService.signIn(kakaoDto);
 		return new ResponseEntity<Message>(
 				Message.builder()
