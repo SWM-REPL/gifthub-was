@@ -20,6 +20,7 @@ public class AuthServiceImpl implements AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
 	private final RefreshTokenService refreshTokenService;
+	private final NaverService naverService;
 
 	public TokenDto signIn(SignInDto loginDto) {
 		Member member = memberRepository.findByUsername(loginDto.getUsername());

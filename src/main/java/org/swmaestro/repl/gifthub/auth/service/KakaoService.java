@@ -144,7 +144,7 @@ public class KakaoService {
 			JsonParser parser = new JsonParser();
 			JsonElement element = parser.parse(result);
 
-			int id = element.getAsJsonObject().get("id").getAsInt();
+			String id = Integer.toString(element.getAsJsonObject().get("id").getAsInt());
 			String nickname = element.getAsJsonObject().get("kakao_account").getAsJsonObject().get("profile").getAsJsonObject().get("nickname").getAsString();
 			boolean hasEmail = element.getAsJsonObject().get("kakao_account").getAsJsonObject().get("has_email").getAsBoolean();
 			String email = null;
@@ -153,6 +153,7 @@ public class KakaoService {
 			}
 			br.close();
 			kakaoDto = KakaoDto.builder()
+					.id(id)
 					.nickname(nickname)
 					.username(email)
 					.build();

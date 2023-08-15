@@ -149,11 +149,13 @@ public class GoogleService {
 			JsonParser parser = new JsonParser();
 			JsonElement element = parser.parse(result);
 
+			String id = element.getAsJsonObject().get("id").getAsString();
 			String nickname = element.getAsJsonObject().get("name").getAsString();
 			String email = element.getAsJsonObject().get("email").getAsString();
 
 			br.close();
 			googleDto = GoogleDto.builder()
+					.id(id)
 					.nickname(nickname)
 					.username(email)
 					.build();

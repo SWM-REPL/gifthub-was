@@ -10,6 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class KakaoDto {
+	private String id;
+
 	@NotNull
 	@Size(min = 4, max = 60)
 	private String username;
