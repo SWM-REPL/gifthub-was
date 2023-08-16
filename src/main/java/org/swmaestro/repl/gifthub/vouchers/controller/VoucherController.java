@@ -125,7 +125,7 @@ public class VoucherController {
 		return new ResponseEntity<>(
 				Message.builder()
 						.status(StatusEnum.OK)
-						.message("기프티콘 목록이 성공적으로 조회되었습니다!")
+						.message("기프티콘이 성공적으로 사용되었습니다!")
 						.data(voucherService.use(username, voucherId, voucherUseRequestDto))
 						.build(),
 				new HttpJsonHeaders(),

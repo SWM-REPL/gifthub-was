@@ -137,6 +137,12 @@ public class VoucherService {
 	기프티콘 사용 등록 메서드
 	 */
 	public VoucherUseResponseDto use(String username, Long voucherId, VoucherUseRequestDto voucherUseRequestDto) {
+		if (voucherUseRequestDto.getAmount() == null || voucherUseRequestDto.getAmount() <= 0) {
+			throw new BusinessException("유효한 사용할 금액을 입력해주세요.", StatusEnum.BAD_REQUEST);
+		}
+		if (voucherUseRequestDto.getPlace() == null) {
+			throw new BusinessException("사용처를 입력해주세요.", StatusEnum.BAD_REQUEST);
+		}
 		Optional<Voucher> voucher = voucherRepository.findById(voucherId);
 		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
 		List<VoucherUsageHistory> voucherUsageHistories = voucherUsageHistoryRepository.findAllByVoucherId(voucherId);
@@ -147,17 +153,12 @@ public class VoucherService {
 		if (!vouchers.contains(voucher.get())) {
 			throw new BusinessException("상품권을 사용할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
-		int totalUsageAmount = voucherUsageHistories.stream()
-				.mapToInt(VoucherUsageHistory::getAmount)
-				.sum();
 
-		totalUsageAmount = Math.max(totalUsageAmount, 0);
-
-		if (totalUsageAmount == voucher.get().getBalance()) {
+		if (voucher.get().getBalance() == 0) {
 			throw new BusinessException("이미 사용된 상품권 입니다.", StatusEnum.NOT_FOUND);
 		}
 
-		int remainingBalance = voucher.get().getBalance() - totalUsageAmount;
+		int remainingBalance = voucher.get().getBalance();
 		int requestedAmount = voucherUseRequestDto.getAmount();
 
 		if (requestedAmount > remainingBalance) {
@@ -175,13 +176,16 @@ public class VoucherService {
 				.place(voucherUseRequestDto.getPlace())
 				.createdAt(LocalDateTime.now())
 				.build();
-
 		voucherUsageHistoryRepository.save(voucherUsageHistory);
 
+		voucher.get().setBalance(remainingBalance - requestedAmount);
+		voucherRepository.save(voucher.get());
+		
 		return VoucherUseResponseDto.builder()
 				.usageId(voucherUsageHistory.getId())
 				.voucherId(voucherId)
 				.balance(remainingBalance - requestedAmount)
+				.price(voucher.get().getProduct().getPrice())
 				.build();
 	}
 
@@ -193,6 +197,8 @@ public class VoucherService {
 				.id(voucher.getId())
 				.productId(voucher.getProduct().getId())
 				.barcode(voucher.getBarcode())
+				.price(voucher.getProduct().getPrice())
+				.balance(voucher.getBalance())
 				.expiresAt(voucher.getExpiresAt().toString())
 				.build();
 		return voucherReadResponseDto;

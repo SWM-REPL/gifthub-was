@@ -161,7 +161,6 @@ class VoucherControllerTest {
 		// given
 		Long voucherId = 1L;
 		VoucherUseRequestDto voucherUseRequestDto = VoucherUseRequestDto.builder()
-				.id(1L)
 				.amount(5000)
 				.place("스타벅스 아남타워점")
 				.build();
@@ -170,6 +169,7 @@ class VoucherControllerTest {
 				.usageId(1L)
 				.voucherId(1L)
 				.balance(20000)
+				.price(25000)
 				.build();
 
 		// when
