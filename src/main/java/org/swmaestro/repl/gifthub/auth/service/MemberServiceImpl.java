@@ -55,8 +55,8 @@ public class MemberServiceImpl implements MemberService {
 
 		memberRepository.save(encodedMember);
 
-		String accessToken = jwtProvider.generateToken(encodedMember.getUsername());
-		String refreshToken = jwtProvider.generateRefreshToken(encodedMember.getUsername());
+		String accessToken = jwtProvider.generateToken(encodedMember.getUsername(), encodedMember.getId());
+		String refreshToken = jwtProvider.generateRefreshToken(encodedMember.getUsername(), encodedMember.getId());
 
 		TokenDto tokenDto = TokenDto.builder()
 				.accessToken(accessToken)

@@ -178,8 +178,8 @@ public class GoogleService {
 
 		memberRepository.save(member);
 
-		String accessToken = jwtProvider.generateToken(member.getUsername());
-		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername());
+		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
+		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
 
 		TokenDto tokenDto = TokenDto.builder()
 				.accessToken(accessToken)
@@ -196,8 +196,8 @@ public class GoogleService {
 		if (member == null) {
 			throw new BusinessException("존재하지 않는 아이디입니다.", StatusEnum.BAD_REQUEST);
 		}
-		String accessToken = jwtProvider.generateToken(member.getUsername());
-		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername());
+		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
+		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
 
 		TokenDto tokenDto = TokenDto.builder()
 				.accessToken(accessToken)

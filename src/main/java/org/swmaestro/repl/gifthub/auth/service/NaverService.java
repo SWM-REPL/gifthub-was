@@ -144,9 +144,9 @@ public class NaverService {
 		return memberService.read(naverDto.getEmail());
 	}
 
-	public TokenDto signIn(NaverDto naverDto) {
-		String accessToken = jwtProvider.generateToken(naverDto.getEmail());
-		String refreshToken = jwtProvider.generateRefreshToken(naverDto.getEmail());
+	public TokenDto signIn(NaverDto naverDto, Long userId) {
+		String accessToken = jwtProvider.generateToken(naverDto.getEmail(), userId);
+		String refreshToken = jwtProvider.generateRefreshToken(naverDto.getEmail(), userId);
 
 		TokenDto tokenDto = TokenDto.builder()
 				.accessToken(accessToken)

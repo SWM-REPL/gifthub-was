@@ -218,6 +218,7 @@ public class AuthControllerTest {
 		Member member = Member.builder()
 				.username("jinlee1703@naver.com")
 				.nickname("이진우")
+				.id(1L)
 				.build();
 		NaverDto naverDto = NaverDto.builder()
 				.email(member.getUsername())
@@ -226,7 +227,8 @@ public class AuthControllerTest {
 
 		when(naverService.getNaverToken("token", code)).thenReturn(token);
 		when(naverService.getUserInfo(token)).thenReturn(naverDto);
-		when(naverService.signIn(naverDto)).thenReturn(token);
+		when(naverService.signUp(naverDto)).thenReturn(member);
+		when(naverService.signIn(naverDto, 1L)).thenReturn(token);
 
 		mockMvc.perform(get("/auth/sign-in/naver/callback")
 						.queryParam("code", code)
