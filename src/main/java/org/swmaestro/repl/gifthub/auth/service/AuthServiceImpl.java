@@ -30,8 +30,8 @@ public class AuthServiceImpl implements AuthService {
 		if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) {
 			throw new BusinessException("비밀번호가 일치하지 않습니다.", StatusEnum.BAD_REQUEST);
 		}
-		String accessToken = jwtProvider.generateToken(member.getUsername());
-		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername());
+		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
+		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
 
 		TokenDto tokenDto = TokenDto.builder()
 				.accessToken(accessToken)

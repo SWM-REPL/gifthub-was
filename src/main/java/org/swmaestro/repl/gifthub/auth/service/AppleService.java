@@ -225,10 +225,10 @@ public class AppleService {
 		return member;
 	}
 
-	public TokenDto signIn(AppleDto appleDto) {
+	public TokenDto signIn(AppleDto appleDto, Long userId) {
 		return TokenDto.builder()
-				.accessToken(jwtProvider.generateToken(appleDto.getEmail()))
-				.refreshToken(jwtProvider.generateRefreshToken(appleDto.getEmail()))
+				.accessToken(jwtProvider.generateToken(appleDto.getEmail(), userId))
+				.refreshToken(jwtProvider.generateRefreshToken(appleDto.getEmail(), userId))
 				.build();
 	}
 }

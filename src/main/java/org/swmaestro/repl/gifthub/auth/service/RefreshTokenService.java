@@ -46,7 +46,7 @@ public class RefreshTokenService {
 	public String createNewRefreshTokenByValidateRefreshToken(String refreshToken) {
 		if (jwtProvider.validateToken(refreshToken)) {
 			refreshToken = refreshToken.substring(7);
-			return jwtProvider.generateRefreshToken(jwtProvider.getUsername(refreshToken));
+			return jwtProvider.generateRefreshToken(jwtProvider.getUsername(refreshToken), jwtProvider.getUserId(refreshToken));
 		}
 		return null;
 	}

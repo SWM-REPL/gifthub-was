@@ -126,7 +126,7 @@ public class AuthController {
 		NaverDto naverDto = naverService.getUserInfo(token);
 		Member member = naverService.signUp(naverDto);
 		oAuthService.save(member, OAuthPlatform.NAVER, naverDto.getId());
-		TokenDto tokenDto = naverService.signIn(naverDto);
+		TokenDto tokenDto = naverService.signIn(naverDto, member.getId());
 		return new ResponseEntity<Message>(
 				Message.builder()
 						.status(StatusEnum.OK)
@@ -149,9 +149,9 @@ public class AuthController {
 	public ResponseEntity<Message> kakaoCallback(@RequestParam String code) throws IOException {
 		TokenDto kakaoTokenDto = kakaoService.getToken(code);
 		KakaoDto kakaoDto = kakaoService.getUserInfo(kakaoTokenDto);
+		TokenDto tokenDto = kakaoService.signIn(kakaoDto);
 		Member member = memberService.read(kakaoDto.getUsername());
 		oAuthService.save(member, OAuthPlatform.KAKAO, kakaoDto.getId());
-		TokenDto tokenDto = kakaoService.signIn(kakaoDto);
 		return new ResponseEntity<Message>(
 				Message.builder()
 						.status(StatusEnum.OK)
@@ -204,7 +204,7 @@ public class AuthController {
 		AppleDto appleDto = appleService.getUserInfo(idToken);
 		Member member = appleService.signUp(appleDto);
 		oAuthService.save(member, OAuthPlatform.APPLE, appleDto.getId());
-		TokenDto tokenDto = appleService.signIn(appleDto);
+		TokenDto tokenDto = appleService.signIn(appleDto, member.getId());
 		return new ResponseEntity<Message>(
 				Message.builder()
 						.status(StatusEnum.OK)
