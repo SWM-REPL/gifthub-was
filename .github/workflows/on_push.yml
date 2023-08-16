@@ -29,13 +29,15 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-22.04
+    env:
+      IMAGE_TAG: ${{github.sha}}
 
     steps:
       # 1. Compare branch 코드 내려 받기
       - name: Checkout PR
         uses: actions/checkout@v3
         with:
-          path: dev
+          ref: ${{ github.event.push.base_ref }}
 
       # 2. 자바 환경 설정
       - name: Set up JDK 17
@@ -44,10 +46,33 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      # yml 파일 생성
+      - name: Set up application.yml
+        run: |
+          mkdir ./src/main/resources
+          cd ./src/main/resources
+          touch ./application.yml
+          echo "${{ secrets.APPLICATION }}" > ./application.yml
+          touch ./application-dev.yml
+          echo "${{ secrets.APPLICATION_DEV }}" > ./application-dev.yml
+          touch ./application-prod.yml
+          echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
+        shell: bash
+
+      # Docker 이미지 build 및 push
+      - name: docker build and push
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          pwd
+          ls -al
+          docker build -t repl4242/gifthub-was:${{env.IMAGE_TAG}} .
+          docker push repl4242/gifthub-was:${{env.IMAGE_TAG}}
+
       # AWS SSM을 통한 Run-Command (Docker 이미지 pull 후 docker-compose를 통한 실행)
       - name: AWS SSM Send-Command
         uses: peterkimzz/aws-ssm-send-command@master
         id: ssm
+
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -56,5 +81,6 @@ jobs:
           working-directory: /home/ubuntu
           command: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker pull repl4242/gifthub-was:latest
-            docker-compose up
+            docker pull repl4242/gifthub-was:${{env.IMAGE_TAG}}
+            docker run -p 8080:8080 -d repl4242/gifthub-was:${{env.IMAGE_TAG}}
+

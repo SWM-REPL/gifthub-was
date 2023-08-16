@@ -70,11 +70,3 @@ jobs:
         uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25
         with:
           arguments: build
-
-      # 6. Docker 이미지 build 및 push
-      - name: docker build and push
-        run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -t gifthub-was .
-          docker tag gifthub-was:latest repl4242/gifthub-was:latest
-          docker push repl4242/gifthub-was:latest
