@@ -34,7 +34,7 @@ class JwtUtilTest {
 		String username = "jinwoolee";
 
 		// when
-		when(jwtProvider.generateToken(anyString(), 1L)).thenReturn("myawesomejwt");
+		when(jwtProvider.generateToken(anyString(), anyLong())).thenReturn("myawesomejwt");
 		when(jwtProvider.validateToken(anyString())).thenReturn(true);
 
 		String myJwtToken = jwtProvider.generateToken(username, 1L);
