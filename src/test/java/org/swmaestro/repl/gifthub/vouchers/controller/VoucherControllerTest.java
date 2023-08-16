@@ -117,7 +117,7 @@ class VoucherControllerTest {
 		when(jwtProvider.getUsername(anyString())).thenReturn(username);
 		when(voucherService.list(memberId, username)).thenReturn(voucherIdList);
 
-		mockMvc.perform(get("/vouchers?member_id=" + memberId)
+		mockMvc.perform(get("/vouchers?user_id=" + memberId)
 						.header("Authorization", "Bearer " + accessToken))
 				.andExpect(status().isOk());
 	}
