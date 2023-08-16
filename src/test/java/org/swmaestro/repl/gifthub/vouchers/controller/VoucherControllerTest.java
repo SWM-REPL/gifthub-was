@@ -106,6 +106,7 @@ class VoucherControllerTest {
 	@WithMockUser(username = "이진우", roles = "USER")
 	void listVoucherTest() throws Exception {
 		String accessToken = "my_awesome_access_token";
+		Long memberId = 1L;
 		String username = "이진우";
 
 		List<Long> voucherIdList = new ArrayList<>();
@@ -114,9 +115,9 @@ class VoucherControllerTest {
 
 		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
 		when(jwtProvider.getUsername(anyString())).thenReturn(username);
-		when(voucherService.list(username)).thenReturn(voucherIdList);
+		when(voucherService.list(memberId, username)).thenReturn(voucherIdList);
 
-		mockMvc.perform(get("/vouchers")
+		mockMvc.perform(get("/vouchers?member_id=" + memberId)
 						.header("Authorization", "Bearer " + accessToken))
 				.andExpect(status().isOk());
 	}

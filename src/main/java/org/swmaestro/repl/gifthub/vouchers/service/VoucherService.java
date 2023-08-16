@@ -95,13 +95,26 @@ public class VoucherService {
 	}
 
 	/*
-	사용자 별 기프티콘 목록 조회 메서드
+	사용자 별 기프티콘 목록 조회 메서드(userId로 조회, username으로 권한 대조)
+	 */
+	public List<Long> list(Long userId, String username) {
+		if (!memberService.read(userId).getUsername().equals(username)) {
+			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.NOT_FOUND);
+		}
+
+		List<Voucher> vouchers = voucherRepository.findAllByMemberId(userId);
+		List<Long> voucherIdList = new ArrayList<>();
+		for (Voucher voucher : vouchers) {
+			voucherIdList.add(voucher.getId());
+		}
+		return voucherIdList;
+	}
+
+	/*
+	사용자 별 기프티콘 목록 조회 메서드(username으로 조회)
 	 */
 	public List<Long> list(String username) {
 		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
-		if (vouchers == null) {
-			throw new BusinessException("존재하지 않는 사용자 입니다.", StatusEnum.NOT_FOUND);
-		}
 		List<Long> voucherIdList = new ArrayList<>();
 		for (Voucher voucher : vouchers) {
 			voucherIdList.add(voucher.getId());
@@ -180,7 +193,7 @@ public class VoucherService {
 
 		voucher.get().setBalance(remainingBalance - requestedAmount);
 		voucherRepository.save(voucher.get());
-		
+
 		return VoucherUseResponseDto.builder()
 				.usageId(voucherUsageHistory.getId())
 				.voucherId(voucherId)

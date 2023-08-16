@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -89,13 +90,13 @@ public class VoucherController {
 
 	@GetMapping
 	@Operation(summary = "Voucher 목록 조회 메서드", description = "클라이언트에서 요청한 사용자 별 기프티콘 목록 정보를 조회하기 위한 메서드입니다.")
-	public ResponseEntity<Message> listVoucher(HttpServletRequest request) {
+	public ResponseEntity<Message> listVoucher(HttpServletRequest request, @RequestParam(value = "member_id", required = true) Long memberId) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
 		return new ResponseEntity<>(
 				Message.builder()
 						.status(StatusEnum.OK)
 						.message("기프티콘 목록이 성공적으로 조회되었습니다!")
-						.data(voucherService.list(username))
+						.data(voucherService.list(memberId, username))
 						.build(),
 				new HttpJsonHeaders(),
 				HttpStatus.OK

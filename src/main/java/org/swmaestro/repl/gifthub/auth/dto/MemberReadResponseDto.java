@@ -11,10 +11,12 @@ import lombok.Getter;
 public class MemberReadResponseDto {
 	private Long id;
 	private String nickname;
+	private String username;
 
 	@Builder
-	public MemberReadResponseDto(Long id, String nickname) {
+	public MemberReadResponseDto(Long id, String nickname, String username) {
 		this.id = id;
 		this.nickname = nickname;
+		this.username = username;
 	}
 }
