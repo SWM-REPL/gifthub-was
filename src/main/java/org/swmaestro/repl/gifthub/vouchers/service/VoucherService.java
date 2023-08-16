@@ -103,10 +103,6 @@ public class VoucherService {
 		}
 
 		List<Voucher> vouchers = voucherRepository.findAllByMemberId(userId);
-		if (vouchers == null) {
-			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
-		}
-
 		List<Long> voucherIdList = new ArrayList<>();
 		for (Voucher voucher : vouchers) {
 			voucherIdList.add(voucher.getId());
@@ -119,9 +115,6 @@ public class VoucherService {
 	 */
 	public List<Long> list(String username) {
 		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
-		if (vouchers == null) {
-			throw new BusinessException("존재하지 않는 사용자 입니다.", StatusEnum.NOT_FOUND);
-		}
 		List<Long> voucherIdList = new ArrayList<>();
 		for (Voucher voucher : vouchers) {
 			voucherIdList.add(voucher.getId());
