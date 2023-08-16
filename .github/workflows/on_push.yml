@@ -82,5 +82,5 @@ jobs:
           command: |
             docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker pull repl4242/gifthub-was:${{env.IMAGE_TAG}}
-            docker run -p 8080:8080 -d repl4242/gifthub-was:${{env.IMAGE_TAG}}
+            IMAGE_TAG=${{env.IMAGE_TAG}} docker-compose up
 
