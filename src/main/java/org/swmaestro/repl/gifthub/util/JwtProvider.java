@@ -45,9 +45,10 @@ public class JwtProvider {
 	 * @param username
 	 * @return JWT 토큰
 	 */
-	public String generateToken(String username) {
+	public String generateToken(String username, Long userId) {
 		return io.jsonwebtoken.Jwts.builder()
 				.setSubject(username)
+				.claim("userId", userId)
 				.setIssuer(issuer)
 				.setIssuedAt(new java.util.Date(System.currentTimeMillis()))
 				.setExpiration(new java.util.Date(System.currentTimeMillis() + expiration))
@@ -114,14 +115,27 @@ public class JwtProvider {
 	}
 
 	/**
+	 * JWT 토큰에서 userId를 가져오는 메소드
+	 */
+	public Long getUserId(String token) {
+		return Jwts.parserBuilder()
+				.setSigningKey(secretKey.getBytes())
+				.build()
+				.parseClaimsJws(token)
+				.getBody()
+				.get("userId", Long.class);
+	}
+
+	/**
 	 * RefreshToken 생성 메소드
 	 *
 	 * @param username
 	 * @return username
 	 */
-	public String generateRefreshToken(String username) {
+	public String generateRefreshToken(String username, Long userId) {
 		return io.jsonwebtoken.Jwts.builder()
 				.setSubject(username)
+				.claim("userId", userId)
 				.setIssuer(issuer)
 				.setIssuedAt(new java.util.Date(System.currentTimeMillis()))
 				.setExpiration(Date.from(Instant.now().plus(15, ChronoUnit.DAYS)))
@@ -137,12 +151,13 @@ public class JwtProvider {
 	 */
 	public String reissueAccessToken(String refreshToken) {
 		String username = getUsername(refreshToken);
+		Long userId = getUserId(refreshToken);
 		String storedRefreshToken = refreshTokenRepository.findByUsername(username).get().getToken();
 
 		if (!refreshToken.equals(storedRefreshToken)) {
 			throw new BusinessException("RefreshToken이 유효하지 않습니다.", StatusEnum.UNAUTHORIZED);
 		}
-		return generateToken(username);
+		return generateToken(username, userId);
 	}
 
 	/**
