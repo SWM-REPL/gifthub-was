@@ -90,7 +90,7 @@ public class VoucherController {
 
 	@GetMapping
 	@Operation(summary = "Voucher 목록 조회 메서드", description = "클라이언트에서 요청한 사용자 별 기프티콘 목록 정보를 조회하기 위한 메서드입니다.")
-	public ResponseEntity<Message> listVoucher(HttpServletRequest request, @RequestParam("member_id") Long memberId) {
+	public ResponseEntity<Message> listVoucher(HttpServletRequest request, @RequestParam(value = "member_id", required = true) Long memberId) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
 		return new ResponseEntity<>(
 				Message.builder()
