@@ -106,6 +106,7 @@ public class MemberServiceImpl implements MemberService {
 		return MemberReadResponseDto.builder()
 				.id(member.get().getId())
 				.nickname(member.get().getNickname())
+				.username(member.get().getUsername())
 				.build();
 	}
 

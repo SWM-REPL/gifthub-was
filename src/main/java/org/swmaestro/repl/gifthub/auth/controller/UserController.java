@@ -65,7 +65,7 @@ public class UserController {
 		return new ResponseEntity<>(
 				Message.builder()
 						.status(StatusEnum.OK)
-						.message("성공적으로 조호되었습니다!")
+						.message("성공적으로 조회되었습니다!")
 						.data(memberService.read(userId))
 						.build(),
 				new HttpJsonHeaders(),
