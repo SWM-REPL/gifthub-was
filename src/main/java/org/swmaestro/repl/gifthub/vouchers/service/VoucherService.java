@@ -50,11 +50,10 @@ public class VoucherService {
 		String imageUrl = voucherSaveRequestDto.getImageUrl();
 
 		if (brand == null) {
-			brand = brandService.save(voucherSaveRequestDto.getBrandName());
-			product = productService.save(voucherSaveRequestDto.getProductName(), brand);
+			throw new BusinessException("존재하지 않는 브랜드입니다.", StatusEnum.NOT_FOUND);
 		}
 		if (product == null) {
-			product = productService.save(voucherSaveRequestDto.getProductName(), brand);
+			throw new BusinessException("존재하지 않는 상품입니다.", StatusEnum.NOT_FOUND);
 		}
 		if (imageUrl == null) {
 			imageUrl = storageService.getDefaultImagePath(voucherDirName);
