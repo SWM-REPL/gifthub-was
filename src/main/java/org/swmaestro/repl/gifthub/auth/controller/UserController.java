@@ -17,6 +17,8 @@ import org.swmaestro.repl.gifthub.util.Message;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,11 @@ public class UserController {
 
 	@DeleteMapping("/{userId}")
 	@Operation(summary = "User 삭제 메서드", description = "클라이언트에서 요청한 사용자 정보를 삭제(Soft-Delete)하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "회원 삭제 성공"),
+			@ApiResponse(responseCode = "400(404-1)", description = "존재하지 않는 회원 아이디 입력"),
+			@ApiResponse(responseCode = "400(404-2)", description = "이미 삭제된 회원 아이디 입력")
+	})
 	public ResponseEntity<Message> deleteMember(@PathVariable Long userId) {
 		return new ResponseEntity<>(
 				Message.builder()
@@ -45,6 +52,10 @@ public class UserController {
 
 	@PatchMapping("/{userId}")
 	@Operation(summary = "User 정보 수정 메서드", description = "클라이언트에서 요청한 사용자 정보를 수정하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "회원 수정 성공"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원 아이디 입력")
+	})
 	public ResponseEntity<Message> updateMember(HttpServletRequest request, @PathVariable Long userId,
 			@RequestBody MemberUpdateRequestDto memberUpdateRequestDto) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
@@ -61,6 +72,10 @@ public class UserController {
 
 	@GetMapping("/{userId}")
 	@Operation(summary = "User 정보 조회 메서드", description = "클라이언트에서 요청한 사용자 정보를 조회하기 위한 메서드입니다. 응답으로 회원 id와 nickname을 반환합니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "회원 조회 성공"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원 아이디 입력")
+	})
 	public ResponseEntity<Message> readMember(@PathVariable Long userId) {
 		return new ResponseEntity<>(
 				Message.builder()
