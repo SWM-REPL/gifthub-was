@@ -64,8 +64,9 @@ public class AuthController {
 	@Operation(summary = "회원가입 메서드", description = "사용자가 회원가입을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "회원가입 성공"),
-			@ApiResponse(responseCode = "400", description = "비밀번호 형식 부적합(영문, 숫자, 특수문자를 포함한 8자리 이상), 닉네임 글자 수 부적합(12자리 이하)"),
-			@ApiResponse(responseCode = "409", description = "이미 존재하는 아이디")
+			@ApiResponse(responseCode = "400(400-1)", description = "비밀번호 형식 부적합(영문, 숫자, 특수문자를 포함한 8자리 이상)"),
+			@ApiResponse(responseCode = "400(400-2)", description = "닉네임 글자 수 부적합(12자리 이하)"),
+			@ApiResponse(responseCode = "400(409)", description = "이미 존재하는 아이디")
 	})
 	public ResponseEntity<Message> signUp(@RequestBody SignUpDto signUpDto) {
 		TokenDto tokenDto = memberService.create(signUpDto);
@@ -84,8 +85,9 @@ public class AuthController {
 	@Operation(summary = "로그인 메서드", description = "사용자가 로그인을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "로그인 성공"),
-			@ApiResponse(responseCode = "400", description = "존재하지 않는 아이디, 비밀번호 불일치"),
-			@ApiResponse(responseCode = "409", description = "이미 존재하는 아이디")
+			@ApiResponse(responseCode = "400(400-1)", description = "존재하지 않는 아이디"),
+			@ApiResponse(responseCode = "400(400-2)", description = "비밀번호 불일치"),
+			@ApiResponse(responseCode = "400(409)", description = "이미 존재하는 아이디")
 	})
 	public ResponseEntity<Message> signIn(@RequestBody SignInDto loginDto) {
 		TokenDto tokenDto = authService.signIn(loginDto);
@@ -168,8 +170,9 @@ public class AuthController {
 	@Operation(summary = "카카오 로그인 콜백 메서드", description = "카카오 로그인 콜백을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "카카오 로그인 성공"),
-			@ApiResponse(responseCode = "400", description = "잘못된 프로토콜 혹은 URL 요쳥"),
-			@ApiResponse(responseCode = "500", description = "HTTP 연결 수행 실패"),
+			@ApiResponse(responseCode = "400(400-1)", description = "잘못된 프로토콜 요청"),
+			@ApiResponse(responseCode = "400(400-2)", description = "잘못된 URL 요쳥"),
+			@ApiResponse(responseCode = "400(500)", description = "HTTP 연결 수행 실패"),
 	})
 	public ResponseEntity<Message> kakaoCallback(@RequestParam String code) throws IOException {
 		TokenDto kakaoTokenDto = kakaoService.getToken(code);
@@ -198,8 +201,8 @@ public class AuthController {
 	@Operation(summary = "구글 로그인 콜백 메서드", description = "구글로부터 사용자 정보를 얻어와 회원가입 및 로그인을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "구글 로그인 성공"),
-			@ApiResponse(responseCode = "400", description = "잘못된 프로토콜 혹은 URL 요쳥"),
-			@ApiResponse(responseCode = "500", description = "HTTP 연결 수행 실패"),
+			@ApiResponse(responseCode = "400(400)", description = "잘못된 프로토콜 혹은 URL 요쳥"),
+			@ApiResponse(responseCode = "400(500)", description = "HTTP 연결 수행 실패"),
 	})
 	public ResponseEntity<Message> signIn(@RequestParam String code) throws IOException {
 		TokenDto googleTokenDto = googleService.getToken(code);
@@ -254,7 +257,7 @@ public class AuthController {
 	@Operation(summary = "로그아웃 메서드", description = "사용자가 로그아웃을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "로그인 성공"),
-			@ApiResponse(responseCode = "401", description = "존재하지 않는 사용자")
+			@ApiResponse(responseCode = "400(401)", description = "존재하지 않는 사용자")
 	})
 	public ResponseEntity<Message> signOut(HttpServletRequest request) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
