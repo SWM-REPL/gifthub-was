@@ -150,7 +150,7 @@ public class VoucherController {
 			@ApiResponse(responseCode = "400(400-2)", description = "사용처 미입력"),
 			@ApiResponse(responseCode = "400(403)", description = "상품권 사용 권한 없음"),
 			@ApiResponse(responseCode = "400(404-1)", description = "존재하지 않는 상품권 사용 시도"),
-			@ApiResponse(responseCode = "400(404-2)", description = "이미 사용한 상품권 사용 ㅅ도"),
+			@ApiResponse(responseCode = "400(404-2)", description = "이미 사용한 상품권 사용 시도"),
 	})
 	public ResponseEntity<Message> useVoucher(HttpServletRequest request, @PathVariable Long voucherId,
 			@RequestBody VoucherUseRequestDto voucherUseRequestDto) throws IOException {

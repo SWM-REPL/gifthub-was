@@ -150,7 +150,7 @@ public class VoucherService {
 	 */
 	public VoucherUseResponseDto use(String username, Long voucherId, VoucherUseRequestDto voucherUseRequestDto) {
 		if (voucherUseRequestDto.getAmount() == null || voucherUseRequestDto.getAmount() <= 0) {
-			throw new BusinessException("상도 금액을 입력해주세요.", StatusEnum.BAD_REQUEST);
+			throw new BusinessException("사용 금액을 입력해주세요.", StatusEnum.BAD_REQUEST);
 		}
 		if (voucherUseRequestDto.getPlace() == null) {
 			throw new BusinessException("사용처를 입력해주세요.", StatusEnum.BAD_REQUEST);
