@@ -14,6 +14,8 @@ import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.service.BrandService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +28,10 @@ public class BrandController {
 
 	@GetMapping("/{brandId}")
 	@Operation(summary = "브랜드 상세 조회 메서드", description = "클라이언트에서 요청한 브랜드 상세 정보를 조회하기 위한 메서드입니다. 응답으로 brand-entity를 반환합니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "브랜드 조회 성공"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 브랜드 조회 시도")
+	})
 	public ResponseEntity<Message> readBrand(@PathVariable Long brandId) throws IOException {
 		return new ResponseEntity<>(
 				Message.builder()

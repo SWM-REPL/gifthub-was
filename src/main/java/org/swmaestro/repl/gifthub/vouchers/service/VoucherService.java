@@ -86,7 +86,7 @@ public class VoucherService {
 			throw new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND);
 		}
 		if (!vouchers.contains(voucher.get())) {
-			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.NOT_FOUND);
+			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
 
 		VoucherReadResponseDto voucherReadResponseDto = mapToDto(voucher.get());
@@ -98,7 +98,7 @@ public class VoucherService {
 	 */
 	public List<Long> list(Long userId, String username) {
 		if (!memberService.read(userId).getUsername().equals(username)) {
-			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.NOT_FOUND);
+			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
 
 		List<Voucher> vouchers = voucherRepository.findAllByMemberId(userId);
@@ -150,7 +150,7 @@ public class VoucherService {
 	 */
 	public VoucherUseResponseDto use(String username, Long voucherId, VoucherUseRequestDto voucherUseRequestDto) {
 		if (voucherUseRequestDto.getAmount() == null || voucherUseRequestDto.getAmount() <= 0) {
-			throw new BusinessException("유효한 사용할 금액을 입력해주세요.", StatusEnum.BAD_REQUEST);
+			throw new BusinessException("사용 금액을 입력해주세요.", StatusEnum.BAD_REQUEST);
 		}
 		if (voucherUseRequestDto.getPlace() == null) {
 			throw new BusinessException("사용처를 입력해주세요.", StatusEnum.BAD_REQUEST);

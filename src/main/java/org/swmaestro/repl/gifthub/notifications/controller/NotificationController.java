@@ -13,6 +13,8 @@ import org.swmaestro.repl.gifthub.util.Message;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +28,10 @@ public class NotificationController {
 
 	@GetMapping
 	@Operation(summary = "Notification 목록 조회 메서드", description = "클라이언트에서 요청한 알림 목록 정보를 조회하기 위한 메서드입니다. 응답으로 알림 type, message, notified date, 기프티콘 정보를 반환합니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "알림 목록 조회 성공"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원"),
+	})
 	public ResponseEntity<Message> listNotification(@RequestHeader("Authorization") String accessToken) {
 		String username = jwtProvider.getUsername(accessToken.substring(7));
 		return new ResponseEntity<>(
