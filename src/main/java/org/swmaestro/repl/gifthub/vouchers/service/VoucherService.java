@@ -211,11 +211,14 @@ public class VoucherService {
 		if (voucher.isEmpty()) {
 			throw new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND);
 		}
+
 		if (!vouchers.contains(voucher.get())) {
 			throw new BusinessException("상품권을 삭제할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
 
-		voucherRepository.deleteById(voucherId);
+		voucher.get().setDeletedAt(LocalDateTime.now());
+
+		voucherRepository.save(voucher.get());
 	}
 
 	/*

@@ -1,6 +1,7 @@
 package org.swmaestro.repl.gifthub.vouchers.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.util.BaseTimeEntity;
@@ -51,9 +52,12 @@ public class Voucher extends BaseTimeEntity {
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member member;
 
+	@Column
+	private LocalDateTime deletedAt;
+
 	@Builder
 	public Voucher(Long id, Brand brand, Product product, String barcode, int balance, LocalDate expiresAt,
-		String imageUrl, Member member) {
+			String imageUrl, Member member) {
 		this.id = id;
 		this.brand = brand;
 		this.product = product;
