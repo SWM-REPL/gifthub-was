@@ -171,6 +171,7 @@ public class VoucherController {
 	@Operation(summary = "Voucher 삭제 메서드", description = "클라이언트에서 요청한 기프티콘 정보를 삭제하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "기프티콘 삭제 성공"),
+			@ApiResponse(responseCode = "400(400)", description = "기프티콘 삭제 실패"),
 			@ApiResponse(responseCode = "400(403)", description = "자신의 것이 아닌 기프티콘 삭제 시도"),
 			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 기프티콘 삭제 시도"),
 	})

@@ -204,7 +204,7 @@ public class VoucherService {
 	/*
 	기프티콘 삭제 메서드
 	 */
-	public void delete(String username, Long voucherId) {
+	public boolean delete(String username, Long voucherId) {
 		Optional<Voucher> voucher = voucherRepository.findById(voucherId);
 		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
 
@@ -216,9 +216,13 @@ public class VoucherService {
 			throw new BusinessException("상품권을 삭제할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
 
-		voucher.get().setDeletedAt(LocalDateTime.now());
-
-		voucherRepository.save(voucher.get());
+		try {
+			voucher.get().setDeletedAt(LocalDateTime.now());
+			voucherRepository.save(voucher.get());
+			return true;
+		} catch (Exception e) {
+			throw new BusinessException("상품권 삭제에 실패했습니다.", StatusEnum.BAD_REQUEST);
+		}
 	}
 
 	/*
