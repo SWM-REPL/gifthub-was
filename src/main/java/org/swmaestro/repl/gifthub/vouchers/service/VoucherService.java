@@ -67,6 +67,7 @@ public class VoucherService {
 				.barcode(voucherSaveRequestDto.getBarcode())
 				.expiresAt(DateConverter.stringToLocalDate(voucherSaveRequestDto.getExpiresAt()))
 				.imageUrl(imageUrl)
+				.balance(product.getPrice())
 				.member(memberService.read(username))
 				.build();
 
