@@ -18,12 +18,14 @@ public class VoucherUpdateRequestDto {
 	private String expiresAt;
 	private String productName;
 	private String brandName;
+	private Integer balance;
 
 	@Builder
-	public VoucherUpdateRequestDto(String barcode, String expiresAt, String productName, String brandName) {
+	public VoucherUpdateRequestDto(String barcode, String expiresAt, String productName, String brandName, int balance) {
 		this.barcode = barcode;
 		this.expiresAt = expiresAt;
 		this.productName = productName;
 		this.brandName = brandName;
+		this.balance = balance;
 	}
 }

@@ -137,6 +137,8 @@ public class VoucherService {
 				productService.read(voucherUpdateRequestDto.getProductName()));
 		voucher.setExpiresAt(voucherUpdateRequestDto.getExpiresAt() == null ? voucher.getExpiresAt() :
 				DateConverter.stringToLocalDate(voucherUpdateRequestDto.getExpiresAt()));
+		voucher.setBalance(voucherUpdateRequestDto.getBalance() == null ? voucher.getBalance() :
+				voucherUpdateRequestDto.getBalance());
 
 		voucherRepository.save(voucher);
 
