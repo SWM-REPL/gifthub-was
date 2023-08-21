@@ -67,6 +67,7 @@ public class VoucherService {
 				.barcode(voucherSaveRequestDto.getBarcode())
 				.expiresAt(DateConverter.stringToLocalDate(voucherSaveRequestDto.getExpiresAt()))
 				.imageUrl(imageUrl)
+				.balance(product.getPrice())
 				.member(memberService.read(username))
 				.build();
 
@@ -128,6 +129,10 @@ public class VoucherService {
 		Voucher voucher = voucherRepository.findById(voucherId)
 				.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND));
 
+		if (voucherUpdateRequestDto.getBalance() > productService.read(voucher.getProduct().getName()).getPrice()) {
+			throw new BusinessException("잔액은 상품 가격보다 클 수 없습니다.", StatusEnum.BAD_REQUEST);
+		}
+
 		voucher.setBarcode(
 				voucherUpdateRequestDto.getBarcode() == null ? voucher.getBarcode() :
 						voucherUpdateRequestDto.getBarcode());
@@ -137,6 +142,9 @@ public class VoucherService {
 				productService.read(voucherUpdateRequestDto.getProductName()));
 		voucher.setExpiresAt(voucherUpdateRequestDto.getExpiresAt() == null ? voucher.getExpiresAt() :
 				DateConverter.stringToLocalDate(voucherUpdateRequestDto.getExpiresAt()));
+
+		voucher.setBalance(voucherUpdateRequestDto.getBalance() == null ? voucher.getBalance() :
+				voucherUpdateRequestDto.getBalance());
 
 		voucherRepository.save(voucher);
 

@@ -40,7 +40,7 @@ public class Voucher extends BaseTimeEntity {
 	private String barcode;
 
 	@Column(nullable = false)
-	private int balance;
+	private Integer balance;
 
 	@Column(nullable = false)
 	private LocalDate expiresAt;
@@ -56,7 +56,7 @@ public class Voucher extends BaseTimeEntity {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Voucher(Long id, Brand brand, Product product, String barcode, int balance, LocalDate expiresAt,
+	public Voucher(Long id, Brand brand, Product product, String barcode, Integer balance, LocalDate expiresAt,
 			String imageUrl, Member member) {
 		this.id = id;
 		this.brand = brand;
