@@ -186,4 +186,30 @@ class VoucherControllerTest {
 						.content(objectMapper.writeValueAsString(voucherUseRequestDto)))
 				.andExpect(status().isOk());
 	}
+
+	/*
+	기프티콘 삭제 테스트
+	 */
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	void deleteVoucher() throws Exception {
+		// given
+		Long voucherId = 1L;
+		VoucherUseRequestDto voucherUseRequestDto = VoucherUseRequestDto.builder()
+				.amount(5000)
+				.place("스타벅스 아남타워점")
+				.build();
+
+		// when
+		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
+		when(jwtProvider.getUsername(anyString())).thenReturn("이진우");
+		when(voucherService.delete(anyString(), eq(voucherId)))
+				.thenReturn(true);
+
+		// then
+		mockMvc.perform(delete("/vouchers/" + voucherId)
+						.header("Authorization", "Bearer my_awesome_access_token")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
 }

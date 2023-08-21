@@ -202,6 +202,30 @@ public class VoucherService {
 	}
 
 	/*
+	기프티콘 삭제 메서드
+	 */
+	public boolean delete(String username, Long voucherId) {
+		Optional<Voucher> voucher = voucherRepository.findById(voucherId);
+		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
+
+		if (voucher.isEmpty()) {
+			throw new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND);
+		}
+
+		if (!vouchers.contains(voucher.get())) {
+			throw new BusinessException("상품권을 삭제할 권한이 없습니다.", StatusEnum.FORBIDDEN);
+		}
+
+		try {
+			voucher.get().setDeletedAt(LocalDateTime.now());
+			voucherRepository.save(voucher.get());
+			return true;
+		} catch (Exception e) {
+			throw new BusinessException("상품권 삭제에 실패했습니다.", StatusEnum.BAD_REQUEST);
+		}
+	}
+
+	/*
 	Entity를 Dto로 변환하는 메서드
 	 */
 	public VoucherReadResponseDto mapToDto(Voucher voucher) {
