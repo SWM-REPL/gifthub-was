@@ -105,6 +105,10 @@ public class VoucherService {
 		List<Voucher> vouchers = voucherRepository.findAllByMemberId(userId);
 		List<Long> voucherIdList = new ArrayList<>();
 		for (Voucher voucher : vouchers) {
+			// 삭제된 기프티콘은 조회되지 않도록 함
+			if (voucher.getDeletedAt() != null) {
+				continue;
+			}
 			voucherIdList.add(voucher.getId());
 		}
 		return voucherIdList;
