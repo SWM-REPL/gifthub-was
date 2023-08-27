@@ -36,7 +36,6 @@ public class StorageService {
 		metadata.setContentType(multipartFile.getContentType());
 
 		String keyName = uploadFilePath + uploadFileName;    // example: "vouchers/uuid.jpg"
-
 		InputStream inputStream = multipartFile.getInputStream();
 		amazonS3Client.putObject(new PutObjectRequest(bucketName, keyName, inputStream, metadata));
 
