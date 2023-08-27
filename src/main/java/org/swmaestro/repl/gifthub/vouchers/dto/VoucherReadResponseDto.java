@@ -23,4 +23,5 @@ public class VoucherReadResponseDto {
 	private String expiresAt;
 	private int price;
 	private int balance;
+	private String imageUrl;
 }

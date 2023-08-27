@@ -45,19 +45,13 @@ public class VoucherService {
 	 */
 	public VoucherSaveResponseDto save(String username, VoucherSaveRequestDto voucherSaveRequestDto) throws
 			IOException {
-		Brand brand = brandService.read(voucherSaveRequestDto.getBrandName());
-		Product product = productService.read(voucherSaveRequestDto.getProductName());
+		Brand brand = brandService.read(voucherSaveRequestDto.getBrandName()).orElseThrow(() ->
+				new BusinessException("존재하지 않는 브랜드입니다.", StatusEnum.NOT_FOUND));
+		Product product = productService.read(brand.getId(), voucherSaveRequestDto.getProductName()).orElseThrow(() ->
+				new BusinessException("존재하지 않는 상품입니다.", StatusEnum.NOT_FOUND));
 		String imageUrl = voucherSaveRequestDto.getImageUrl();
 
-		if (brand == null) {
-			throw new BusinessException("존재하지 않는 브랜드입니다.", StatusEnum.NOT_FOUND);
-		}
-		if (product == null) {
-			throw new BusinessException("존재하지 않는 상품입니다.", StatusEnum.NOT_FOUND);
-		}
-		if (imageUrl == null) {
-			imageUrl = storageService.getDefaultImagePath(voucherDirName);
-		} else {
+		if (imageUrl != null) {
 			imageUrl = storageService.getBucketAddress(voucherDirName) + voucherSaveRequestDto.getImageUrl();
 		}
 
@@ -142,7 +136,7 @@ public class VoucherService {
 				voucherUpdateRequestDto.getBarcode() == null ? voucher.getBarcode() :
 						voucherUpdateRequestDto.getBarcode());
 		voucher.setBrand(voucherUpdateRequestDto.getBrandName() == null ? voucher.getBrand() :
-				brandService.read(voucherUpdateRequestDto.getBrandName()));
+				brandService.read(voucherUpdateRequestDto.getBrandName()).get());
 		voucher.setProduct(voucherUpdateRequestDto.getProductName() == null ? voucher.getProduct() :
 				productService.read(voucherUpdateRequestDto.getProductName()));
 
@@ -250,6 +244,7 @@ public class VoucherService {
 				.price(voucher.getProduct().getPrice())
 				.balance(voucher.getBalance())
 				.expiresAt(voucher.getExpiresAt().toString())
+				.imageUrl(voucher.getImageUrl())
 				.build();
 		return voucherReadResponseDto;
 	}

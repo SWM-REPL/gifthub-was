@@ -21,6 +21,10 @@ public class ProductService {
 		return productRepository.findByName(productName);
 	}
 
+	public Optional<Product> read(Long brandId, String productName) {
+		return productRepository.findByBrandIdAndName(brandId, productName);
+	}
+
 	public ProductReadResponseDto readById(Long id) {
 		Optional<Product> product = productRepository.findById(id);
 		if (product.isEmpty()) {

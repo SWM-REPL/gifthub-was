@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 public class BrandService {
 	private final BrandRepository brandRepository;
 
-	public Brand read(String brandName) {
+	public Optional<Brand> read(String brandName) {
 		return brandRepository.findByName(brandName);
 	}
 
