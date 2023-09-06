@@ -71,4 +71,12 @@ public class DeviceTokenService {
 		return deviceTokenRepository.findById(deviceTokenId)
 				.orElseThrow(() -> new BusinessException("존재하지 않는 토큰입니다.", StatusEnum.INTERNAL_SERVER_ERROR));
 	}
+
+	/*
+	 * DeviceToken 삭제 메서드 (token)
+	 */
+	public void delete(String token) {
+		DeviceToken deviceToken = read(token);
+		deviceTokenRepository.delete(deviceToken);
+	}
 }
