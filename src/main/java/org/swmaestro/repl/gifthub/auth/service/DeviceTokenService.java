@@ -1,5 +1,7 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
@@ -42,4 +44,14 @@ public class DeviceTokenService {
 
 		return deviceTokenRepository.findByMemberAndToken(member, deviceToken).isPresent();
 	}
+
+	/*
+	 * DeviceToken 전체 조회 메서드
+	 */
+	public List<DeviceToken> list(Long memberId) {
+		MemberReadResponseDto memberDto = memberService.read(memberId);
+		Member member = memberService.read(memberDto.getUsername());
+		return deviceTokenRepository.findAllByMember(member);
+	}
+
 }
