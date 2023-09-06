@@ -7,6 +7,8 @@ import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.DeviceTokenRepository;
+import org.swmaestro.repl.gifthub.exception.BusinessException;
+import org.swmaestro.repl.gifthub.util.StatusEnum;
 
 import lombok.RequiredArgsConstructor;
 
@@ -54,4 +56,19 @@ public class DeviceTokenService {
 		return deviceTokenRepository.findAllByMember(member);
 	}
 
+	/*
+	 * DeviceToken 선택 조회 메서드 (token)
+	 */
+	public DeviceToken read(String token) {
+		return deviceTokenRepository.findByToken(token)
+				.orElseThrow(() -> new BusinessException("존재하지 않는 토큰입니다.", StatusEnum.INTERNAL_SERVER_ERROR));
+	}
+
+	/*
+	 * DeviceToken 선택 조회 메서드 (deviceTokenId)
+	 */
+	public DeviceToken read(Long deviceTokenId) {
+		return deviceTokenRepository.findById(deviceTokenId)
+				.orElseThrow(() -> new BusinessException("존재하지 않는 토큰입니다.", StatusEnum.INTERNAL_SERVER_ERROR));
+	}
 }
