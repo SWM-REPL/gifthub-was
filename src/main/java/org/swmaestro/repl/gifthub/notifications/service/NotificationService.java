@@ -41,7 +41,7 @@ public class NotificationService {
 	public NotificationReadResponseDto mapToDto(Notification notification) {
 		NotificationReadResponseDto notificationReadResponseDto = NotificationReadResponseDto.builder()
 				.id(notification.getId())
-				.type(notification.getType())
+				.type(notification.getType().getDescription())
 				.message(notification.getMessage())
 				.notifiedAt(notification.getCreatedAt())
 				.voucherId(notification.getVoucher().getId())
