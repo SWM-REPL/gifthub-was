@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenSaveRequestDto;
 import org.swmaestro.repl.gifthub.notifications.service.NotificationService;
 import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -52,9 +53,11 @@ public class NotificationController {
 			@ApiResponse(responseCode = "200", description = "디바이스 토큰 등록 성공"),
 			@ApiResponse(responseCode = "400", description = "디바이스토큰 저장 실패"),
 	})
-	public ResponseEntity<Message> registerDeviceToken(@RequestHeader("Authorization") String accessToken, String deviceToken) {
+	public ResponseEntity<Message> registerDeviceToken(
+			@RequestHeader("Authorization") String accessToken,
+			DeviceTokenSaveRequestDto deviceTokenSaveRequestDto) {
 		String username = jwtProvider.getUsername(accessToken.substring(7));
-		notificationService.saveDeviceToken(username, deviceToken);
+		notificationService.saveDeviceToken(username, deviceTokenSaveRequestDto.getToken());
 		return new ResponseEntity<>(
 				Message.builder()
 						.status(StatusEnum.OK)

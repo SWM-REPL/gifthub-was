@@ -52,9 +52,10 @@ public class NotificationService {
 	/**
 	 * 디바이스 토큰을 저장하는 메서드
 	 */
-	public void saveDeviceToken(String username, String deviceToken) {
+	public boolean saveDeviceToken(String username, String deviceToken) {
 		try {
 			deviceTokenService.save(username, deviceToken);
+			return true;
 		} catch (Exception e) {
 			throw new BusinessException("디바이스 토큰 저장에 실패하였습니다.", StatusEnum.BAD_REQUEST);
 		}
