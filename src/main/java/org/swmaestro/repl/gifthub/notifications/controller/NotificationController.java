@@ -3,6 +3,7 @@ package org.swmaestro.repl.gifthub.notifications.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,6 +40,25 @@ public class NotificationController {
 						.status(StatusEnum.OK)
 						.message("알림 목록 조회에 성공하였습니다!")
 						.data(notificationService.list(username))
+						.build(),
+				new HttpJsonHeaders(),
+				HttpStatus.OK
+		);
+	}
+
+	@PostMapping("/device")
+	@Operation(summary = "디바이스 토큰 등록 메서드", description = "알림 서비스를 위한 디바이스 토큰을 등록하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "디바이스 토큰 등록 성공"),
+			@ApiResponse(responseCode = "400", description = "디바이스토큰 저장 실패"),
+	})
+	public ResponseEntity<Message> registerDeviceToken(@RequestHeader("Authorization") String accessToken, String deviceToken) {
+		String username = jwtProvider.getUsername(accessToken.substring(7));
+		notificationService.saveDeviceToken(username, deviceToken);
+		return new ResponseEntity<>(
+				Message.builder()
+						.status(StatusEnum.OK)
+						.message("디바이스 토큰 등록에 성공하였습니다!")
 						.build(),
 				new HttpJsonHeaders(),
 				HttpStatus.OK
