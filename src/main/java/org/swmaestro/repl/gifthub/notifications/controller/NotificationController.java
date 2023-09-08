@@ -59,7 +59,6 @@ public class NotificationController {
 			@RequestHeader("Authorization") String accessToken,
 			@RequestBody DeviceTokenSaveRequestDto deviceTokenSaveRequestDto) {
 		String username = jwtProvider.getUsername(accessToken.substring(7));
-		System.out.println("deviceToken:" + deviceTokenSaveRequestDto.getToken());
 		notificationService.saveDeviceToken(username, deviceTokenSaveRequestDto.getToken());
 		return new ResponseEntity<>(
 				Message.builder()
