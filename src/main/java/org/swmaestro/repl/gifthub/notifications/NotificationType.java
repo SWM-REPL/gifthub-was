@@ -4,12 +4,14 @@ import lombok.Getter;
 
 @Getter
 public enum NotificationType {
-	EXPIRATION(0),     // 유효기간 임박
-	RECOMMENDATION(1);   // 사용 추천
+	EXPIRATION(0, "유효기간 임박 알림"),     // 유효기간 임박
+	RECOMMENDATION(1, "사용 추천 알림");   // 사용 추천
 
 	private final int value;
+	private final String description;
 
-	NotificationType(int value) {
+	NotificationType(int value, String description) {
 		this.value = value;
+		this.description = description;
 	}
 }

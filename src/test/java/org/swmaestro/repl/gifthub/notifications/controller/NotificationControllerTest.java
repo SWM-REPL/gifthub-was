@@ -51,7 +51,7 @@ public class NotificationControllerTest {
 		List<NotificationReadResponseDto> notifications = new ArrayList<>();
 		notifications.add(NotificationReadResponseDto.builder()
 				.id(1L)
-				.type(NotificationType.EXPIRATION)
+				.type("유효기간 임박 알림")
 				.message("유효기간이 3일 남았습니다.")
 				.voucherId(1L)
 				.notifiedAt(LocalDateTime.now())
@@ -65,7 +65,7 @@ public class NotificationControllerTest {
 						.header("Authorization", "Bearer " + accessToken))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.data[0].id").value(1L))
-				.andExpect(jsonPath("$.data[0].type").value(NotificationType.EXPIRATION.name()))
+				.andExpect(jsonPath("$.data[0].type").value("유효기간 임박 알림"))
 				.andExpect(jsonPath("$.data[0].message").value("유효기간이 3일 남았습니다."))
 				.andReturn();
 
