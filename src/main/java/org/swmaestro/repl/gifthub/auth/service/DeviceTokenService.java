@@ -23,6 +23,15 @@ public class DeviceTokenService {
 	 */
 	public DeviceToken save(String username, String token) {
 		Member member = memberService.read(username);
+
+		if (member == null) {
+			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
+		}
+
+		if (token == null) {
+			throw new BusinessException("토큰이 존재하지 않습니다.", StatusEnum.BAD_REQUEST);
+		}
+
 		DeviceToken deviceToken = DeviceToken.builder()
 				.member(member)
 				.token(token)

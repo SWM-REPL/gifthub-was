@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.notifications.dto.NotificationReadResponseDto;
 import org.swmaestro.repl.gifthub.notifications.entity.Notification;
 import org.swmaestro.repl.gifthub.notifications.repository.NotificationRepository;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
-import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class NotificationService {
 	private final MemberService memberService;
 	private final NotificationRepository notificationRepository;
-	private final VoucherService voucherService;
+	private final DeviceTokenService deviceTokenService;
 
 	public List<NotificationReadResponseDto> list(String username) {
 		if (memberService.read(username) == null) {
@@ -49,4 +49,16 @@ public class NotificationService {
 		return notificationReadResponseDto;
 	}
 
+	/**
+	 * 디바이스 토큰을 저장하는 메서드
+	 */
+	public boolean saveDeviceToken(String username, String deviceToken) {
+		try {
+			deviceTokenService.save(username, deviceToken);
+			return true;
+		} catch (Exception e) {
+			throw new BusinessException("디바이스 토큰 저장에 실패하였습니다.", StatusEnum.BAD_REQUEST);
+		}
+
+	}
 }
