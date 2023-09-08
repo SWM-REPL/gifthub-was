@@ -16,11 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-<<<<<<< HEAD
-import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenSaveRequestDto;
-=======
->>>>>>> 9e188b34fda8c881b8988198c8297905c97531f8
 import org.swmaestro.repl.gifthub.notifications.dto.NotificationReadResponseDto;
 import org.swmaestro.repl.gifthub.notifications.service.NotificationService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
