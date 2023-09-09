@@ -88,6 +88,13 @@ public class VoucherService {
 		return voucherReadResponseDto;
 	}
 
+	/**
+	 사용자 별 기프티콘 목록 조회 메서드
+	 */
+	public List<Voucher> list() {
+		return voucherRepository.findAll();
+	}
+
 	/*
 	사용자 별 기프티콘 목록 조회 메서드(userId로 조회, username으로 권한 대조)
 	 */
