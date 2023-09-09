@@ -64,8 +64,15 @@ public class DeviceTokenService {
 		return deviceTokenRepository.findByMemberAndToken(member, deviceToken).isPresent();
 	}
 
+	/**
+	 DeviceToken 전체 조회 메서드
+	 */
+	public List<DeviceToken> list() {
+		return deviceTokenRepository.findAll();
+	}
+
 	/*
-	 * DeviceToken 전체 조회 메서드
+	 * DeviceToken 전체 조회 메서드(memberId)
 	 */
 	public List<DeviceToken> list(Long memberId) {
 		MemberReadResponseDto memberDto = memberService.read(memberId);
