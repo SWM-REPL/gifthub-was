@@ -1,8 +1,6 @@
 package org.swmaestro.repl.gifthub.auth.entity;
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.annotation.CreatedDate;
+import org.swmaestro.repl.gifthub.util.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class DeviceToken {
+public class DeviceToken extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -31,14 +29,10 @@ public class DeviceToken {
 	@Column(length = 100)
 	private String token;
 
-	@CreatedDate
-	private LocalDateTime createdAt;
-
 	@Builder
-	public DeviceToken(Long id, Member member, String token, LocalDateTime createdAt) {
+	public DeviceToken(Long id, Member member, String token) {
 		this.id = id;
 		this.member = member;
 		this.token = token;
-		this.createdAt = createdAt;
 	}
 }
