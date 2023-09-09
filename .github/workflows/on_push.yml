@@ -57,6 +57,8 @@ jobs:
           echo "${{ secrets.APPLICATION_DEV }}" > ./application-dev.yml
           touch ./application-prod.yml
           echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
+          touch ./firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json
+          echo "${{ secrets.FIREBASE_JSON }}" > ./firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json
         shell: bash
 
       # Docker 이미지 build 및 push
