@@ -50,19 +50,13 @@ public class ScheduledTasks {
 	public void deleteDeviceToken() {
 		LocalDateTime now = LocalDateTime.now();
 
-		List<DeviceToken> DeviceTokenList = de.findAll();
+		List<DeviceToken> DeviceTokenList = deviceTokenService.list();
 
-		for (Voucher voucher : voucherList) {
-			long daysDifference = ChronoUnit.DAYS.between(today, voucher.getExpiresAt());
+		for (DeviceToken deviceToken : DeviceTokenList) {
+			long daysDifference = ChronoUnit.DAYS.between(now, deviceToken.getUpdatedAt());
 
-			if (daysDifference <= 3) {
-				FCMNotificationRequestDto requestDto = FCMNotificationRequestDto.builder()
-						.targetMemberId(voucher.getMember().getId())
-						.title(NotificationType.EXPIRATION.getDescription())
-						.body(voucher.getBrand().getName() + "에서 사용할 수 있는 기프티콘 기한이 " + daysDifference + "일 남았습니다.")
-						.build();
-
-				fcmNotificationService.sendNotificationByToken(requestDto);
+			if (daysDifference > 30) {
+				deviceTokenService.delete(deviceToken.getToken());
 			}
 		}
 	}
