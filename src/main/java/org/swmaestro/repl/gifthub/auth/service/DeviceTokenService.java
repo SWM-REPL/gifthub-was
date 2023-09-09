@@ -21,7 +21,7 @@ public class DeviceTokenService {
 	/*
 	 * DeviceToken 저장 메서드
 	 */
-	public DeviceToken save(String username, String token) {
+	public void save(String username, String token) {
 		Member member = memberService.read(username);
 
 		if (member == null) {
@@ -32,11 +32,14 @@ public class DeviceTokenService {
 			throw new BusinessException("토큰이 존재하지 않습니다.", StatusEnum.BAD_REQUEST);
 		}
 
-		DeviceToken deviceToken = DeviceToken.builder()
-				.member(member)
-				.token(token)
-				.build();
-		return deviceTokenRepository.save(deviceToken);
+		if (!isExist(token)) {
+			DeviceToken deviceToken = DeviceToken.builder()
+					.member(member)
+					.token(token)
+					.build();
+
+			deviceTokenRepository.save(deviceToken);
+		}
 	}
 
 	/*
