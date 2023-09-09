@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenSaveRequestDto;
+import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationService;
 import org.swmaestro.repl.gifthub.notifications.service.NotificationService;
 import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Notifications", description = "알림 관련 API")
 public class NotificationController {
 	private final NotificationService notificationService;
+	private final FCMNotificationService fcmNotificationService;
 	private final JwtProvider jwtProvider;
 
 	@GetMapping

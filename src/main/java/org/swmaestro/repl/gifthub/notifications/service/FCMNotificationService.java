@@ -25,6 +25,8 @@ public class FCMNotificationService {
 		List<DeviceToken> deviceTokenList = deviceTokenService.list(requestDto.getTargetMemberId());
 
 		for (DeviceToken deviceToken : deviceTokenList) {
+			System.out.println("deviceToken: " + deviceToken.getToken());
+
 			Notification notification = Notification.builder()
 					.setTitle(requestDto.getTitle())
 					.setBody(requestDto.getBody())
