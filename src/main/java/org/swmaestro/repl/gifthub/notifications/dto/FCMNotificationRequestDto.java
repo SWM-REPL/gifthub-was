@@ -1,5 +1,8 @@
 package org.swmaestro.repl.gifthub.notifications.dto;
 
+import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,13 +10,15 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class FCMNotificationRequestDto {
-	private Long targetMemberId;
+	private Member targetMember;
+	private Voucher targetVoucher;
 	private String title;
 	private String body;
 
 	@Builder
-	public FCMNotificationRequestDto(Long targetMemberId, String title, String body) {
-		this.targetMemberId = targetMemberId;
+	public FCMNotificationRequestDto(Member targetMember, Voucher targetVoucher, String title, String body) {
+		this.targetMember = targetMember;
+		this.targetVoucher = targetVoucher;
 		this.title = title;
 		this.body = body;
 	}
