@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
 import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
+import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
+import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.dto.FCMNotificationRequestDto;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 
@@ -20,9 +22,11 @@ import lombok.RequiredArgsConstructor;
 public class FCMNotificationService {
 	private final FirebaseMessaging firebaseMessaging;
 	private final DeviceTokenService deviceTokenService;
+	private final NotificationService notificationService;
+	private final MemberService memberService;
 
 	public void sendNotificationByToken(FCMNotificationRequestDto requestDto) {
-		List<DeviceToken> deviceTokenList = deviceTokenService.list(requestDto.getTargetMemberId());
+		List<DeviceToken> deviceTokenList = deviceTokenService.list(requestDto.getTargetMember().getId());
 
 		for (DeviceToken deviceToken : deviceTokenList) {
 			System.out.println("deviceToken: " + deviceToken.getToken());
@@ -32,9 +36,13 @@ public class FCMNotificationService {
 					.setBody(requestDto.getBody())
 					.build();
 
+			org.swmaestro.repl.gifthub.notifications.entity.Notification savedNotification
+					= notificationService.save(requestDto.getTargetMember(), requestDto.getTargetVoucher(), NotificationType.EXPIRATION, requestDto.getBody());
+
 			Message message = Message.builder()
 					.setToken(deviceToken.getToken())
 					.setNotification(notification)
+					.putData("notification_id", savedNotification.getId().toString())
 					.build();
 
 			try {
