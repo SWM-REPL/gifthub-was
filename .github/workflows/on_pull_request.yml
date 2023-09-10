@@ -62,7 +62,7 @@ jobs:
       - name: Create Json
         uses: jsdaniell/create-json@v1.2.2
         with:
-          name: "./firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json"
+          name: "./src/main/resources/firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json"
           json: ${{ secrets.FIREBASE_JSON }}
 
       # 5. 테스트를 위한 MySQL 설정
