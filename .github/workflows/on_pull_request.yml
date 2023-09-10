@@ -60,7 +60,7 @@ jobs:
 
       # 4. Firebase를 위한 JSON 파일 생성
       - name: Create Json
-        uses: jsdaniell/create-json@1.2.2
+        uses: jsdaniell/create-json@v1.2.2
         with:
           name: "./firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json"
           json: ${{ secrets.FIREBASE_JSON }}
