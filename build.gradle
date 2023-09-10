@@ -63,7 +63,7 @@ dependencies {
     implementation 'io.sentry:sentry-spring-boot-starter-jakarta:6.27.0'
 
     // firebase
-    implementation group: 'com.google.firebase', name: 'firebase-admin', version: '8.1.0'
+    implementation 'com.google.firebase:firebase-admin:9.1.1'
 }
 
 tasks.named('test') {
