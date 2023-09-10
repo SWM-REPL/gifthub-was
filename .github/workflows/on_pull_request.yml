@@ -56,8 +56,9 @@ jobs:
           touch ./application-prod.yml
           echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
           mkdir ./firebase
-          touch ./firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json
-          echo "${{ secrets.FIREBASE_JSON }}" > ./firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json
+          cd ./firebase
+          touch ./gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json
+          echo "${{ secrets.FIREBASE_JSON }}" > ./gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json
         shell: bash
 
       # 4. 테스트를 위한 MySQL 설정
