@@ -36,7 +36,8 @@ public class ScheduledTasks {
 
 			if (daysDifference <= 3) {
 				FCMNotificationRequestDto requestDto = FCMNotificationRequestDto.builder()
-						.targetMemberId(voucher.getMember().getId())
+						.targetMember(voucher.getMember())
+						.targetVoucher(voucher)
 						.title(NotificationType.EXPIRATION.getDescription())
 						.body(voucher.getBrand().getName() + "에서 사용할 수 있는 기프티콘 기한이 " + daysDifference + "일 남았습니다.")
 						.build();
