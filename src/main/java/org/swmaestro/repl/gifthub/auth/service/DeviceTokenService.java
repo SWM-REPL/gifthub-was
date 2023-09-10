@@ -1,5 +1,6 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class DeviceTokenService {
 	/*
 	 * DeviceToken 저장 메서드
 	 */
-	public DeviceToken save(String username, String token) {
+	public void save(String username, String token) {
 		Member member = memberService.read(username);
 
 		if (member == null) {
@@ -32,11 +33,18 @@ public class DeviceTokenService {
 			throw new BusinessException("토큰이 존재하지 않습니다.", StatusEnum.BAD_REQUEST);
 		}
 
-		DeviceToken deviceToken = DeviceToken.builder()
-				.member(member)
-				.token(token)
-				.build();
-		return deviceTokenRepository.save(deviceToken);
+		DeviceToken deviceToken;
+		if (!isExist(token)) {
+			deviceToken = DeviceToken.builder()
+					.member(member)
+					.token(token)
+					.build();
+
+		} else {
+			deviceToken = read(token);
+			deviceToken.setUpdatedAt(LocalDateTime.now());
+		}
+		deviceTokenRepository.save(deviceToken);
 	}
 
 	/*
@@ -56,8 +64,15 @@ public class DeviceTokenService {
 		return deviceTokenRepository.findByMemberAndToken(member, deviceToken).isPresent();
 	}
 
+	/**
+	 DeviceToken 전체 조회 메서드
+	 */
+	public List<DeviceToken> list() {
+		return deviceTokenRepository.findAll();
+	}
+
 	/*
-	 * DeviceToken 전체 조회 메서드
+	 * DeviceToken 전체 조회 메서드(memberId)
 	 */
 	public List<DeviceToken> list(Long memberId) {
 		MemberReadResponseDto memberDto = memberService.read(memberId);

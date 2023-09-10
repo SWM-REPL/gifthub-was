@@ -9,9 +9,11 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import lombok.Data;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
+@Data
 public abstract class BaseTimeEntity {
 	@CreatedDate
 	@Column(nullable = false)
