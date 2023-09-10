@@ -56,12 +56,16 @@ jobs:
           touch ./application-prod.yml
           echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
           mkdir ./firebase
-          cd ./firebase
-          touch ./gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json
-          echo "${{ secrets.FIREBASE_JSON }}" > ./gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json
         shell: bash
 
-      # 4. 테스트를 위한 MySQL 설정
+      # 4. Firebase를 위한 JSON 파일 생성
+      - name: Create Json
+        uses: jsdaniell/create-json@1.2.2
+        with:
+          name: "./firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json"
+          json: ${{ secrets.FIREBASE_JSON }}
+
+      # 5. 테스트를 위한 MySQL 설정
       - name: Setup MySQL
         uses: mirromutth/mysql-action@v1.1
         with:
@@ -69,11 +73,9 @@ jobs:
           mysql user: ${{ secrets.MYSQL_USER }}
           mysql password: ${{ secrets.MYSQL_PASSWORD }}
 
-      # 5. 테스트를 위한 빌드 실행
+      # 6. 테스트를 위한 빌드 실행
       - name: Build with Gradle
         uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25
         with:
           arguments: |
             test
-            --scan
-          
