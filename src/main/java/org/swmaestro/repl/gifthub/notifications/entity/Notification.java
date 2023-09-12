@@ -47,9 +47,11 @@ public class Notification {
 
 	private LocalDateTime deletedAt;
 
+	private LocalDateTime checkedAt;
+
 	@Builder
 	public Notification(Long id, Member receiver, Voucher voucher, NotificationType type, String message,
-			LocalDateTime createdAt, LocalDateTime deletedAt) {
+			LocalDateTime createdAt, LocalDateTime deletedAt, LocalDateTime checkedAt) {
 		this.id = id;
 		this.receiver = receiver;
 		this.voucher = voucher;
@@ -57,5 +59,10 @@ public class Notification {
 		this.message = message;
 		this.createdAt = createdAt;
 		this.deletedAt = deletedAt;
+		this.checkedAt = checkedAt;
+	}
+
+	public void setCheckedAt(LocalDateTime checkedAt) {
+		this.checkedAt = checkedAt;
 	}
 }
