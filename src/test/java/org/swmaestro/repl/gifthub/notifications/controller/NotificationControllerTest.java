@@ -60,8 +60,7 @@ public class NotificationControllerTest {
 		when(jwtProvider.getUsername(anyString())).thenReturn(username);
 		when(notificationService.list(username)).thenReturn(notifications);
 		// then
-		mockMvc.perform(get("/notifications")
-						.header("Authorization", "Bearer " + accessToken))
+		mockMvc.perform(get("/notifications").header("Authorization", "Bearer " + accessToken))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.data[0].id").value(1L))
 				.andExpect(jsonPath("$.data[0].type").value("유효기간 임박 알림"))
@@ -79,9 +78,7 @@ public class NotificationControllerTest {
 		// given
 		String accessToken = "my.access.token";
 		String username = "이진우";
-		DeviceTokenSaveRequestDto deviceTokenSaveRequestDto = DeviceTokenSaveRequestDto.builder()
-				.token("my.device.token")
-				.build();
+		DeviceTokenSaveRequestDto deviceTokenSaveRequestDto = DeviceTokenSaveRequestDto.builder().token("my.device.token").build();
 
 		// when
 		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
@@ -89,10 +86,33 @@ public class NotificationControllerTest {
 		when(notificationService.saveDeviceToken(username, deviceTokenSaveRequestDto.getToken())).thenReturn(true);
 
 		// then
-		mockMvc.perform(post("/notifications/device")
-						.header("Authorization", "Bearer " + accessToken)
-						.contentType("application/json")
-						.content(objectMapper.writeValueAsString(deviceTokenSaveRequestDto)))
+		mockMvc.perform(post("/notifications/device").header("Authorization", "Bearer " + accessToken)
+				.contentType("application/json")
+				.content(objectMapper.writeValueAsString(deviceTokenSaveRequestDto))).andExpect(status().isOk()).andReturn();
+	}
+
+	/**
+	 * 알림 상세 조회 테스트
+	 */
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	void readNotificationTest() throws Exception {
+		String accessToken = "myAccessToken";
+		String username = "이진우";
+		NotificationReadResponseDto notificationReadResponseDto = NotificationReadResponseDto.builder()
+				.id(1L)
+				.type("유효기간 임박 알림")
+				.message("유효기간이 3일 남았습니다.")
+				.voucherId(1L)
+				.notifiedAt(LocalDateTime.now())
+				.checkedAt(LocalDateTime.now())
+				.build();
+		// when
+		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
+		when(jwtProvider.getUsername(anyString())).thenReturn(username);
+		when(notificationService.read(1L, username)).thenReturn(notificationReadResponseDto);
+		// then
+		mockMvc.perform(get("/notifications/1").header("Authorization", "Bearer " + accessToken))
 				.andExpect(status().isOk())
 				.andReturn();
 	}
