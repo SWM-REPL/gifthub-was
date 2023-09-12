@@ -3,6 +3,7 @@ package org.swmaestro.repl.gifthub.notifications.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -32,7 +33,7 @@ public class NotificationController {
 	private final JwtProvider jwtProvider;
 
 	@GetMapping
-	@Operation(summary = "Notification 목록 조회 메서드", description = "클라이언트에서 요청한 알림 목록 정보를 조회하기 위한 메서드입니다. 응답으로 알림 type, message, notified date, 기프티콘 정보를 반환합니다.")
+	@Operation(summary = "Notification 목록 조회 메서드", description = "클라이언트에서 요청한 알림 목록 정보를 조회하기 위한 메서드입니다. 응답으로 알림 type, message, notified date, 기프티콘 정보, 알림 확인 시간을 반환합니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "알림 목록 조회 성공"),
 			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원"),
@@ -66,6 +67,27 @@ public class NotificationController {
 				Message.builder()
 						.status(StatusEnum.OK)
 						.message("디바이스 토큰 등록에 성공하였습니다!")
+						.build(),
+				new HttpJsonHeaders(),
+				HttpStatus.OK
+		);
+	}
+
+	@GetMapping("/{notificationId}")
+	@Operation(summary = "Notification 상세 조회 메서드", description = "클라이언트에서 요청한 알림 상세 정보를 조회하기 위한 메서드입니다. 응답으로 알림 type, message, notified date, 기프티콘 정보, 기존 알림 확인 시간을 반환합니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "알림 상세 조회 성공"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 알림"),
+			@ApiResponse(responseCode = "400(403)", description = "알림 상세 조회 권한 없음"),
+	})
+	public ResponseEntity<Message> readNotification(@RequestHeader("Authorization") String accessToken,
+			@PathVariable Long notificationId) {
+		String username = jwtProvider.getUsername(accessToken.substring(7));
+		return new ResponseEntity<>(
+				Message.builder()
+						.status(StatusEnum.OK)
+						.message("알림 상세 조회에 성공하였습니다!")
+						.data(notificationService.read(notificationId, username))
 						.build(),
 				new HttpJsonHeaders(),
 				HttpStatus.OK
