@@ -1,5 +1,6 @@
 package org.swmaestro.repl.gifthub.notifications.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class NotificationService {
 				.message(notification.getMessage())
 				.notifiedAt(notification.getCreatedAt())
 				.voucherId(notification.getVoucher().getId())
+				.checkedAt(notification.getCheckedAt())
 				.build();
 		return notificationReadResponseDto;
 	}
@@ -71,12 +73,25 @@ public class NotificationService {
 	 * Notification 저장 메서드
 	 */
 	public Notification save(Member member, Voucher voucher, NotificationType type, String message) {
-		Notification notification = Notification.builder()
-				.receiver(member)
-				.type(type)
-				.message(message)
-				.voucher(voucher)
-				.build();
+		Notification notification = Notification.builder().receiver(member).type(type).message(message).voucher(voucher).build();
 		return notificationRepository.save(notification);
+	}
+
+	/**
+	 * Notification 상세 조회 메서드
+	 */
+	public NotificationReadResponseDto read(Long id, String username) {
+		if (memberService.read(username) == null) {
+			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
+		}
+		Notification notification = notificationRepository.findById(id).orElseThrow(() -> new BusinessException("존재하지 않는 알림입니다.", StatusEnum.NOT_FOUND));
+
+		if (!notification.getReceiver().getUsername().equals(username)) {
+			throw new BusinessException("알림을 조회할 권한이 없습니다.", StatusEnum.FORBIDDEN);
+		}
+		NotificationReadResponseDto notificationReadResponseDto = mapToDto(notification);
+		notification.setCheckedAt(LocalDateTime.now());
+		notificationRepository.save(notification);
+		return notificationReadResponseDto;
 	}
 }
