@@ -87,8 +87,10 @@ public class NotificationControllerTest {
 
 		// then
 		mockMvc.perform(post("/notifications/device").header("Authorization", "Bearer " + accessToken)
-				.contentType("application/json")
-				.content(objectMapper.writeValueAsString(deviceTokenSaveRequestDto))).andExpect(status().isOk()).andReturn();
+						.contentType("application/json")
+						.content(objectMapper.writeValueAsString(deviceTokenSaveRequestDto)))
+				.andExpect(status().isOk())
+				.andReturn();
 	}
 
 	/**

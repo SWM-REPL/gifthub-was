@@ -73,7 +73,12 @@ public class NotificationService {
 	 * Notification 저장 메서드
 	 */
 	public Notification save(Member member, Voucher voucher, NotificationType type, String message) {
-		Notification notification = Notification.builder().receiver(member).type(type).message(message).voucher(voucher).build();
+		Notification notification = Notification.builder()
+				.receiver(member)
+				.type(type)
+				.message(message)
+				.voucher(voucher)
+				.build();
 		return notificationRepository.save(notification);
 	}
 
