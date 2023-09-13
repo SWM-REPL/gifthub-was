@@ -26,7 +26,7 @@ public class DeviceToken extends BaseTimeEntity {
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member member;
 
-	@Column(length = 100)
+	@Column(length = 200)
 	private String token;
 
 	@Builder
