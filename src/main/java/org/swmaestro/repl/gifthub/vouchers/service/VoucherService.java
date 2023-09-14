@@ -70,6 +70,14 @@ public class VoucherService {
 				.build();
 	}
 
+	/**
+	 * 기프티콘 상세 조회 메서드
+	 */
+	public Voucher read(Long id) {
+		return voucherRepository.findById(id)
+				.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND));
+	}
+
 	/*
 	기프티콘 상세 조회 메서드
 	 */

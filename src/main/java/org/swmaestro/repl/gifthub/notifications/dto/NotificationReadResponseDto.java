@@ -19,13 +19,16 @@ public class NotificationReadResponseDto {
 	private String message;
 	private LocalDateTime notifiedAt;
 	private Long voucherId;
+	private LocalDateTime checkedAt;
 
 	@Builder
-	public NotificationReadResponseDto(Long id, String type, String message, LocalDateTime notifiedAt, Long voucherId) {
+	public NotificationReadResponseDto(Long id, String type, String message, LocalDateTime notifiedAt, Long voucherId,
+			LocalDateTime checkedAt) {
 		this.id = id;
 		this.type = type;
 		this.message = message;
 		this.notifiedAt = notifiedAt;
 		this.voucherId = voucherId;
+		this.checkedAt = checkedAt;
 	}
 }
