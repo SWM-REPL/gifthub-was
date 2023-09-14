@@ -3,7 +3,6 @@ package org.swmaestro.repl.gifthub.notifications.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,12 +25,17 @@ public class ScheduledTasks {
 
 	@Scheduled(cron = "0 0 10 * * ?", zone = "Asia/Seoul") // 매일 오전 10시 실행
 	public void sendExpirationNotification() {
-		Date now = new Date();
-		LocalDate today = LocalDate.of(now.getYear(), now.getMonth(), now.getDay());
+		LocalDate today = LocalDate.now();
+		List<Voucher> expiringVoucherList = voucherService.list().stream().filter(voucher -> {
+			long daysDifference = ChronoUnit.DAYS.between(today, voucher.getExpiresAt());
 
-		List<Voucher> voucherList = voucherService.list();
+			if (daysDifference <= 3 && daysDifference >= 0) {
+				return true;
+			}
+			return false;
+		}).toList();
 
-		for (Voucher voucher : voucherList) {
+		for (Voucher voucher : expiringVoucherList) {
 			long daysDifference = ChronoUnit.DAYS.between(today, voucher.getExpiresAt());
 
 			if (daysDifference <= 3) {
