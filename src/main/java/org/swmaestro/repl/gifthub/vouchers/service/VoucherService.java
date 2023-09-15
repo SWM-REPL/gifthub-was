@@ -51,6 +51,10 @@ public class VoucherService {
 				new BusinessException("존재하지 않는 상품입니다.", StatusEnum.NOT_FOUND));
 		String imageUrl = voucherSaveRequestDto.getImageUrl();
 
+		if (isDuplicateVoucher(username, voucherSaveRequestDto.getBarcode()) == true) {
+			throw new BusinessException("이미 등록된 기프티콘입니다.", StatusEnum.CONFLICT);
+		}
+
 		if (imageUrl != null) {
 			imageUrl = storageService.getBucketAddress(voucherDirName) + voucherSaveRequestDto.getImageUrl();
 		}
@@ -262,5 +266,18 @@ public class VoucherService {
 				.imageUrl(voucher.getImageUrl())
 				.build();
 		return voucherReadResponseDto;
+	}
+
+	/**
+	 *  사용자 별 중복 기프티콘 검사 메서드
+	 */
+	public boolean isDuplicateVoucher(String username, String barcode) {
+		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
+		for (Voucher voucher : vouchers) {
+			if (voucher.getBarcode().equals(barcode)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
