@@ -32,8 +32,16 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(authorizeHttpRequests ->
-						authorizeHttpRequests.requestMatchers("/auth/sign-up", "/auth/sign-in", "/auth/sign-in/**",
-										"/swagger-resources/**", "/swagger-ui/**", "/v3/api-docs/**", "/webjars/**", "/error").permitAll()
+						authorizeHttpRequests.requestMatchers(
+										"/auth/sign-up",
+										"/auth/sign-in",
+										"/auth/sign-in/**",
+										"/swagger-resources/**",
+										"/swagger-ui/**",
+										"/v3/api-docs/**",
+										"/webjars/**",
+										"/error",
+										"/notifications").permitAll()
 								.anyRequest().authenticated())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.exceptionHandling(exceptionHandling -> exceptionHandling
