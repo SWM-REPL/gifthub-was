@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
 import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
-import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.dto.FCMNotificationRequestDto;
+import org.swmaestro.repl.gifthub.notifications.dto.NoticeNotificationDto;
 
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
@@ -41,6 +41,28 @@ public class FCMNotificationService {
 					.setToken(deviceToken.getToken())
 					.setNotification(notification)
 					.putData("notification_id", savedNotification.getId().toString())
+					.build();
+
+			try {
+				firebaseMessaging.send(message);
+			} catch (FirebaseMessagingException e) {
+				deviceTokenService.delete(deviceToken.getToken());
+			}
+		}
+	}
+
+	public void sendNotification(NoticeNotificationDto noticeNotificationDto) {
+		List<DeviceToken> deviceTokenList = deviceTokenService.list();
+
+		for (DeviceToken deviceToken : deviceTokenList) {
+			Notification notification = Notification.builder()
+					.setTitle(noticeNotificationDto.getTitle())
+					.setBody(noticeNotificationDto.getBody())
+					.build();
+
+			Message message = Message.builder()
+					.setToken(deviceToken.getToken())
+					.setNotification(notification)
 					.build();
 
 			try {

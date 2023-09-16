@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenSaveRequestDto;
+import org.swmaestro.repl.gifthub.notifications.dto.NoticeNotificationDto;
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationService;
 import org.swmaestro.repl.gifthub.notifications.service.NotificationService;
 import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
@@ -88,6 +89,23 @@ public class NotificationController {
 						.status(StatusEnum.OK)
 						.message("알림 상세 조회에 성공하였습니다!")
 						.data(notificationService.read(notificationId, username))
+						.build(),
+				new HttpJsonHeaders(),
+				HttpStatus.OK
+		);
+	}
+
+	@PostMapping
+	@Operation(summary = "Notification 전송 메서드", description = "모든 클라이언트에게 일괄적으로 알림을 전송하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "알림 전송 성공")
+	})
+	public ResponseEntity<Message> sendNotification(@RequestBody NoticeNotificationDto noticeNotificationDto) {
+		fcmNotificationService.sendNotification(noticeNotificationDto);
+		return new ResponseEntity<>(
+				Message.builder()
+						.status(StatusEnum.OK)
+						.message("알림 전송에 성공하였습니다!")
 						.build(),
 				new HttpJsonHeaders(),
 				HttpStatus.OK

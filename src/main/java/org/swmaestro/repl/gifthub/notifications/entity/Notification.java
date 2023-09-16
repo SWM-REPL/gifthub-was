@@ -42,7 +42,6 @@ public class Notification {
 	private String message;
 
 	@CreatedDate
-	@Column(nullable = false)
 	private LocalDateTime createdAt;
 
 	private LocalDateTime deletedAt;

@@ -213,5 +213,4 @@ public class KakaoService {
 				.username(kakaoDto.getUsername())
 				.build();
 	}
-
 }
