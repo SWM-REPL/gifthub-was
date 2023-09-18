@@ -23,7 +23,7 @@ public class ScheduledTasks {
 	private final DeviceTokenService deviceTokenService;
 	private final FCMNotificationService fcmNotificationService;
 
-	@Scheduled(cron = "0 35 10 * * ?", zone = "Asia/Seoul") // 매일 오전 10시 실행
+	@Scheduled(cron = "0 0 10 * * ?", zone = "Asia/Seoul") // 매일 오전 10시 실행
 	public void sendExpirationNotification() {
 		LocalDate today = LocalDate.now();
 		List<Voucher> expiringVoucherList = voucherService.list().stream().filter(voucher -> {
@@ -51,7 +51,7 @@ public class ScheduledTasks {
 		}
 	}
 
-	@Scheduled(cron = "0 0 10 * * ?", zone = "Asia/Seoul") // 매일 오전 9시 실행
+	@Scheduled(cron = "0 0 9 * * ?", zone = "Asia/Seoul") // 매일 오전 9시 실행
 	public void deleteDeviceToken() {
 		LocalDateTime now = LocalDateTime.now();
 
