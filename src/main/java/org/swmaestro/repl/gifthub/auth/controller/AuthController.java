@@ -262,7 +262,6 @@ public class AuthController {
 	})
 	public ResponseEntity<Message> signOut(HttpServletRequest request, @RequestBody SignOutDto signOutDto) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		System.out.println("성공?:" + signOutDto.getDeviceToken());
 		authService.signOut(username, signOutDto);
 		return ResponseEntity.ok().body(
 				Message.builder()
