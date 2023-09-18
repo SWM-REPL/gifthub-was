@@ -20,6 +20,7 @@ import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
 import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
 import org.swmaestro.repl.gifthub.auth.dto.NaverDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
+import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
@@ -274,11 +275,17 @@ public class AuthControllerTest {
 		String username = "jinlee1703";
 		String accessToken = "my_awesome_access_token";
 
+		SignOutDto signOutDto = SignOutDto.builder()
+				.deviceToken("my_awesome_device_token")
+				.build();
+
 		when(jwtProvider.getUsername(accessToken)).thenReturn(username);
 		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
 
 		mockMvc.perform(post("/auth/sign-out")
-						.header("Authorization", "Bearer " + accessToken))
+						.header("Authorization", "Bearer " + accessToken)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(signOutDto)))
 				.andExpect(status().isOk());
 
 	}
