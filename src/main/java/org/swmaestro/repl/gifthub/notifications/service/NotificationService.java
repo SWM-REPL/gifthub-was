@@ -78,6 +78,7 @@ public class NotificationService {
 				.type(type)
 				.message(message)
 				.voucher(voucher)
+				.createdAt(LocalDateTime.now())
 				.build();
 		return notificationRepository.save(notification);
 	}
