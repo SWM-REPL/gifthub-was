@@ -58,6 +58,7 @@ dependencies {
     // aws - s3
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws', version: '2.2.6.RELEASE'
     testImplementation group: 'io.findify', name: 's3mock_2.12', version: '0.2.6'
+    testImplementation group: 'software.amazon.awssdk', name: 's3', version: '2.20.151'
 
     // sentry
     implementation 'io.sentry:sentry-spring-boot-starter-jakarta:6.27.0'
