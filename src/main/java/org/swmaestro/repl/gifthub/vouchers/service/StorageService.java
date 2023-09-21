@@ -2,6 +2,7 @@ package org.swmaestro.repl.gifthub.vouchers.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.swmaestro.repl.gifthub.vouchers.dto.S3FileDto;
 
+import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
@@ -56,5 +59,13 @@ public class StorageService {
 
 	public String getDefaultImagePath(String dirName) {
 		return "http://" + bucketName + "/" + dirName + "/" + defaultImageFile;
+	}
+
+	public String getPresignedUrlForSaveVoucher(String dirName, String extension) {
+		String key = dirName + "/" + UUID.randomUUID().toString() + "." + extension;
+		GeneratePresignedUrlRequest generatePresignedUrlRequest =
+				new GeneratePresignedUrlRequest(bucketName, key, HttpMethod.PUT)
+						.withExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5));
+		return amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest).toString();
 	}
 }
