@@ -62,6 +62,15 @@ public class VoucherController {
 		);
 	}
 
+	@GetMapping("/images")
+	@Operation(summary = "Voucher 이미지 등록 메서드", description = "클라이언트에서 요청한 기프티콘 이미지를 Amazon S3에 저장하기 위한 메서드입니다. 요청 시 S3 PreSigned URL이 반환됩니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "성공적으로 S3 Presigned URL 반환"),
+	})
+	public ResponseEntity<String> saveVoucherImage() throws IOException {
+		return ResponseEntity.ok(storageService.getPresignedUrlForSaveVoucher("AAA"));
+	}
+
 	@PostMapping
 	@Operation(summary = "Voucher 등록 메서드", description = "클라이언트에서 요청한 기프티콘 정보를 저장하기 위한 메서드입니다.")
 	@ApiResponses({
