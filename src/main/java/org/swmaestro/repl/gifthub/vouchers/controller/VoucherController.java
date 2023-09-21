@@ -13,13 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.Message;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
+import org.swmaestro.repl.gifthub.vouchers.dto.PresignedUrlResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
@@ -44,31 +43,22 @@ public class VoucherController {
 	private final StorageService storageService;
 	private final JwtProvider jwtProvider;
 
-	@PostMapping("/images")
-	@Operation(summary = "Voucher 이미지 등록 메서드", description = "클라이언트에서 요청한 기프티콘 이미지를 Amazon S3에 저장하기 위한 메서드입니다.")
-	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "기프티콘 이미지 등록 성공"),
-			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 브랜드 조회 시도")
-	})
-	public ResponseEntity<Message> saveVoucherImage(@RequestPart("image_file") MultipartFile imageFile) throws IOException {
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("기프티콘 이미지가 성공적으로 등록되었습니다!")
-						.data(storageService.save(voucherDirName, imageFile))
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
-	}
-
 	@GetMapping("/images")
 	@Operation(summary = "Voucher 이미지 등록 메서드", description = "클라이언트에서 요청한 기프티콘 이미지를 Amazon S3에 저장하기 위한 메서드입니다. 요청 시 S3 PreSigned URL이 반환됩니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "성공적으로 S3 Presigned URL 반환"),
 	})
-	public ResponseEntity<String> saveVoucherImage() throws IOException {
-		return ResponseEntity.ok(storageService.getPresignedUrlForSaveVoucher("AAA"));
+	public ResponseEntity<Message> saveVoucherImage() throws IOException {
+		PresignedUrlResponseDto presignedUrlResponseDto = PresignedUrlResponseDto.builder()
+				.presignedUrl(storageService.getPresignedUrlForSaveVoucher("voucher", "PNG"))
+				.build();
+
+		return ResponseEntity.ok(Message.builder()
+				.status(StatusEnum.OK)
+				.message("성공적으로 S3 Presigned URL 반환되었습니다!")
+				.data(presignedUrlResponseDto)
+				.build()
+		);
 	}
 
 	@PostMapping

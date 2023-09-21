@@ -61,13 +61,11 @@ public class StorageService {
 		return "http://" + bucketName + "/" + dirName + "/" + defaultImageFile;
 	}
 
-	public String getPresignedUrlForSaveVoucher(String fileName) {
-		String uuidFileName = getUUidFileName(fileName);
-		GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, uuidFileName)
-				.withMethod(HttpMethod.PUT)
-				.withExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5));
-		// .withContentType("image/jpeg")
-		// .withContentType("image/png");
+	public String getPresignedUrlForSaveVoucher(String dirName, String extension) {
+		String key = dirName + "/" + UUID.randomUUID().toString() + "." + extension;
+		GeneratePresignedUrlRequest generatePresignedUrlRequest =
+				new GeneratePresignedUrlRequest(bucketName, key, HttpMethod.PUT)
+						.withExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5));
 		return amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest).toString();
 	}
 }
