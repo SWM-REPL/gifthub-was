@@ -11,7 +11,6 @@ import java.net.URL;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
@@ -23,43 +22,18 @@ import org.swmaestro.repl.gifthub.util.StatusEnum;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
 @PropertySource("classpath:application.yml")
+@RequiredArgsConstructor
 public class KakaoService {
 	private final MemberService memberService;
 	private final MemberRepository memberRepository;
 	private final RefreshTokenService refreshTokenService;
-	private final String clientId;
-	private final String redirectUri;
 	private final JwtProvider jwtProvider;
-	private final String authorizationUri;
-	private final String tokenUri;
-	private final String userInfoUri;
-
-	public KakaoService(MemberService memberService, MemberRepository memberRepository, RefreshTokenService refreshTokenService,
-			JwtProvider jwtProvider, @Value("${kakao.client_id}") String clientId, @Value("${kakao.redirect_uri}") String redirectUri,
-			@Value("${kakao.authorization_uri}") String authorizationUri, @Value("${kakao.user_info_uri}") String userInfoUri,
-			@Value("${kakao.token_uri}") String tokenUri) {
-		this.memberService = memberService;
-		this.memberRepository = memberRepository;
-		this.refreshTokenService = refreshTokenService;
-		this.jwtProvider = jwtProvider;
-		this.clientId = clientId;
-		this.redirectUri = redirectUri;
-		this.authorizationUri = authorizationUri;
-		this.userInfoUri = userInfoUri;
-		this.tokenUri = tokenUri;
-	}
-
-	public String getAuthorizationUrl() {
-		return UriComponentsBuilder
-				.fromUriString(authorizationUri)
-				.queryParam("client_id", clientId)
-				.queryParam("redirect_uri", redirectUri)
-				.queryParam("response_type", "code")
-				.build()
-				.toString();
-	}
+	@Value("${kakao.user_info_uri}")
+	private String userInfoUri;
 
 	public KakaoDto getUserInfo(TokenDto tokenDto) {
 
