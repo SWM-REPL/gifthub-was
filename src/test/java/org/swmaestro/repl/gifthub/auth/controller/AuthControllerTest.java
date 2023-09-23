@@ -137,11 +137,7 @@ public class AuthControllerTest {
 	}
 
 	@Test
-	public void kakaoSignInCallbackTest() throws Exception {
-		String accesstoken = "myawesome_accesstoken";
-		String code = "myawesome_code";
-		String state = "myawesome_state";
-
+	public void kakaoSignInTest() throws Exception {
 		TokenDto kakaoTokenDto = TokenDto.builder()
 				.accessToken("myawesomeKakaojwt")
 				.refreshToken("myawesomeKakaojwt")
@@ -162,16 +158,13 @@ public class AuthControllerTest {
 				.nickname(kakaoDto.getNickname())
 				.build();
 
-		when(kakaoService.getToken(code)).thenReturn(kakaoTokenDto);
 		when(kakaoService.getUserInfo(kakaoTokenDto)).thenReturn(kakaoDto);
 		when(memberService.read(kakaoDto.getUsername())).thenReturn(member);
-
 		when(kakaoService.signIn(kakaoDto)).thenReturn(tokenDto);
 
-		mockMvc.perform(get("/auth/sign-in/kakao/callback")
-						.queryParam("code", code)
-						.queryParam("state", state)
-						.header("Authorization", "Bearer " + accesstoken))
+		mockMvc.perform(post("/auth/sign-in/kakao")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(kakaoTokenDto)))
 				.andExpect(status().isOk());
 	}
 

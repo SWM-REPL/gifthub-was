@@ -161,13 +161,7 @@ public class AuthController {
 		);
 	}
 
-	@GetMapping("/sign-in/kakao")
-	@Operation(summary = "카카오 로그인 메서드", description = "카카오 로그인을 하기 위한 메서드입니다.")
-	public void kakaoLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.sendRedirect(kakaoService.getAuthorizationUrl());
-	}
-
-	@GetMapping("/sign-in/kakao/callback")
+	@PostMapping("/sign-in/kakao")
 	@Operation(summary = "카카오 로그인 콜백 메서드", description = "카카오 로그인 콜백을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "카카오 로그인 성공"),
@@ -175,9 +169,8 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(400-2)", description = "잘못된 URL 요쳥"),
 			@ApiResponse(responseCode = "400(500)", description = "HTTP 연결 수행 실패"),
 	})
-	public ResponseEntity<Message> kakaoCallback(@RequestParam String code) throws IOException {
-		TokenDto kakaoTokenDto = kakaoService.getToken(code);
-		KakaoDto kakaoDto = kakaoService.getUserInfo(kakaoTokenDto);
+	public ResponseEntity<Message> kakaoCallback(@RequestBody TokenDto dto) throws IOException {
+		KakaoDto kakaoDto = kakaoService.getUserInfo(dto);
 		TokenDto tokenDto = kakaoService.signIn(kakaoDto);
 		Member member = memberService.read(kakaoDto.getUsername());
 		oAuthService.save(member, OAuthPlatform.KAKAO, kakaoDto.getId());
