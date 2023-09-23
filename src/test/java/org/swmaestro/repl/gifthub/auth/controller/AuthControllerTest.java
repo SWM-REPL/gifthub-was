@@ -162,7 +162,6 @@ public class AuthControllerTest {
 				.nickname(kakaoDto.getNickname())
 				.build();
 
-		when(kakaoService.getToken(code)).thenReturn(kakaoTokenDto);
 		when(kakaoService.getUserInfo(kakaoTokenDto)).thenReturn(kakaoDto);
 		when(memberService.read(kakaoDto.getUsername())).thenReturn(member);
 

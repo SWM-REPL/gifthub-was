@@ -1,10 +1,8 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -61,60 +59,6 @@ public class KakaoService {
 				.queryParam("response_type", "code")
 				.build()
 				.toString();
-	}
-
-	public TokenDto getToken(String code) throws MalformedURLException {
-
-		TokenDto tokenDto = null;
-		try {
-			URL url = new URL(tokenUri);
-			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-
-			conn.setRequestMethod("POST");
-			conn.setDoOutput(true);
-
-			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
-			StringBuilder sb = new StringBuilder();
-
-			sb.append("grant_type=authorization_code");
-			sb.append("&client_id=" + clientId);
-			sb.append("&redirect_uri=" + redirectUri);
-			sb.append("&code=" + code);
-			bw.write(sb.toString());
-			bw.flush();
-
-			int responseCode = conn.getResponseCode();
-
-			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-			String line = "";
-			String result = "";
-
-			while ((line = br.readLine()) != null) {
-				result += line;
-			}
-
-			JsonParser parser = new JsonParser();
-			JsonElement element = parser.parse(result);
-
-			String accessToken = element.getAsJsonObject().get("access_token").getAsString();
-			String refreshToken = element.getAsJsonObject().get("refresh_token").getAsString();
-
-			br.close();
-			bw.close();
-
-			tokenDto = TokenDto.builder()
-					.accessToken(accessToken)
-					.refreshToken(refreshToken)
-					.build();
-		} catch (ProtocolException e) {
-			throw new BusinessException("잘못된 프로토콜을 사용하였습니다.", StatusEnum.BAD_REQUEST);
-		} catch (MalformedURLException e) {
-			throw new BusinessException("잘못된 URL 형식을 사용하였습니다.", StatusEnum.BAD_REQUEST);
-		} catch (IOException e) {
-			throw new BusinessException("HTTP 연결을 수행하는 동안 입출력 관련 오류가 발생하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		}
-
-		return tokenDto;
 	}
 
 	public KakaoDto getUserInfo(TokenDto tokenDto) {
