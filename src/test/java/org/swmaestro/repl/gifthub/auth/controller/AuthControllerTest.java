@@ -201,14 +201,12 @@ public class AuthControllerTest {
 	}
 
 	@Test
-	public void naverSignInCallbackTest() throws Exception {
-		String accesstoken = "myawesome_accesstoken";
-		String code = "myawesome_code";
-		String state = "myawesome_state";
+	public void naverSignInTest() throws Exception {
 		TokenDto token = TokenDto.builder()
-				.accessToken(accesstoken)
-				.refreshToken(accesstoken)
+				.accessToken("accesstoken")
+				.refreshToken("refreshtoken")
 				.build();
+
 		Member member = Member.builder()
 				.username("jinlee1703@naver.com")
 				.nickname("이진우")
@@ -219,15 +217,13 @@ public class AuthControllerTest {
 				.nickname(member.getNickname())
 				.build();
 
-		when(naverService.getNaverToken("token", code)).thenReturn(token);
 		when(naverService.getUserInfo(token)).thenReturn(naverDto);
 		when(naverService.signUp(naverDto)).thenReturn(member);
 		when(naverService.signIn(naverDto, 1L)).thenReturn(token);
 
-		mockMvc.perform(get("/auth/sign-in/naver/callback")
-						.queryParam("code", code)
-						.queryParam("state", state)
-						.header("Authorization", "Bearer " + accesstoken))
+		mockMvc.perform(post("/auth/sign-in/naver")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(token)))
 				.andExpect(status().isOk());
 	}
 
