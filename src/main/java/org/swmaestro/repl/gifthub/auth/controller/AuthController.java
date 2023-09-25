@@ -162,7 +162,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/sign-in/kakao")
-	@Operation(summary = "카카오 로그인 콜백 메서드", description = "카카오 로그인 콜백을 하기 위한 메서드입니다.")
+	@Operation(summary = "카카오 로그인 메서드", description = "카카오 로그인을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "카카오 로그인 성공"),
 			@ApiResponse(responseCode = "400(400-1)", description = "잘못된 프로토콜 요청"),
@@ -186,7 +186,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/sign-in/google")
-	@Operation(summary = "구글 로그인 콜백 메서드", description = "구글로부터 사용자 정보를 얻어와 회원가입 및 로그인을 하기 위한 메서드입니다.")
+	@Operation(summary = "구글 로그인 메서드", description = "구글로부터 사용자 정보를 얻어와 회원가입 및 로그인을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "구글 로그인 성공"),
 			@ApiResponse(responseCode = "400(400)", description = "잘못된 프로토콜 혹은 URL 요쳥"),
