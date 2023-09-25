@@ -22,41 +22,20 @@ import org.swmaestro.repl.gifthub.util.StatusEnum;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
 @PropertySource("classpath:application.yml")
+@RequiredArgsConstructor
 public class GoogleService {
 	private final MemberService memberService;
 	private final MemberRepository memberRepository;
 	private final RefreshTokenService refreshTokenService;
 	private final JwtProvider jwtProvider;
-	private final String clientId;
-	private final String redirectUri;
-	private final String clientSecret;
-
-	private final String tokenUri;
-
-	private final String userInfoUri;
-	private final String authorizationUri;
-
-	public GoogleService(MemberService memberService, MemberRepository memberRepository, RefreshTokenService refreshTokenService, JwtProvider jwtProvider,
-			@Value("${google.client_id}") String clientId, @Value("${google.client_secret}") String clientSecret,
-			@Value("${google.redirect_uri}") String redirectUri,
-			@Value("${google.token_uri}") String tokenUri, @Value("${google.user_info_uri}") String userInfoUri,
-			@Value("${google.authorization_uri}") String authorizationUri) {
-		this.memberService = memberService;
-		this.memberRepository = memberRepository;
-		this.refreshTokenService = refreshTokenService;
-		this.jwtProvider = jwtProvider;
-		this.clientId = clientId;
-		this.redirectUri = redirectUri;
-		this.clientSecret = clientSecret;
-		this.tokenUri = tokenUri;
-		this.userInfoUri = userInfoUri;
-		this.authorizationUri = authorizationUri;
-	}
+	@Value("${google.user_info_uri}")
+	private String userInfoUri;
 
 	public GoogleDto getUserInfo(TokenDto tokenDto) {
-
 		GoogleDto googleDto = null;
 
 		try {
