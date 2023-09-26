@@ -169,19 +169,11 @@ public class AuthControllerTest {
 	}
 
 	@Test
-	public void googleSignInCallbackTest() throws Exception {
-		String accesstoken = "myawesome_accesstoken";
-		String code = "myawesome_code";
-		String state = "myawesome_state";
+	public void googleSignInTest() throws Exception {
 
 		TokenDto googleTokenDto = TokenDto.builder()
-				.accessToken("myawesomeKakaojwt")
-				.refreshToken("myawesomeKakaojwt")
-				.build();
-
-		TokenDto tokenDto = TokenDto.builder()
-				.accessToken("myawesomejwt")
-				.refreshToken("myawesomejwt")
+				.accessToken("my.awesome.google.jwt")
+				.refreshToken("my.awesome.google.jwt")
 				.build();
 
 		GoogleDto googleDto = GoogleDto.builder()
@@ -189,14 +181,12 @@ public class AuthControllerTest {
 				.username("dls@gmail.com")
 				.build();
 
-		when(googleService.getToken(code)).thenReturn(tokenDto);
-		when(googleService.getUserInfo(tokenDto)).thenReturn(googleDto);
-		when(googleService.signIn(googleDto)).thenReturn(tokenDto);
+		when(googleService.getUserInfo(googleTokenDto)).thenReturn(googleDto);
+		when(googleService.signIn(googleDto)).thenReturn(googleTokenDto);
 
-		mockMvc.perform(get("/auth/sign-in/google/callback")
-						.queryParam("code", code)
-						.queryParam("state", state)
-						.header("Authorization", "Bearer " + accesstoken))
+		mockMvc.perform(post("/auth/sign-in/google")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(googleTokenDto)))
 				.andExpect(status().isOk());
 	}
 

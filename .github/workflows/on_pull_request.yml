@@ -47,7 +47,6 @@ jobs:
       # 3. Spring 환경 변수 설정
       - name: Set up application.yml
         run: |
-          mkdir ./src/main/resources
           cd ./src/main/resources
           touch ./application.yml
           echo "${{ secrets.APPLICATION }}" > ./application.yml
