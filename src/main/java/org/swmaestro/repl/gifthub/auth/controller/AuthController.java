@@ -132,20 +132,13 @@ public class AuthController {
 		);
 	}
 
-	@GetMapping("/sign-in/naver")
-	@Operation(summary = "네이버 로그인 메서드", description = "네이버 로그인을 하기 위한 메서드입니다.")
-	public void naverLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.sendRedirect(naverService.getAuthorizationUrl());
-	}
-
-	@GetMapping("/sign-in/naver/callback")
+	@PostMapping("/sign-in/naver")
 	@Operation(summary = "네이버 로그인 콜백 메서드", description = "네이버 로그인 콜백을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "네이버 로그인 성공"),
 			@ApiResponse(responseCode = "400", description = "네이버 로그인 실패"),
 	})
-	public ResponseEntity<Message> naverCallback(@RequestParam String code, @RequestParam String state) throws IOException {
-		TokenDto token = naverService.getNaverToken("token", code);
+	public ResponseEntity<Message> naverSignIn(@RequestBody TokenDto token) throws IOException {
 		NaverDto naverDto = naverService.getUserInfo(token);
 		Member member = naverService.signUp(naverDto);
 		oAuthService.save(member, OAuthPlatform.NAVER, naverDto.getId());
@@ -169,7 +162,7 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(400-2)", description = "잘못된 URL 요쳥"),
 			@ApiResponse(responseCode = "400(500)", description = "HTTP 연결 수행 실패"),
 	})
-	public ResponseEntity<Message> kakaoCallback(@RequestBody TokenDto dto) throws IOException {
+	public ResponseEntity<Message> kakaoSignIn(@RequestBody TokenDto dto) throws IOException {
 		KakaoDto kakaoDto = kakaoService.getUserInfo(dto);
 		TokenDto tokenDto = kakaoService.signIn(kakaoDto);
 		Member member = memberService.read(kakaoDto.getUsername());
