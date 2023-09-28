@@ -38,6 +38,7 @@ out/
 
 # Application Properties
 /src/main/resources/application.yml
+/src/main/resources/application-test.yml
 /src/main/resources/application-dev.yml
 /src/main/resources/application-prod.yml
 
@@ -50,3 +51,6 @@ src/.DS_Store
 
 # Firebase
 /src/main/resources/firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json
+
+# Actions Secrets
+actions-secrets.yml
