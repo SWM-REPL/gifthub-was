@@ -1,7 +1,19 @@
 version: '3'
 services:
-  was:
-    container_name: gifthub-was
+  was-dev:
+    container_name: gifthub-was-dev
+    build:
+      context: ./development
+    image: repl4242/gifthub-was:${IMAGE_TAG}
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+
+  was-prod:
+    container_name: gifthub-was-prod
+    build:
+      context: ./production
     image: repl4242/gifthub-was:${IMAGE_TAG}
     expose:
       - 8080
