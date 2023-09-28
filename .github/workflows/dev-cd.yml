@@ -53,6 +53,8 @@ jobs:
           touch ./application.yml
           echo "${{ secrets.APPLICATION }}" > ./application.yml
           touch ./application-dev.yml
+          echo "${{ secrets.APPLICATION_TEST }}" > ./application-test.yml
+          touch ./application-test.yml
           echo "${{ secrets.APPLICATION_DEV }}" > ./application-dev.yml
           touch ./application-prod.yml
           echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml

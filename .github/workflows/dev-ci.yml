@@ -51,6 +51,8 @@ jobs:
           touch ./application.yml
           echo "${{ secrets.APPLICATION }}" > ./application.yml
           touch ./application-dev.yml
+          echo "${{ secrets.APPLICATION_TEST }}" > ./application-test.yml
+          touch ./application-test.yml
           echo "${{ secrets.APPLICATION_DEV }}" > ./application-dev.yml
           touch ./application-prod.yml
           echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
@@ -68,9 +70,9 @@ jobs:
       - name: Setup MySQL
         uses: mirromutth/mysql-action@v1.1
         with:
-          mysql database: ${{ secrets.MYSQL_DATABASE }}
-          mysql user: ${{ secrets.MYSQL_USER }}
-          mysql password: ${{ secrets.MYSQL_PASSWORD }}
+          mysql database: ${{ secrets.MYSQL_TEST_DATABASE }}
+          mysql user: ${{ secrets.MYSQL_TEST_USER }}
+          mysql password: ${{ secrets.MYSQL_TEST_PASSWORD }}
 
       # 6. 테스트를 위한 빌드 실행
       - name: Build with Gradle
@@ -78,3 +80,4 @@ jobs:
         with:
           arguments: |
             test
+            -Dspring.profiles.active=test
