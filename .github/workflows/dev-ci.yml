@@ -80,3 +80,5 @@ jobs:
         with:
           arguments: |
             test
+        env:
+          SPRING_PROFILES_ACTIVE: test
