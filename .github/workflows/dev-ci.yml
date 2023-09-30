@@ -80,4 +80,3 @@ jobs:
         with:
           arguments: |
             test
-            -Dspring.profiles.active=test
