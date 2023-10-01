@@ -1,7 +1,4 @@
 version: '3'
 services:
   was:
-    build:
-      context: ./development
-      dockerfile: Dockerfile
     container_name: gifthub-was-dev
