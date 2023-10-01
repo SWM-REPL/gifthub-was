@@ -74,7 +74,7 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           pwd
           ls -al
-          docker build -t repl4242/gifthub-was:${{env.IMAGE_TAG}} -f Dockerfile.prod .
+          docker build -t repl4242/gifthub-was:${{env.IMAGE_TAG}} -f production/Dockerfile .
           docker push repl4242/gifthub-was:${{env.IMAGE_TAG}}
 
       # AWS SSM을 통한 Run-Command (Docker 이미지 pull 후 docker-compose를 통한 실행)
