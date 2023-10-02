@@ -90,8 +90,6 @@ public class FCMNotificationService {
 					.setToken(deviceToken.getToken())
 					.setNotification(notification)
 					.build();
-			System.out.println("==============================");
-			System.out.println(message.toString());
 
 			try {
 				firebaseMessaging.send(message);
