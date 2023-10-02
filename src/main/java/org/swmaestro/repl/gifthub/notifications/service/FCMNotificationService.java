@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
+import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
@@ -64,6 +65,33 @@ public class FCMNotificationService {
 					.setToken(deviceToken.getToken())
 					.setNotification(notification)
 					.build();
+
+			try {
+				firebaseMessaging.send(message);
+			} catch (FirebaseMessagingException e) {
+				deviceTokenService.delete(deviceToken.getToken());
+			}
+		}
+	}
+
+	/**
+	 * 특정 회원에게 알림을 보내는 메서드(username으로 검색)
+	 */
+	public void sendNotification(NoticeNotificationDto noticeNotificationDto, String username) {
+		Member member = memberService.read(username);
+		List<DeviceToken> deviceTokenList = deviceTokenService.list(member.getId());
+		for (DeviceToken deviceToken : deviceTokenList) {
+			Notification notification = Notification.builder()
+					.setTitle(noticeNotificationDto.getTitle())
+					.setBody(noticeNotificationDto.getBody())
+					.build();
+
+			Message message = Message.builder()
+					.setToken(deviceToken.getToken())
+					.setNotification(notification)
+					.build();
+			System.out.println("==============================");
+			System.out.println(message.toString());
 
 			try {
 				firebaseMessaging.send(message);
