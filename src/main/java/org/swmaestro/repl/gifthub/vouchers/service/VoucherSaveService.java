@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
-import org.swmaestro.repl.gifthub.notifications.dto.NoticeNotificationDto;
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationService;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.dto.GptResponseDto;
@@ -33,14 +32,12 @@ public class VoucherSaveService {
 				.subscribe(
 						// onSuccess
 						aVoid -> {
-							// logic for successful completion, if
-							sendSuccessNotification("기프티콘 등록 성공", "기프티콘 등록에 성공했습니다!", username);
+							fcmNotificationService.sendNotification("기프티콘 등록 성공", "기프티콘 등록에 성공했습니다!", username);
 						},
 						// onError
 						throwable -> {
 							throwable.printStackTrace();
-							sendFailureNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
-							// logic for error handling, if needed
+							fcmNotificationService.sendNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
 						});
 	}
 
@@ -50,7 +47,7 @@ public class VoucherSaveService {
 				VoucherSaveRequestDto voucherSaveRequestDto = createVoucherSaveRequestDto(response);
 				return Mono.just(voucherSaveRequestDto);
 			} catch (JsonProcessingException e) {
-				sendFailureNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
+				fcmNotificationService.sendNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
 				return Mono.error(new BusinessException("GPT 응답 에러", StatusEnum.NOT_FOUND));
 			}
 		});
@@ -65,7 +62,7 @@ public class VoucherSaveService {
 				voucherSaveRequestDto.setProductName(productName);
 				return Mono.just(voucherSaveRequestDto);
 			} catch (Exception e) {
-				sendFailureNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
+				fcmNotificationService.sendNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
 				return Mono.error(new BusinessException("Elasticsearch 응답 에러", StatusEnum.NOT_FOUND));
 			}
 		});
@@ -75,23 +72,13 @@ public class VoucherSaveService {
 		return Mono.fromCallable(() -> {
 			try {
 				voucherService.save(username, voucherSaveRequestDto);
-				sendSuccessNotification("기프티콘 등록 성공", "기프티콘 등록에 성공했습니다!", username);
+				fcmNotificationService.sendNotification("기프티콘 등록 성공", "기프티콘 등록에 성공했습니다!", username);
 				return null;
 			} catch (IOException e) {
-				sendFailureNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
+				fcmNotificationService.sendNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
 				throw new RuntimeException(e);
 			}
 		});
-	}
-
-	private void sendFailureNotification(String title, String body, String username) {
-		NoticeNotificationDto noticeNotificationDto = NoticeNotificationDto.builder().title(title).body(body).build();
-		fcmNotificationService.sendNotification(noticeNotificationDto, username);
-	}
-
-	private void sendSuccessNotification(String title, String body, String username) {
-		NoticeNotificationDto noticeNotificationDto = NoticeNotificationDto.builder().title(title).body(body).build();
-		fcmNotificationService.sendNotification(noticeNotificationDto, username);
 	}
 
 	private VoucherSaveRequestDto createVoucherSaveRequestDto(GptResponseDto gptResponseDto) throws JsonProcessingException {

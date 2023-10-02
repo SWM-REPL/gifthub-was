@@ -98,4 +98,12 @@ public class FCMNotificationService {
 			}
 		}
 	}
+
+	/**
+	 * title과 body를 받아서 특정 회원에게 알림을 보내는 메서드(username으로 검색)
+	 */
+	public void sendNotification(String title, String body, String username) {
+		NoticeNotificationDto noticeNotificationDto = NoticeNotificationDto.builder().title(title).body(body).build();
+		sendNotification(noticeNotificationDto, username);
+	}
 }
