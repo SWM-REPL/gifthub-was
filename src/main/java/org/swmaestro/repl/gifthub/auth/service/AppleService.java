@@ -1,23 +1,12 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-import java.security.PrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
@@ -39,8 +28,6 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.SignedJWT;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -60,43 +47,6 @@ public class AppleService {
 	@Value("${apple.base-url}")
 	private String baseUrl;
 	private final JwtProvider jwtProvider;
-
-	public String readKeyPath() throws IOException {
-		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(keyIdPath);
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-		String readLine = null;
-		StringBuilder stringBuilder = new StringBuilder();
-		while ((readLine = bufferedReader.readLine()) != null) {
-			stringBuilder.append(readLine);
-			stringBuilder.append("\n");
-		}
-		return stringBuilder.toString();
-	}
-
-	public PrivateKey craetePrivateKey(String keyPath) throws IOException {
-		Reader reader = new StringReader(keyPath);
-		PEMParser pemParser = new PEMParser(reader);
-		JcaPEMKeyConverter jcaPEMKeyConverter = new JcaPEMKeyConverter();
-		PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo)pemParser.readObject();
-		return jcaPEMKeyConverter.getPrivateKey(privateKeyInfo);
-	}
-
-	public String createClientSecretKey(PrivateKey privateKey) {
-		Map<String, Object> headerParamsMap = new HashMap<>();
-		headerParamsMap.put("kid", keyId);
-		headerParamsMap.put("alg", "ES256");
-
-		return Jwts
-				.builder()
-				.setHeaderParams(headerParamsMap)
-				.setIssuer(teamId)
-				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 30)) // 만료 시간 (30초)
-				.setAudience(baseUrl)
-				.setSubject(key)
-				.signWith(SignatureAlgorithm.ES256, privateKey)
-				.compact();
-	}
 
 	public String getIdToken(String clientSecretKey, String code) throws IOException {
 		WebClient webClient = WebClient.builder()

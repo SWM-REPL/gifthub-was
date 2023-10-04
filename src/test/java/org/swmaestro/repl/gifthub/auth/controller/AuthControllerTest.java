@@ -5,8 +5,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.security.PrivateKey;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.swmaestro.repl.gifthub.auth.dto.AppleDto;
+import org.swmaestro.repl.gifthub.auth.dto.AppleTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
 import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
 import org.swmaestro.repl.gifthub.auth.dto.NaverDto;
@@ -218,34 +217,38 @@ public class AuthControllerTest {
 	}
 
 	@Test
-	public void appleSignInCallbackTest() throws Exception {
-		String keyPath = "my_awesome_key_path";
-		String clientSecretKey = "my_awesome_client_secret_key";
-		String idToken = "my_awesome_id_token";
-		String accesstoken = "my_awesome_access_token";
-		String refreshToken = "my_awesome_refresh_token";
-		PrivateKey privateKey = mock(PrivateKey.class);
+	public void appleSignInTest() throws Exception {
+		String idToken = "my.awesome.id_token";
 
-		TokenDto token = TokenDto.builder()
-				.accessToken(accesstoken)
-				.refreshToken(refreshToken)
+		AppleTokenDto appleTokenDto = AppleTokenDto.builder()
+				.identityToken(idToken)
 				.build();
 
 		AppleDto appleDto = AppleDto.builder()
+				.id("my_awesome_id")
 				.email("binarywooo@gmail.com")
 				.nickname("이진우")
 				.build();
 
-		when(appleService.readKeyPath()).thenReturn(keyPath);
-		when(appleService.craetePrivateKey(keyPath)).thenReturn(privateKey);
-		when(appleService.createClientSecretKey(privateKey)).thenReturn(clientSecretKey);
-		when(appleService.getIdToken(clientSecretKey, "my_awesome_code")).thenReturn(idToken);
-		when(appleService.getUserInfo(idToken)).thenReturn(appleDto);
+		Member member = Member.builder()
+				.username("jinlee1703@naver.com")
+				.nickname("이진우")
+				.id(1L)
+				.build();
 
-		mockMvc.perform(post("/auth/sign-in/apple/callback")
-						.requestAttr("code", "my_awesome_code")
-						.header("Authorization", "Bearer " + accesstoken))
-				.andExpect(status().isBadRequest());
+		TokenDto token = TokenDto.builder()
+				.accessToken("accesstoken")
+				.refreshToken("refreshtoken")
+				.build();
+
+		when(appleService.getUserInfo(idToken)).thenReturn(appleDto);
+		when(appleService.signUp(appleDto)).thenReturn(member);
+		when(appleService.signIn(appleDto, 1L)).thenReturn(token);
+
+		mockMvc.perform(post("/auth/sign-in/apple")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(appleTokenDto)))
+				.andExpect(status().isOk());
 	}
 
 	@Test
