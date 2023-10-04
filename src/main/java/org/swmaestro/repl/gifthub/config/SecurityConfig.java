@@ -54,7 +54,7 @@ public class SecurityConfig {
 							public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws
 									IOException {
 								// 권한 문제가 발생했을 때 이 부분을 호출한다.
-								response.setStatus(403);
+								response.setStatus(400);
 								response.setCharacterEncoding("utf-8");
 								response.setContentType("application/json");
 								response.getWriter().write(objectMapper.writeValueAsString(
@@ -69,12 +69,12 @@ public class SecurityConfig {
 							public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws
 									IOException {
 								// 인증문제가 발생했을 때 이 부분을 호출한다.
-								response.setStatus(401);
+								response.setStatus(400);
 								response.setCharacterEncoding("utf-8");
 								response.setContentType("application/json");
 								response.getWriter().write(objectMapper.writeValueAsString(
 										Message.builder()
-												.status(StatusEnum.FORBIDDEN)
+												.status(StatusEnum.UNAUTHORIZED)
 												.message("인증되지 않은 사용자입니다.")
 												.build()));
 								Sentry.captureException(authException);
