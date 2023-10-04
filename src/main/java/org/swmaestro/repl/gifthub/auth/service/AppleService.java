@@ -41,54 +41,25 @@ import com.nimbusds.jwt.SignedJWT;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 @PropertySource("classpath:application.yml")
 public class AppleService {
 	private final MemberService memberService;
 	private final MemberRepository memberRepository;
-	private final String keyId;
-	private final String keyIdPath;
-	private final String key;
-	private final String teamId;
-	private final String authorizationUri;
-	private final String responseType;
-	private final String responseMode;
-	private final String scope;
-	private final String clientId;
-	private final String redirectUri;
-	private final String baseUrl;
+	@Value("${apple.key-id}")
+	private String keyId;
+	@Value("${apple.key-id-path}")
+	private String keyIdPath;
+	@Value("${apple.key}")
+	private String key;
+	@Value("${apple.team-id}")
+	private String teamId;
+	@Value("${apple.base-url}")
+	private String baseUrl;
 	private final JwtProvider jwtProvider;
-
-	public AppleService(MemberService memberService,
-			MemberRepository memberRepository,
-			JwtProvider jwtProvider,
-			@Value("${apple.client-id}") String clientId,
-			@Value("${apple.key-id}") String keyId,
-			@Value("${apple.key-id-path}") String keyIdPath,
-			@Value("${apple.key}") String key,
-			@Value("${apple.team-id}") String teamId,
-			@Value("${apple.authorization-uri}") String authorizationUri,
-			@Value("${apple.response-type}") String responseType,
-			@Value("${apple.response-mode}") String responseMode,
-			@Value("${apple.scope}") String scope,
-			@Value("${apple.redirect-uri}") String redirectUri,
-			@Value("${apple.base-url}") String baseUrl) {
-		this.memberService = memberService;
-		this.memberRepository = memberRepository;
-		this.keyId = keyId;
-		this.keyIdPath = keyIdPath;
-		this.key = key;
-		this.teamId = teamId;
-		this.authorizationUri = authorizationUri;
-		this.responseType = responseType;
-		this.responseMode = responseMode;
-		this.scope = scope;
-		this.clientId = clientId;
-		this.redirectUri = redirectUri;
-		this.baseUrl = baseUrl;
-		this.jwtProvider = jwtProvider;
-	}
 
 	public String readKeyPath() throws IOException {
 		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(keyIdPath);
@@ -168,7 +139,7 @@ public class AppleService {
 
 		List<Map<String, Object>> keys = (List<Map<String, Object>>)keyReponse.get("keys");
 
-		SignedJWT signedJWT = SignedJWT.parse("Bearer " + idToken);
+		SignedJWT signedJWT = SignedJWT.parse(idToken);
 		for (Map<String, Object> key : keys) {
 			RSAKey rsaKey = (RSAKey)JWK.parse(new ObjectMapper().writeValueAsString(key));
 			RSAPublicKey rsaPublicKey = rsaKey.toRSAPublicKey();
@@ -180,21 +151,17 @@ public class AppleService {
 				String payload = idToken.split("[.]")[1];
 				// public key로 idToken 복호화
 				Map<String, Object> payloadMap = new ObjectMapper().readValue(new String(Base64.getDecoder().decode(payload)), Map.class);
+
+				String id = payloadMap.get("sub").toString();
 				// 사용자 이메일 정보 추출
-				String id = payloadMap.get("id").toString();
 				String email = payloadMap.get("email").toString();
-				String name = payloadMap.get("name").toString();
+				String name = payloadMap.containsKey("name") ? name = payloadMap.get("name").toString() : "이름없는 사용자";
 
 				return AppleDto.builder()
 						.id(id)
 						.email(email)
 						.nickname(name)
 						.build();
-
-				// return TokenDto.builder()
-				// 		.accessToken(jwtProvider.generateToken(member.getUsername()))
-				// 		.refreshToken(jwtProvider.generateRefreshToken(member.getUsername()))
-				// 		.build();
 			}
 		}
 		return null;

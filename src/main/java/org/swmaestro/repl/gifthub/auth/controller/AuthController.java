@@ -1,7 +1,6 @@
 package org.swmaestro.repl.gifthub.auth.controller;
 
 import java.io.IOException;
-import java.security.PrivateKey;
 import java.text.ParseException;
 
 import org.springframework.http.HttpStatus;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.swmaestro.repl.gifthub.auth.dto.AppleDto;
+import org.swmaestro.repl.gifthub.auth.dto.AppleTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
 import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
 import org.swmaestro.repl.gifthub.auth.dto.NaverDto;
@@ -182,7 +182,7 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(400)", description = "잘못된 프로토콜 혹은 URL 요쳥"),
 			@ApiResponse(responseCode = "400(500)", description = "HTTP 연결 수행 실패"),
 	})
-	public ResponseEntity<Message> signIn(@RequestBody TokenDto dto) throws IOException {
+	public ResponseEntity<Message> googleSignIn(@RequestBody TokenDto dto) throws IOException {
 		GoogleDto googleDto = googleService.getUserInfo(dto);
 		TokenDto tokenDto = googleService.signIn(googleDto);
 		Member member = memberService.read(googleDto.getUsername());
@@ -198,51 +198,23 @@ public class AuthController {
 		);
 	}
 
-	@PostMapping("/sign-in/apple/test")
-	@Operation(summary = "애플 로그인 메서드", description = "애플 로그인 콜백을 하기 위한 메서드입니다.")
+	@PostMapping("/sign-in/apple")
+	@Operation(summary = "애플 로그인 메서드", description = "애플 로그인을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "애플 로그인 성공"),
 			@ApiResponse(responseCode = "400", description = "애플 로그인 실패"),
 	})
-	public ResponseEntity<Message> appleSignIn(@RequestBody String idToken) throws IOException, ParseException, JOSEException {
-		AppleDto appleDto = appleService.getUserInfo(idToken);
+	public ResponseEntity<Message> appleSignIn(@RequestBody AppleTokenDto appleTestDto) throws IOException, ParseException, JOSEException {
+		AppleDto appleDto = appleService.getUserInfo(appleTestDto.getIdentityToken());
 		Member member = appleService.signUp(appleDto);
 		oAuthService.save(member, OAuthPlatform.APPLE, appleDto.getId());
 		TokenDto tokenDto = appleService.signIn(appleDto, member.getId());
-		return new ResponseEntity<Message>(
+		return ResponseEntity.ok(
 				Message.builder()
 						.status(StatusEnum.OK)
 						.message("애플 로그인 성공!")
 						.data(tokenDto)
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
-	}
-
-	@PostMapping("/sign-in/apple/callback")
-	@Operation(summary = "애플 로그인 콜백 메서드", description = "애플 로그인 콜백을 하기 위한 메서드입니다.")
-	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "애플 로그인 성공"),
-			@ApiResponse(responseCode = "400", description = "애플 로그인 실패"),
-	})
-	public ResponseEntity<Message> appleCallback(@RequestBody String code) throws IOException, ParseException, JOSEException {
-		String keyPath = appleService.readKeyPath();
-		PrivateKey privateKey = appleService.craetePrivateKey(keyPath);
-		String clientSecretKey = appleService.createClientSecretKey(privateKey);
-		String idToken = appleService.getIdToken(code, clientSecretKey);
-		AppleDto appleDto = appleService.getUserInfo(idToken);
-		Member member = appleService.signUp(appleDto);
-		oAuthService.save(member, OAuthPlatform.APPLE, appleDto.getId());
-		TokenDto tokenDto = appleService.signIn(appleDto, member.getId());
-		return new ResponseEntity<Message>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("애플 로그인 성공!")
-						.data(tokenDto)
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
+						.build()
 		);
 	}
 
