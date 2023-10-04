@@ -6,12 +6,10 @@ import java.text.ParseException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.swmaestro.repl.gifthub.auth.dto.AppleDto;
 import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
@@ -43,7 +41,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -201,10 +198,26 @@ public class AuthController {
 		);
 	}
 
-	@GetMapping("/sign-in/apple")
-	@Operation(summary = "애플 로그인 메서드", description = "애플 로그인을 하기 위한 메서드입니다.")
-	public void appleLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		response.sendRedirect(appleService.getAuthorizationUrl());
+	@PostMapping("/sign-in/apple/test")
+	@Operation(summary = "애플 로그인 메서드", description = "애플 로그인 콜백을 하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "애플 로그인 성공"),
+			@ApiResponse(responseCode = "400", description = "애플 로그인 실패"),
+	})
+	public ResponseEntity<Message> appleSignIn(@RequestBody String idToken) throws IOException, ParseException, JOSEException {
+		AppleDto appleDto = appleService.getUserInfo(idToken);
+		Member member = appleService.signUp(appleDto);
+		oAuthService.save(member, OAuthPlatform.APPLE, appleDto.getId());
+		TokenDto tokenDto = appleService.signIn(appleDto, member.getId());
+		return new ResponseEntity<Message>(
+				Message.builder()
+						.status(StatusEnum.OK)
+						.message("애플 로그인 성공!")
+						.data(tokenDto)
+						.build(),
+				new HttpJsonHeaders(),
+				HttpStatus.OK
+		);
 	}
 
 	@PostMapping("/sign-in/apple/callback")

@@ -24,7 +24,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 import org.swmaestro.repl.gifthub.auth.dto.AppleDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
@@ -89,17 +88,6 @@ public class AppleService {
 		this.redirectUri = redirectUri;
 		this.baseUrl = baseUrl;
 		this.jwtProvider = jwtProvider;
-	}
-
-	public String getAuthorizationUrl() {
-		return UriComponentsBuilder
-				.fromUriString(authorizationUri)
-				.queryParam("response_type", responseType)
-				.queryParam("response_mode", responseMode)
-				.queryParam("scope", scope)
-				.queryParam("client_id", clientId)
-				.queryParam("redirect_uri", redirectUri)
-				.build().toString();
 	}
 
 	public String readKeyPath() throws IOException {
@@ -180,7 +168,7 @@ public class AppleService {
 
 		List<Map<String, Object>> keys = (List<Map<String, Object>>)keyReponse.get("keys");
 
-		SignedJWT signedJWT = SignedJWT.parse(idToken);
+		SignedJWT signedJWT = SignedJWT.parse("Bearer " + idToken);
 		for (Map<String, Object> key : keys) {
 			RSAKey rsaKey = (RSAKey)JWK.parse(new ObjectMapper().writeValueAsString(key));
 			RSAPublicKey rsaPublicKey = rsaKey.toRSAPublicKey();
