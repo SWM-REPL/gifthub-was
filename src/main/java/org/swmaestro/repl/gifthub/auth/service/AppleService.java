@@ -175,9 +175,10 @@ public class AppleService {
 
 		if (!memberService.isDuplicateUsername(appleDto.getEmail())) {
 			memberRepository.save(member);
+			return member;
+		} else {
+			return memberService.read(appleDto.getEmail());
 		}
-
-		return member;
 	}
 
 	public TokenDto signIn(AppleDto appleDto, Long userId) {
