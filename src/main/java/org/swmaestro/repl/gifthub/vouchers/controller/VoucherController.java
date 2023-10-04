@@ -18,11 +18,13 @@ import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.Message;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
+import org.swmaestro.repl.gifthub.vouchers.dto.OCRDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.PresignedUrlResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.service.StorageService;
+import org.swmaestro.repl.gifthub.vouchers.service.VoucherSaveService;
 import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,6 +44,7 @@ public class VoucherController {
 	private final VoucherService voucherService;
 	private final StorageService storageService;
 	private final JwtProvider jwtProvider;
+	private final VoucherSaveService voucherSaveService;
 
 	@GetMapping("/images")
 	@Operation(summary = "Voucher 이미지 등록 메서드", description = "클라이언트에서 요청한 기프티콘 이미지를 Amazon S3에 저장하기 위한 메서드입니다. 요청 시 S3 PreSigned URL이 반환됩니다.")
@@ -184,5 +187,23 @@ public class VoucherController {
 						.message("기프티콘이 성공적으로 삭제되었습니다!")
 						// .data()
 						.build());
+	}
+
+	@PostMapping("/test")
+	@Operation(summary = "Voucher 등록 확장 메서드", description = "기존 기능의 확장으로, 기프티콘 정보를 저장하기 위한 메서드입니다. 비동기 방식으로 처리되며 현재는 테스트 버전입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200(202)", description = "기프티콘 등록 요청"),
+	})
+	public ResponseEntity<Message> test(HttpServletRequest request, @RequestBody OCRDto ocrDto) throws IOException {
+		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
+		voucherSaveService.execute(ocrDto, username);
+		return new ResponseEntity<>(
+				Message.builder()
+						.status(StatusEnum.OK)
+						.message("기프티콘 등록 요청에 성공하였습니다!")
+						.build(),
+				new HttpJsonHeaders(),
+				HttpStatus.OK
+		);
 	}
 }
