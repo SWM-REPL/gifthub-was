@@ -1,7 +1,5 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
-import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
@@ -30,15 +28,6 @@ public class OAuthService {
 	}
 
 	public boolean isExists(Member member, OAuthPlatform platform) {
-		List<OAuth> oAuthList = oAuthRepository.findAll().stream().filter(oAuth -> {
-			return oAuth.getMember().equals(member) && oAuth.getPlatform().equals(platform);
-		}).toList();
-
-		for (OAuth oAuth : oAuthList) {
-			if (oAuth.getMember().equals(member) && oAuth.getPlatform() == platform) {
-				return true;
-			}
-		}
-		return false;
+		return oAuthRepository.findByMemberAndPlatform(member, platform).isPresent();
 	}
 }
