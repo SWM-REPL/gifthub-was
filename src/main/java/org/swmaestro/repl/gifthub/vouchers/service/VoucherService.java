@@ -39,6 +39,7 @@ public class VoucherService {
 	private final VoucherRepository voucherRepository;
 	private final MemberService memberService;
 	private final VoucherUsageHistoryRepository voucherUsageHistoryRepository;
+	private final int defaultPrice = 500000;
 
 	/*
 		기프티콘 저장 메서드
@@ -54,7 +55,7 @@ public class VoucherService {
 					.brand(brand)
 					.name(voucherSaveRequestDto.getProductName())
 					.imageUrl(storageService.getDefaultImagePath(voucherDirName))
-					.price(0)
+					.price(defaultPrice)
 					.build();
 			return productService.save(newProduct);
 		});
