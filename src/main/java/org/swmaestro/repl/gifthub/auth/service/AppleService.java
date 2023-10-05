@@ -1,6 +1,5 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
-import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.Base64;
@@ -47,29 +46,6 @@ public class AppleService {
 	@Value("${apple.base-url}")
 	private String baseUrl;
 	private final JwtProvider jwtProvider;
-
-	public String getIdToken(String clientSecretKey, String code) throws IOException {
-		WebClient webClient = WebClient.builder()
-				.baseUrl(baseUrl)
-				.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-				.build();
-
-		Map<String, Object> tokenResponse =
-				webClient
-						.post()
-						.uri(uriBuilder -> uriBuilder
-								.path("/auth/token")
-								.queryParam("grant_type", "authorization_code")
-								.queryParam("client_id", key)
-								.queryParam("client_secret", clientSecretKey)
-								.queryParam("code", code)
-								.build())
-						.retrieve()
-						.bodyToMono(Map.class)
-						.block();
-
-		return (String)tokenResponse.get("id_token");
-	}
 
 	public AppleDto getUserInfo(String idToken) throws ParseException, JsonProcessingException, JOSEException {
 		WebClient webClient = WebClient.builder()
