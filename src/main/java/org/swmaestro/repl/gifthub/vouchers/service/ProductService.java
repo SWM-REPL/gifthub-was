@@ -55,4 +55,11 @@ public class ProductService {
 				.build();
 		return productReadResponseDto;
 	}
+
+	/**
+	 * 상품 저장 메서드 (Product 객체 저장)
+	 */
+	public Product save(Product product) {
+		return productRepository.save(product);
+	}
 }
