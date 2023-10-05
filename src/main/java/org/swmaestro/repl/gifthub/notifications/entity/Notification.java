@@ -3,12 +3,14 @@ package org.swmaestro.repl.gifthub.notifications.entity;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,6 +24,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Notification {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,8 +34,8 @@ public class Notification {
 	@JoinColumn(name = "receiver_id", nullable = false)
 	private Member receiver;
 
-	@ManyToOne
-	@JoinColumn(name = "voucher_id", nullable = false)
+	@ManyToOne(optional = true)
+	@JoinColumn(name = "voucher_id", nullable = true)
 	private Voucher voucher;
 
 	@Column(columnDefinition = "TINYINT", length = 1, nullable = false)
@@ -42,6 +45,7 @@ public class Notification {
 	private String message;
 
 	@CreatedDate
+	@Column(nullable = false)
 	private LocalDateTime createdAt;
 
 	private LocalDateTime deletedAt;
@@ -49,14 +53,12 @@ public class Notification {
 	private LocalDateTime checkedAt;
 
 	@Builder
-	public Notification(Long id, Member receiver, Voucher voucher, NotificationType type, String message,
-			LocalDateTime createdAt, LocalDateTime deletedAt, LocalDateTime checkedAt) {
+	public Notification(Long id, Member receiver, Voucher voucher, NotificationType type, String message, LocalDateTime deletedAt, LocalDateTime checkedAt) {
 		this.id = id;
 		this.receiver = receiver;
 		this.voucher = voucher;
 		this.type = type;
 		this.message = message;
-		this.createdAt = createdAt;
 		this.deletedAt = deletedAt;
 		this.checkedAt = checkedAt;
 	}
