@@ -2,13 +2,15 @@ package org.swmaestro.repl.gifthub.notifications.entity;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
-import org.swmaestro.repl.gifthub.util.BaseTimeEntity;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,7 +24,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Notification extends BaseTimeEntity {
+@EntityListeners(AuditingEntityListener.class)
+public class Notification {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -40,6 +43,10 @@ public class Notification extends BaseTimeEntity {
 
 	@Column(columnDefinition = "TINYTEXT", length = 200, nullable = false)
 	private String message;
+
+	@CreatedDate
+	@Column(nullable = false)
+	private LocalDateTime createdAt;
 
 	private LocalDateTime deletedAt;
 
