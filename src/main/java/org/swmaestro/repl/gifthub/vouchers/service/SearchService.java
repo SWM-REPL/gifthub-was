@@ -14,14 +14,16 @@ import reactor.core.publisher.Mono;
 @Service
 public class SearchService {
 	private final WebClient openSearchClient;
+
 	@Value("${opensearch.username}")
 	private String username;
+
 	@Value("${opensearch.password}")
 	private String password;
 	private String auth;
 
-	public SearchService(WebClient.Builder webClientBuilder) {
-		this.openSearchClient = webClientBuilder.baseUrl("https://es.dev.gifthub.kr").build();
+	public SearchService(WebClient.Builder webClientBuilder, @Value("${opensearch.base-url}") String baseUrl) {
+		this.openSearchClient = webClientBuilder.baseUrl(baseUrl).build();
 	}
 
 	@PostConstruct
