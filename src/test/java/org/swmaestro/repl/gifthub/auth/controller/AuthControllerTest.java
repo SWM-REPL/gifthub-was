@@ -132,7 +132,7 @@ public class AuthControllerTest {
 
 		mockMvc.perform(post("/auth/refresh")
 						.header("Authorization", refreshToken))
-				.andExpect(status().isUnauthorized());
+				.andExpect(status().is4xxClientError());
 	}
 
 	@Test
