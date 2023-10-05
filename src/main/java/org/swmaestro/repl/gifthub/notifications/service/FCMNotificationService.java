@@ -61,9 +61,13 @@ public class FCMNotificationService {
 					.setBody(noticeNotificationDto.getBody())
 					.build();
 
+			org.swmaestro.repl.gifthub.notifications.entity.Notification savedNotification
+					= notificationService.save(deviceToken.getMember(), null, NotificationType.NOTICE, noticeNotificationDto.getBody());
+
 			Message message = Message.builder()
 					.setToken(deviceToken.getToken())
 					.setNotification(notification)
+					.putData("notification_id", savedNotification.getId().toString())
 					.build();
 
 			try {

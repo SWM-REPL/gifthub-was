@@ -102,13 +102,10 @@ public class NotificationController {
 	})
 	public ResponseEntity<Message> sendNotification(@RequestBody NoticeNotificationDto noticeNotificationDto) {
 		fcmNotificationService.sendNotification(noticeNotificationDto);
-		return new ResponseEntity<>(
+		return ResponseEntity.ok(
 				Message.builder()
 						.status(StatusEnum.OK)
 						.message("알림 전송에 성공하였습니다!")
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+						.build());
 	}
 }
