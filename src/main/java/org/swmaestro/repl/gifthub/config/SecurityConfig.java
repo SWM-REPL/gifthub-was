@@ -44,8 +44,7 @@ public class SecurityConfig {
 										"/swagger-ui/**",
 										"/v3/api-docs/**",
 										"/webjars/**",
-										"/error",
-										"/notifications").permitAll()
+										"/error").permitAll()
 								.anyRequest().authenticated())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.exceptionHandling(exceptionHandling -> exceptionHandling

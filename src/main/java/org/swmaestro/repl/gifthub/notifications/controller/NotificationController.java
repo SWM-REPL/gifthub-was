@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -37,10 +38,11 @@ public class NotificationController {
 	@Operation(summary = "Notification 목록 조회 메서드", description = "클라이언트에서 요청한 알림 목록 정보를 조회하기 위한 메서드입니다. 응답으로 알림 type, message, notified date, 기프티콘 정보, 알림 확인 시간을 반환합니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "알림 목록 조회 성공"),
+			@ApiResponse(responseCode = "400(401)", description = "유효하지 않은 토큰"),
 			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원"),
 	})
-	public ResponseEntity<Message> listNotification(@RequestHeader("Authorization") String accessToken) {
-		String username = jwtProvider.getUsername(accessToken.substring(7));
+	public ResponseEntity<Message> listNotification(HttpServletRequest request) {
+		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
 		return new ResponseEntity<>(
 				Message.builder()
 						.status(StatusEnum.OK)
