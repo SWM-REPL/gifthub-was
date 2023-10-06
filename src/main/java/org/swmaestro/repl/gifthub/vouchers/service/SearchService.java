@@ -9,11 +9,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.swmaestro.repl.gifthub.vouchers.dto.SearchResponseDto;
 
+import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 @Service
+@RequiredArgsConstructor
 public class SearchService {
-	private final WebClient openSearchClient;
 
 	@Value("${opensearch.username}")
 	private String username;
@@ -22,12 +23,16 @@ public class SearchService {
 	private String password;
 	private String auth;
 
-	public SearchService(WebClient.Builder webClientBuilder, @Value("${opensearch.base-url}") String baseUrl) {
-		this.openSearchClient = webClientBuilder.baseUrl(baseUrl).build();
-	}
+	@Value("${opensearch.base-url}")
+	private String baseUrl;
+
+	private WebClient openSearchClient;
 
 	@PostConstruct
 	public void init() {
+		openSearchClient = WebClient.builder()
+				.baseUrl(baseUrl)
+				.build();
 		auth = "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 	}
 
