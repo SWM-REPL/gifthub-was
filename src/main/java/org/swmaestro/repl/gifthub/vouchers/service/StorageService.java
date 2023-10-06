@@ -28,6 +28,8 @@ public class StorageService {
 	private final AmazonS3Client amazonS3Client;
 	@Value("${cloud.aws.s3.default-image-file}")
 	private String defaultImageFile;
+	@Value("${cloud.aws.cloudfront.bucket}")
+	private String cloudFrontBucketName;
 
 	public S3FileDto save(String dirName, MultipartFile multipartFile) throws IOException {
 		String originalFileName = multipartFile.getOriginalFilename();
@@ -58,7 +60,7 @@ public class StorageService {
 	}
 
 	public String getDefaultImagePath(String dirName) {
-		return "http://" + bucketName + "/" + dirName + "/" + defaultImageFile;
+		return "https://" + cloudFrontBucketName + "/" + dirName + "/" + defaultImageFile;
 	}
 
 	public String getPresignedUrlForSaveVoucher(String dirName, String extension) {

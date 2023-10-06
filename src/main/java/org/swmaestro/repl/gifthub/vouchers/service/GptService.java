@@ -1,5 +1,10 @@
 package org.swmaestro.repl.gifthub.vouchers.service;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,6 +26,9 @@ public class GptService {
 	@Value("${openai.api-key}")
 	private String apiKey;
 
+	@Value("${openai.question-path}")
+	private String promptPath;
+
 	@Autowired
 	private ObjectMapper objectMapper;
 
@@ -28,19 +36,10 @@ public class GptService {
 		this.gptClient = webClientBuilder.build();
 	}
 
-	public Mono<GptResponseDto> getGptResponse(OCRDto ocrDto) {
-		String question = "Please categorize them into 4 categories: brand name, product name, expiration date, and barcode number.\n"
-				+ "But please keep this format and return it based on Korean.\n"
-				+ " And Return the expiration date in this format, where year is a 4-digit number and month and day are 2-digit numbers.\n"
-				+ " And the barcode number has 12 digits. Remove any hyphens or spaces and return it as 12 consecutive digits. \n"
-				+ "If you can't categorize it, return an empty value in the JSON structure below."
-				+ "\"year-month-day\"\n"
-				+ "{\"brand_name\" : \n"
-				+ "\"product_name\" :\n"
-				+ "\"expires_at\" : \n"
-				+ "\"barcode\":  }";
-
+	public Mono<GptResponseDto> getGptResponse(OCRDto ocrDto) throws IOException {
+		String question = loadQuestionFromFile(promptPath);
 		String content = ocrDto.concatenateTexts();
+
 		String prompt = question + content;
 		ObjectNode requestBody = objectMapper.createObjectNode();
 		requestBody.put("model", "gpt-3.5-turbo");
@@ -55,5 +54,9 @@ public class GptService {
 				.body(Mono.just(requestBody), ObjectNode.class)
 				.retrieve()
 				.bodyToMono(GptResponseDto.class);
+	}
+
+	public String loadQuestionFromFile(String filePath) throws IOException {
+		return new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
 	}
 }

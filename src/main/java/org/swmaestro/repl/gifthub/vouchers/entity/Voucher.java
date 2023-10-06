@@ -39,7 +39,7 @@ public class Voucher extends BaseTimeEntity {
 	@Column(length = 12, nullable = false)
 	private String barcode;
 
-	@Column(nullable = false)
+	@Column
 	private Integer balance;
 
 	@Column(nullable = false)

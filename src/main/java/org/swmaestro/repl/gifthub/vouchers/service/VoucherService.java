@@ -45,10 +45,18 @@ public class VoucherService {
 	 */
 	public VoucherSaveResponseDto save(String username, VoucherSaveRequestDto voucherSaveRequestDto) throws
 			IOException {
-		Brand brand = brandService.read(voucherSaveRequestDto.getBrandName()).orElseThrow(() ->
-				new BusinessException("존재하지 않는 브랜드입니다.", StatusEnum.NOT_FOUND));
-		Product product = productService.read(brand.getId(), voucherSaveRequestDto.getProductName()).orElseThrow(() ->
-				new BusinessException("존재하지 않는 상품입니다.", StatusEnum.NOT_FOUND));
+		Brand brand = brandService.read(voucherSaveRequestDto.getBrandName()).orElseGet(() -> {
+			Optional<Brand> defaultBrand = brandService.read("기타");
+			return defaultBrand.get();
+		});
+		Product product = productService.read(brand.getId(), voucherSaveRequestDto.getProductName()).orElseGet(() -> {
+			Product newProduct = Product.builder()
+					.brand(brand)
+					.name(voucherSaveRequestDto.getProductName())
+					.imageUrl(storageService.getDefaultImagePath(voucherDirName))
+					.build();
+			return productService.save(newProduct);
+		});
 		String imageUrl = voucherSaveRequestDto.getImageUrl();
 
 		if (isDuplicateVoucher(username, voucherSaveRequestDto.getBarcode()) == true) {
@@ -146,8 +154,12 @@ public class VoucherService {
 		Voucher voucher = voucherRepository.findById(voucherId)
 				.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND));
 
-		if ((voucherUpdateRequestDto.getBalance() != null) && (voucherUpdateRequestDto.getBalance() > productService.read(voucher.getProduct().getName())
-				.getPrice())) {
+		Product product = productService.read(voucher.getProduct().getName());
+
+		Integer productPrice = product.getPrice();
+		Integer voucherUpdateRequestBalance = voucherUpdateRequestDto.getBalance();
+
+		if (productPrice != null && voucherUpdateRequestBalance != null && voucherUpdateRequestBalance > productPrice) {
 			throw new BusinessException("잔액은 상품 가격보다 클 수 없습니다.", StatusEnum.BAD_REQUEST);
 		}
 

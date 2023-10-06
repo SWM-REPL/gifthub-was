@@ -1,0 +1,10 @@
+Please categorize them into 4 categories: brand name, product name, expiration date, and barcode number.
+But please keep this format and return it based on Korean.
+And Return the expiration date in this format, where year is a 4-digit number and month and day are 2-digit numbers.
+And the barcode number has 12 digits. Remove any hyphens or spaces and return it as 12 consecutive digits.
+If you can't categorize it, return an empty value in the JSON structure below.
+"year-month-day"
+{"brand_name" :
+"product_name" :
+"expires_at" :
+"barcode":  }

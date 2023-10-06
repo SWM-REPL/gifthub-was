@@ -34,4 +34,11 @@ public class BrandService {
 
 		return brandRepository.save(brand);
 	}
+
+	/**
+	 * 브랜드 저장 메서드 (Brand 객체 저장)
+	 */
+	public Brand save(Brand brand) {
+		return brandRepository.save(brand);
+	}
 }
