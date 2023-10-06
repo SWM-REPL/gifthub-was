@@ -36,14 +36,14 @@ public class Product {
 	@ColumnDefault("0")
 	private int isReusable;
 
-	@Column(nullable = false)
-	private int price;
+	@Column
+	private Integer price;
 
 	@Column(length = 200)
 	private String imageUrl;
 
 	@Builder
-	public Product(Long id, Brand brand, String name, String description, int isReusable, int price, String imageUrl) {
+	public Product(Long id, Brand brand, String name, String description, int isReusable, Integer price, String imageUrl) {
 		this.id = id;
 		this.brand = brand;
 		this.name = name;
