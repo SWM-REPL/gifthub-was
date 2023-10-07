@@ -1,9 +1,9 @@
 package org.swmaestro.repl.gifthub.util;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +19,11 @@ public class QueryTemplateReader {
 	}
 
 	public static String readQueryTemplate() {
-		try {
-			return new String(Files.readAllBytes(Paths.get(queryTemplatePath)), StandardCharsets.UTF_8);
+		try (InputStream inputStream = QueryTemplateReader.class.getResourceAsStream(queryTemplatePath)) {
+			if (inputStream == null) {
+				throw new FileNotFoundException("File not found: " + queryTemplatePath);
+			}
+			return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new RuntimeException("쿼리 템플릿을 읽지 못했습니다.", e);
 		}

@@ -1,9 +1,9 @@
 package org.swmaestro.repl.gifthub.vouchers.service;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +57,11 @@ public class GptService {
 	}
 
 	public String loadQuestionFromFile(String filePath) throws IOException {
-		return new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
+		try (InputStream inputStream = getClass().getResourceAsStream(filePath)) {
+			if (inputStream == null) {
+				throw new FileNotFoundException("File not found: " + filePath);
+			}
+			return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+		}
 	}
 }
