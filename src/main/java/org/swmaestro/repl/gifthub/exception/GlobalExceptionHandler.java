@@ -1,9 +1,9 @@
 package org.swmaestro.repl.gifthub.exception;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.swmaestro.repl.gifthub.util.ErrorMessage;
 import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
 import org.swmaestro.repl.gifthub.util.Message;
 
@@ -19,11 +19,11 @@ public class GlobalExceptionHandler {
 		Sentry.captureException(e);
 
 		return new ResponseEntity<>(
-				Message.builder()
-						.status(e.getStatus())
-						.message(e.getMessage())
+				ErrorMessage.builder()
+						.status(e.getStatus().statusCode)
+						.path("")
+						.error(e.getMessage())
 						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.BAD_REQUEST);
+				new HttpJsonHeaders(), e.getStatus().statusCode);
 	}
 }

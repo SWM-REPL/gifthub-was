@@ -12,8 +12,8 @@ public class SuccessMessage extends Message {
 	private Object data;
 
 	@Builder
-	public SuccessMessage(int status, String path, Object data) {
-		super(status, path);
+	public SuccessMessage(String path, Object data) {
+		super(StatusEnum.OK.statusCode, path);
 		this.data = data;
 	}
 }
