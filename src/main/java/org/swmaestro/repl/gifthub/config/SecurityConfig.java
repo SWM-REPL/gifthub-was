@@ -16,7 +16,6 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.swmaestro.repl.gifthub.filter.JwtAuthenticationFilter;
 import org.swmaestro.repl.gifthub.util.ErrorMessage;
-import org.swmaestro.repl.gifthub.util.Message;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,7 +61,7 @@ public class SecurityConfig {
 												.status(StatusEnum.FORBIDDEN.statusCode)
 												.path("")
 												.error("권한이 없습니다.")
-												.build()
+												.build()));
 							}
 						})
 						.authenticationEntryPoint(new AuthenticationEntryPoint() {
@@ -74,11 +73,11 @@ public class SecurityConfig {
 								response.setCharacterEncoding("utf-8");
 								response.setContentType("application/json");
 								response.getWriter().write(objectMapper.writeValueAsString(
-									ErrorMessage.builder()
-											.status(StatusEnum.UNAUTHORIZED.statusCode)
-											.path("")
-											.error("인증되지 않은 사용자입니다.")
-											.build();
+										ErrorMessage.builder()
+												.status(StatusEnum.UNAUTHORIZED.statusCode)
+												.path("")
+												.error("인증되지 않은 사용자입니다.")
+												.build()));
 								Sentry.captureException(authException);
 							}
 						})
