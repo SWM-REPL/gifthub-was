@@ -6,7 +6,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import jakarta.persistence.MappedSuperclass;
-import lombok.Builder;
 import lombok.Getter;
 
 @MappedSuperclass
@@ -16,18 +15,23 @@ public abstract class Message {
 	private int status;
 	private String path;
 
-	@Builder
 	public Message(int status, String path) {
+		this.timestamp = Timestamp.from(getKoreanTime().toInstant());
 		this.status = status;
 		this.path = path;
-		this.timestamp = new Timestamp(getKoreanTime().toInstant().toEpochMilli());
 	}
 
-	private ZonedDateTime getKoreanTime() {
+	public Message(int status, String path, Timestamp timestamp) {
+		this.timestamp = getKoreanTime();
+		this.status = status;
+		this.path = path;
+	}
+
+	private Timestamp getKoreanTime() {
 		long timestamp = System.currentTimeMillis();
 		Instant instant = Instant.ofEpochMilli(timestamp);
 		ZoneId koreaZone = ZoneId.of("Asia/Seoul");
 		ZonedDateTime koreaTime = instant.atZone(koreaZone);
-		return koreaTime;
+		return Timestamp.from(koreaTime.toInstant());
 	}
 }
