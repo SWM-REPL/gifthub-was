@@ -21,7 +21,7 @@ public class VoucherReadResponseDto {
 	private Long productId;
 	private String barcode;
 	private String expiresAt;
-	private int price;
-	private int balance;
+	private Integer price;
+	private Integer balance;
 	private String imageUrl;
 }
