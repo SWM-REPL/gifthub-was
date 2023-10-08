@@ -1,9 +1,9 @@
 package org.swmaestro.repl.gifthub.vouchers.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,15 +14,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.Message;
-import org.swmaestro.repl.gifthub.util.StatusEnum;
+import org.swmaestro.repl.gifthub.util.SuccessMessage;
 import org.swmaestro.repl.gifthub.vouchers.dto.OCRDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.PresignedUrlResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.service.StorageService;
 import org.swmaestro.repl.gifthub.vouchers.service.VoucherSaveService;
 import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
@@ -51,17 +53,15 @@ public class VoucherController {
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "성공적으로 S3 Presigned URL 반환"),
 	})
-	public ResponseEntity<Message> saveVoucherImage() throws IOException {
+	public ResponseEntity<Message> saveVoucherImage(HttpServletRequest request) throws IOException {
 		PresignedUrlResponseDto presignedUrlResponseDto = PresignedUrlResponseDto.builder()
 				.presignedUrl(storageService.getPresignedUrlForSaveVoucher("voucher", "PNG"))
 				.build();
-
-		return ResponseEntity.ok(Message.builder()
-				.status(StatusEnum.OK)
-				.message("성공적으로 S3 Presigned URL 반환되었습니다!")
-				.data(presignedUrlResponseDto)
-				.build()
-		);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(presignedUrlResponseDto)
+						.build());
 	}
 
 	@PostMapping
@@ -75,15 +75,12 @@ public class VoucherController {
 			@RequestBody VoucherSaveRequestDto voucherSaveRequestDto) throws
 			IOException {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("기프티콘이 성공적으로 등록되었습니다!")
-						.data(voucherService.save(username, voucherSaveRequestDto))
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+		VoucherSaveResponseDto voucherSaveResponseDto = voucherService.save(username, voucherSaveRequestDto);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(voucherSaveResponseDto)
+						.build());
 	}
 
 	@GetMapping("/{voucherId}")
@@ -96,15 +93,12 @@ public class VoucherController {
 	public ResponseEntity<Message> readVoucher(HttpServletRequest request, @PathVariable Long voucherId) throws
 			IOException {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("기프티콘이 성공적으로 조회되었습니다!")
-						.data(voucherService.read(voucherId, username))
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+		VoucherReadResponseDto voucherReadResponseDto = voucherService.read(voucherId, username);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(voucherReadResponseDto)
+						.build());
 	}
 
 	@GetMapping
@@ -115,15 +109,12 @@ public class VoucherController {
 	})
 	public ResponseEntity<Message> listVoucher(HttpServletRequest request, @RequestParam(value = "user_id", required = true) Long memberId) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("기프티콘 목록이 성공적으로 조회되었습니다!")
-						.data(voucherService.list(memberId, username))
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+		List<Long> voucherIdList = voucherService.list(memberId, username);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(voucherIdList)
+						.build());
 	}
 
 	@PatchMapping("/{voucherId}")
@@ -132,17 +123,14 @@ public class VoucherController {
 			@ApiResponse(responseCode = "200", description = "기프티콘 수정 성공"),
 			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 기프티콘 조회 시도"),
 	})
-	public ResponseEntity<Message> updateVoucher(@PathVariable Long voucherId,
+	public ResponseEntity<Message> updateVoucher(HttpServletRequest request, @PathVariable Long voucherId,
 			@RequestBody VoucherUpdateRequestDto voucherUpdateRequestDto) throws IOException {
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("기프티콘 목록이 성공적으로 수정되었습니다!")
-						.data(voucherService.update(voucherId, voucherUpdateRequestDto))
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+		VoucherSaveResponseDto updatedVoucher = voucherService.update(voucherId, voucherUpdateRequestDto);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(updatedVoucher)
+						.build());
 	}
 
 	@PostMapping("/{voucherId}/usage")
@@ -158,15 +146,12 @@ public class VoucherController {
 	public ResponseEntity<Message> useVoucher(HttpServletRequest request, @PathVariable Long voucherId,
 			@RequestBody VoucherUseRequestDto voucherUseRequestDto) throws IOException {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("기프티콘이 성공적으로 사용되었습니다!")
-						.data(voucherService.use(username, voucherId, voucherUseRequestDto))
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+		VoucherUseResponseDto usedVoucher = voucherService.use(username, voucherId, voucherUseRequestDto);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(usedVoucher)
+						.build());
 	}
 
 	@DeleteMapping("/{voucherId}")
@@ -181,11 +166,9 @@ public class VoucherController {
 			IOException {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
 		voucherService.delete(username, voucherId);
-		return ResponseEntity
-				.ok(Message.builder()
-						.status(StatusEnum.OK)
-						.message("기프티콘이 성공적으로 삭제되었습니다!")
-						// .data()
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.build());
 	}
 
@@ -197,13 +180,9 @@ public class VoucherController {
 	public ResponseEntity<Message> test(HttpServletRequest request, @RequestBody OCRDto ocrDto) throws IOException {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
 		voucherSaveService.execute(ocrDto, username);
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("기프티콘 등록 요청에 성공하였습니다!")
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.build());
 	}
 }
