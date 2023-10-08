@@ -1,28 +1,37 @@
 package org.swmaestro.repl.gifthub.util;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
-import lombok.Builder;
-import lombok.Data;
+import jakarta.persistence.MappedSuperclass;
+import lombok.Getter;
 
-@Data
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class Message {
-	private int statusCode;
-	private String message;
-	private Object data;
+@MappedSuperclass
+@Getter
+public abstract class Message {
+	private Timestamp timestamp;
+	private int status;
+	private String path;
 
-	public Message() {
-		this.statusCode = StatusEnum.BAD_REQUEST.statusCode;
-		this.message = null;
-		this.data = null;
+	public Message(int status, String path) {
+		this.timestamp = Timestamp.from(getKoreanTime().toInstant());
+		this.status = status;
+		this.path = path;
 	}
 
-	@Builder
-	public Message(StatusEnum status, String message, Object data) {
-		this.statusCode = status.statusCode;
-		this.message = message;
-		this.data = data;
+	public Message(int status, String path, Timestamp timestamp) {
+		this.timestamp = getKoreanTime();
+		this.status = status;
+		this.path = path;
+	}
+
+	private Timestamp getKoreanTime() {
+		long timestamp = System.currentTimeMillis();
+		Instant instant = Instant.ofEpochMilli(timestamp);
+		ZoneId koreaZone = ZoneId.of("Asia/Seoul");
+		ZonedDateTime koreaTime = instant.atZone(koreaZone);
+		return Timestamp.from(koreaTime.toInstant());
 	}
 }

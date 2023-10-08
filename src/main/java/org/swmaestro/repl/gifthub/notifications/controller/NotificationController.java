@@ -1,6 +1,7 @@
 package org.swmaestro.repl.gifthub.notifications.controller;
 
-import org.springframework.http.HttpStatus;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenSaveRequestDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NoticeNotificationDto;
+import org.swmaestro.repl.gifthub.notifications.dto.NotificationReadResponseDto;
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationService;
 import org.swmaestro.repl.gifthub.notifications.service.NotificationService;
-import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.Message;
-import org.swmaestro.repl.gifthub.util.StatusEnum;
+import org.swmaestro.repl.gifthub.util.SuccessMessage;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -43,15 +44,12 @@ public class NotificationController {
 	})
 	public ResponseEntity<Message> listNotification(HttpServletRequest request) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("알림 목록 조회에 성공하였습니다!")
-						.data(notificationService.list(username))
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+		List<NotificationReadResponseDto> notificationList = notificationService.list(username);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(notificationList)
+						.build());
 	}
 
 	@PostMapping("/device")
@@ -62,18 +60,15 @@ public class NotificationController {
 			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원"),
 	})
 	public ResponseEntity<Message> registerDeviceToken(
+			HttpServletRequest request,
 			@RequestHeader("Authorization") String accessToken,
 			@RequestBody DeviceTokenSaveRequestDto deviceTokenSaveRequestDto) {
 		String username = jwtProvider.getUsername(accessToken.substring(7));
 		notificationService.saveDeviceToken(username, deviceTokenSaveRequestDto.getToken());
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("디바이스 토큰 등록에 성공하였습니다!")
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.build());
 	}
 
 	@GetMapping("/{notificationId}")
@@ -83,18 +78,17 @@ public class NotificationController {
 			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 알림"),
 			@ApiResponse(responseCode = "400(403)", description = "알림 상세 조회 권한 없음"),
 	})
-	public ResponseEntity<Message> readNotification(@RequestHeader("Authorization") String accessToken,
+	public ResponseEntity<Message> readNotification(
+			HttpServletRequest request,
+			@RequestHeader("Authorization") String accessToken,
 			@PathVariable Long notificationId) {
 		String username = jwtProvider.getUsername(accessToken.substring(7));
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("알림 상세 조회에 성공하였습니다!")
-						.data(notificationService.read(notificationId, username))
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+		NotificationReadResponseDto notificationReadResponseDto = notificationService.read(notificationId, username);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(notificationReadResponseDto)
+						.build());
 	}
 
 	@PostMapping
@@ -102,12 +96,13 @@ public class NotificationController {
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "알림 전송 성공")
 	})
-	public ResponseEntity<Message> sendNotification(@RequestBody NoticeNotificationDto noticeNotificationDto) {
+	public ResponseEntity<Message> sendNotification(
+			HttpServletRequest request,
+			@RequestBody NoticeNotificationDto noticeNotificationDto) {
 		fcmNotificationService.sendNotification(noticeNotificationDto);
 		return ResponseEntity.ok(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("알림 전송에 성공하였습니다!")
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.build());
 	}
 }

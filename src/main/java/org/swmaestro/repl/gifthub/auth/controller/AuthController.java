@@ -3,7 +3,6 @@ package org.swmaestro.repl.gifthub.auth.controller;
 import java.io.IOException;
 import java.text.ParseException;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,10 +28,9 @@ import org.swmaestro.repl.gifthub.auth.service.NaverService;
 import org.swmaestro.repl.gifthub.auth.service.OAuthService;
 import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
-import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.Message;
-import org.swmaestro.repl.gifthub.util.StatusEnum;
+import org.swmaestro.repl.gifthub.util.SuccessMessage;
 
 import com.nimbusds.jose.JOSEException;
 
@@ -66,17 +64,13 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(400-2)", description = "닉네임 글자 수 부적합(12자리 이하)"),
 			@ApiResponse(responseCode = "400(409)", description = "이미 존재하는 아이디")
 	})
-	public ResponseEntity<Message> signUp(@RequestBody SignUpDto signUpDto) {
+	public ResponseEntity<Message> signUp(HttpServletRequest request, @RequestBody SignUpDto signUpDto) {
 		TokenDto tokenDto = memberService.create(signUpDto);
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("성공적으로 회원가입되었습니다!")
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.data(tokenDto)
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+						.build());
 	}
 
 	@PostMapping("/sign-in")
@@ -87,17 +81,13 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(400-2)", description = "비밀번호 불일치"),
 			@ApiResponse(responseCode = "400(409)", description = "이미 존재하는 아이디")
 	})
-	public ResponseEntity<Message> signIn(@RequestBody SignInDto loginDto) {
+	public ResponseEntity<Message> signIn(HttpServletRequest request, @RequestBody SignInDto loginDto) {
 		TokenDto tokenDto = authService.signIn(loginDto);
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("로그인 성공!")
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.data(tokenDto)
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+						.build());
 	}
 
 	@PostMapping("/refresh")
@@ -106,7 +96,7 @@ public class AuthController {
 			@ApiResponse(responseCode = "200", description = "Access Token 재발급 성공"),
 			@ApiResponse(responseCode = "400", description = "Access Token 재발급 실패"),
 	})
-	public ResponseEntity<Message> reissueAccessToken(@RequestHeader("Authorization") String refreshToken) {
+	public ResponseEntity<Message> reissueAccessToken(HttpServletRequest request, @RequestHeader("Authorization") String refreshToken) {
 		String newAccessToken = refreshTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken);
 		String newRefreshToken = refreshTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken);
 
@@ -118,15 +108,11 @@ public class AuthController {
 		refreshToken = refreshToken.substring(7);
 		refreshTokenService.storeRefreshToken(tokenDto, jwtProvider.getUsername(refreshToken));
 
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("새로운 Access Token, Refresh Token이 발급되었습니다!")
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.data(tokenDto)
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+						.build());
 	}
 
 	@PostMapping("/sign-in/naver")
@@ -135,20 +121,16 @@ public class AuthController {
 			@ApiResponse(responseCode = "200", description = "네이버 로그인 성공"),
 			@ApiResponse(responseCode = "400", description = "네이버 로그인 실패"),
 	})
-	public ResponseEntity<Message> naverSignIn(@RequestBody TokenDto token) throws IOException {
+	public ResponseEntity<Message> naverSignIn(HttpServletRequest request, @RequestBody TokenDto token) throws IOException {
 		NaverDto naverDto = naverService.getUserInfo(token);
 		Member member = naverService.signUp(naverDto);
 		oAuthService.save(member, OAuthPlatform.NAVER, naverDto.getId());
 		TokenDto tokenDto = naverService.signIn(naverDto, member.getId());
-		return new ResponseEntity<Message>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("네이버 로그인 성공!")
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.data(tokenDto)
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+						.build());
 	}
 
 	@PostMapping("/sign-in/kakao")
@@ -159,20 +141,16 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(400-2)", description = "잘못된 URL 요쳥"),
 			@ApiResponse(responseCode = "400(500)", description = "HTTP 연결 수행 실패"),
 	})
-	public ResponseEntity<Message> kakaoSignIn(@RequestBody TokenDto dto) throws IOException {
+	public ResponseEntity<Message> kakaoSignIn(HttpServletRequest request, @RequestBody TokenDto dto) throws IOException {
 		KakaoDto kakaoDto = kakaoService.getUserInfo(dto);
 		TokenDto tokenDto = kakaoService.signIn(kakaoDto);
 		Member member = memberService.read(kakaoDto.getUsername());
 		oAuthService.save(member, OAuthPlatform.KAKAO, kakaoDto.getId());
-		return new ResponseEntity<Message>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("카카오 로그인 성공!")
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.data(tokenDto)
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+						.build());
 	}
 
 	@PostMapping("/sign-in/google")
@@ -182,20 +160,16 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(400)", description = "잘못된 프로토콜 혹은 URL 요쳥"),
 			@ApiResponse(responseCode = "400(500)", description = "HTTP 연결 수행 실패"),
 	})
-	public ResponseEntity<Message> googleSignIn(@RequestBody TokenDto dto) throws IOException {
+	public ResponseEntity<Message> googleSignIn(HttpServletRequest request, @RequestBody TokenDto dto) throws IOException {
 		GoogleDto googleDto = googleService.getUserInfo(dto);
 		TokenDto tokenDto = googleService.signIn(googleDto);
 		Member member = memberService.read(googleDto.getUsername());
 		oAuthService.save(member, OAuthPlatform.GOOGLE, googleDto.getId());
-		return new ResponseEntity<Message>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("구글 로그인 성공!")
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.data(tokenDto)
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+						.build());
 	}
 
 	@PostMapping("/sign-in/apple")
@@ -204,18 +178,19 @@ public class AuthController {
 			@ApiResponse(responseCode = "200", description = "애플 로그인 성공"),
 			@ApiResponse(responseCode = "400", description = "애플 로그인 실패"),
 	})
-	public ResponseEntity<Message> appleSignIn(@RequestBody AppleTokenDto appleTestDto) throws IOException, ParseException, JOSEException {
+	public ResponseEntity<Message> appleSignIn(HttpServletRequest request, @RequestBody AppleTokenDto appleTestDto) throws
+			IOException,
+			ParseException,
+			JOSEException {
 		AppleDto appleDto = appleService.getUserInfo(appleTestDto.getIdentityToken());
 		Member member = appleService.signUp(appleDto);
 		oAuthService.save(member, OAuthPlatform.APPLE, appleDto.getId());
 		TokenDto tokenDto = appleService.signIn(appleDto, member.getId());
 		return ResponseEntity.ok(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("애플 로그인 성공!")
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.data(tokenDto)
-						.build()
-		);
+						.build());
 	}
 
 	@PostMapping("/sign-out")
@@ -227,10 +202,9 @@ public class AuthController {
 	public ResponseEntity<Message> signOut(HttpServletRequest request, @RequestBody SignOutDto signOutDto) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
 		authService.signOut(username, signOutDto);
-		return ResponseEntity.ok().body(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("로그아웃 성공!")
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.data(null)
 						.build());
 	}
