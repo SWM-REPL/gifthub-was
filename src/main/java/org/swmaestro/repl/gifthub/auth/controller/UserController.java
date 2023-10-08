@@ -1,6 +1,5 @@
 package org.swmaestro.repl.gifthub.auth.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,12 +8,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
-import org.swmaestro.repl.gifthub.util.HttpJsonHeaders;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.Message;
-import org.swmaestro.repl.gifthub.util.StatusEnum;
+import org.swmaestro.repl.gifthub.util.SuccessMessage;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -38,16 +37,13 @@ public class UserController {
 			@ApiResponse(responseCode = "400(404-1)", description = "존재하지 않는 회원 아이디 입력"),
 			@ApiResponse(responseCode = "400(404-2)", description = "이미 삭제된 회원 아이디 입력")
 	})
-	public ResponseEntity<Message> deleteMember(@PathVariable Long userId) {
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("성공적으로 삭제되었습니다!")
-						.data(memberService.delete(userId))
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+	public ResponseEntity<Message> deleteMember(HttpServletRequest request, @PathVariable Long userId) {
+		MemberDeleteResponseDto deletedMember = memberService.delete(userId);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(deletedMember)
+						.build());
 	}
 
 	@PatchMapping("/{userId}")
@@ -59,15 +55,11 @@ public class UserController {
 	public ResponseEntity<Message> updateMember(HttpServletRequest request, @PathVariable Long userId,
 			@RequestBody MemberUpdateRequestDto memberUpdateRequestDto) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("성공적으로 수정되었습니다!")
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.data(memberService.update(username, userId, memberUpdateRequestDto))
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+						.build());
 	}
 
 	@GetMapping("/{userId}")
@@ -76,15 +68,11 @@ public class UserController {
 			@ApiResponse(responseCode = "200", description = "회원 조회 성공"),
 			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원 아이디 입력")
 	})
-	public ResponseEntity<Message> readMember(@PathVariable Long userId) {
-		return new ResponseEntity<>(
-				Message.builder()
-						.status(StatusEnum.OK)
-						.message("성공적으로 조회되었습니다!")
+	public ResponseEntity<Message> readMember(HttpServletRequest request, @PathVariable Long userId) {
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
 						.data(memberService.read(userId))
-						.build(),
-				new HttpJsonHeaders(),
-				HttpStatus.OK
-		);
+						.build());
 	}
 }
