@@ -16,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 public class OAuthService {
 	private final NaverService naverService;
 	private final KakaoService kakaoService;
+	private final GoogleService googleService;
+	private final AppleService appleService;
 
 	public OAuthUserInfoDto getUserInfo(OAuthTokenDto oAuthTokenDto, OAuthPlatform platform) {
 		switch (platform) {
@@ -24,9 +26,9 @@ public class OAuthService {
 			case KAKAO:
 				return kakaoService.getUserInfo(oAuthTokenDto);
 			case GOOGLE:
-				return null;
+				return googleService.getUserInfo(oAuthTokenDto);
 			case APPLE:
-				return null;
+				return appleService.getUserInfo(oAuthTokenDto);
 			default:
 				throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		}
@@ -39,9 +41,9 @@ public class OAuthService {
 			case KAKAO:
 				return kakaoService.create(member, oAuthUserInfoDto);
 			case GOOGLE:
-				return null;
+				return googleService.create(member, oAuthUserInfoDto);
 			case APPLE:
-				return null;
+				return appleService.create(member, oAuthUserInfoDto);
 			default:
 				throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		}
@@ -54,9 +56,9 @@ public class OAuthService {
 			case KAKAO:
 				return kakaoService.read(oAuthUserInfoDto);
 			case GOOGLE:
-				return null;
+				return googleService.read(oAuthUserInfoDto);
 			case APPLE:
-				return null;
+				return googleService.read(oAuthUserInfoDto);
 			default:
 				throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		}
@@ -69,9 +71,9 @@ public class OAuthService {
 			case KAKAO:
 				return kakaoService.isExists(member);
 			case GOOGLE:
-				return null;
+				return googleService.isExists(member);
 			case APPLE:
-				return null;
+				return appleService.isExists(member);
 			default:
 				throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		}
@@ -84,9 +86,9 @@ public class OAuthService {
 			case KAKAO:
 				return kakaoService.isExists(oAuthUserInfoDto);
 			case GOOGLE:
-				return null;
+				return googleService.isExists(oAuthUserInfoDto);
 			case APPLE:
-				return null;
+				return appleService.isExists(oAuthUserInfoDto);
 			default:
 				throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		}

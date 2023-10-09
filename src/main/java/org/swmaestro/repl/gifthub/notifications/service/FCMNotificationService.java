@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
+import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.dto.FCMNotificationRequestDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NoticeNotificationDto;
