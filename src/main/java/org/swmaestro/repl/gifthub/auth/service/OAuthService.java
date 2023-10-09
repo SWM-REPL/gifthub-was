@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * OAuth 플랫폼에 따라서 OAuth2Service를 구현한 서비스를 호출하는 클래스
+ */
 public class OAuthService {
 	private final NaverService naverService;
 	private final KakaoService kakaoService;

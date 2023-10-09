@@ -8,7 +8,6 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.config.NaverConfig;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
@@ -27,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@PropertySource("classpath:application.yml")
 public class NaverService implements OAuth2Service {
 	private final NaverConfig naverConfig;
 	private final JsonParser parser = new JsonParser();

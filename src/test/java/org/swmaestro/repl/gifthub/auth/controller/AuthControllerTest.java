@@ -13,24 +13,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.swmaestro.repl.gifthub.auth.dto.AppleDto;
-import org.swmaestro.repl.gifthub.auth.dto.AppleTokenDto;
-import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
 import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
-import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
-import org.swmaestro.repl.gifthub.auth.dto.NaverDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.service.AppleService;
 import org.swmaestro.repl.gifthub.auth.service.AuthService;
-import org.swmaestro.repl.gifthub.auth.service.GoogleService;
-import org.swmaestro.repl.gifthub.auth.service.KakaoService;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
-import org.swmaestro.repl.gifthub.auth.service.NaverService;
 import org.swmaestro.repl.gifthub.auth.service.OAuthService;
 import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
+import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,9 +37,6 @@ public class AuthControllerTest {
 	private ObjectMapper objectMapper;
 
 	@MockBean
-	private MemberService memberService;
-
-	@MockBean
 	private AuthService authService;
 
 	@MockBean
@@ -56,18 +44,6 @@ public class AuthControllerTest {
 
 	@MockBean
 	private JwtProvider jwtProvider;
-
-	@MockBean
-	private KakaoService kakaoService;
-
-	@MockBean
-	private GoogleService googleService;
-
-	@MockBean
-	private NaverService naverService;
-
-	@MockBean
-	private AppleService appleService;
 
 	@MockBean
 	private OAuthService oAuthService;
@@ -86,7 +62,7 @@ public class AuthControllerTest {
 				.build();
 
 		// when
-		// when(memberService.create(signUpDto)).thenReturn(jwtTokenDto);
+		when(authService.signUp(any(SignUpDto.class))).thenReturn(jwtTokenDto);
 
 		// then
 		mockMvc.perform(post("/auth/sign-up")
@@ -137,9 +113,8 @@ public class AuthControllerTest {
 
 	@Test
 	public void kakaoSignInTest() throws Exception {
-		JwtTokenDto kakaoJwtTokenDto = JwtTokenDto.builder()
-				.accessToken("myawesomeKakaojwt")
-				.refreshToken("myawesomeKakaojwt")
+		OAuthTokenDto oAuthTokenDto = OAuthTokenDto.builder()
+				.token("myawesomeKakaojwt")
 				.build();
 
 		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
@@ -147,107 +122,72 @@ public class AuthControllerTest {
 				.refreshToken("myawesomejwt")
 				.build();
 
-		KakaoDto kakaoDto = KakaoDto.builder()
-				.nickname("정인희")
-				.username("dls@gmail.com")
-				.build();
-
-		Member member = Member.builder()
-				.username(kakaoDto.getUsername())
-				.nickname(kakaoDto.getNickname())
-				.build();
-
-		// when(kakaoService.getUserInfo(kakaoJwtTokenDto)).thenReturn(kakaoDto);
-		// when(memberService.read(kakaoDto.getUsername())).thenReturn(member);
-		// when(kakaoService.signIn(kakaoDto)).thenReturn(jwtTokenDto);
+		// when
+		when(authService.signIn(any(OAuthTokenDto.class), any(OAuthPlatform.class))).thenReturn(jwtTokenDto);
 
 		mockMvc.perform(post("/auth/sign-in/kakao")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(kakaoJwtTokenDto)))
+						.content(objectMapper.writeValueAsString(oAuthTokenDto)))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void googleSignInTest() throws Exception {
-
-		JwtTokenDto googleJwtTokenDto = JwtTokenDto.builder()
-				.accessToken("my.awesome.google.jwt")
-				.refreshToken("my.awesome.google.jwt")
+		OAuthTokenDto oAuthTokenDto = OAuthTokenDto.builder()
+				.token("myawesomeKakaojwt")
 				.build();
 
-		GoogleDto googleDto = GoogleDto.builder()
-				.nickname("정인희")
-				.username("dls@gmail.com")
+		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
+				.accessToken("myawesomejwt")
+				.refreshToken("myawesomejwt")
 				.build();
 
-		// when(googleService.getUserInfo(googleJwtTokenDto)).thenReturn(googleDto);
-		// when(googleService.signIn(googleDto)).thenReturn(googleJwtTokenDto);
+		// when
+		when(authService.signIn(any(OAuthTokenDto.class), any(OAuthPlatform.class))).thenReturn(jwtTokenDto);
 
 		mockMvc.perform(post("/auth/sign-in/google")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(googleJwtTokenDto)))
+						.content(objectMapper.writeValueAsString(oAuthTokenDto)))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void naverSignInTest() throws Exception {
-		JwtTokenDto token = JwtTokenDto.builder()
-				.accessToken("accesstoken")
-				.refreshToken("refreshtoken")
+		OAuthTokenDto oAuthTokenDto = OAuthTokenDto.builder()
+				.token("myawesomeKakaojwt")
 				.build();
 
-		Member member = Member.builder()
-				.username("jinlee1703@naver.com")
-				.nickname("이진우")
-				.id(1L)
-				.build();
-		NaverDto naverDto = NaverDto.builder()
-				.email(member.getUsername())
-				.nickname(member.getNickname())
+		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
+				.accessToken("myawesomejwt")
+				.refreshToken("myawesomejwt")
 				.build();
 
-		// when(naverService.getUserInfo(token)).thenReturn(naverDto);
-		// when(naverService.signUp(naverDto)).thenReturn(member);
-		// when(naverService.signIn(naverDto, 1L)).thenReturn(token);
+		// when
+		when(authService.signIn(any(OAuthTokenDto.class), any(OAuthPlatform.class))).thenReturn(jwtTokenDto);
 
 		mockMvc.perform(post("/auth/sign-in/naver")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(token)))
+						.content(objectMapper.writeValueAsString(oAuthTokenDto)))
 				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void appleSignInTest() throws Exception {
-		String idToken = "my.awesome.id_token";
-
-		AppleTokenDto appleTokenDto = AppleTokenDto.builder()
-				.identityToken(idToken)
+		OAuthTokenDto oAuthTokenDto = OAuthTokenDto.builder()
+				.token("myawesomeKakaojwt")
 				.build();
 
-		AppleDto appleDto = AppleDto.builder()
-				.id("my_awesome_id")
-				.email("binarywooo@gmail.com")
-				.nickname("이진우")
+		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
+				.accessToken("myawesomejwt")
+				.refreshToken("myawesomejwt")
 				.build();
 
-		Member member = Member.builder()
-				.username("jinlee1703@naver.com")
-				.nickname("이진우")
-				.id(1L)
-				.build();
-
-		JwtTokenDto token = JwtTokenDto.builder()
-				.accessToken("accesstoken")
-				.refreshToken("refreshtoken")
-				.build();
-
-		// when(appleService.getUserInfo(idToken)).thenReturn(appleDto);
-		// when(appleService.signUp(appleDto)).thenReturn(member);
-		// when(appleService.signIn(appleDto, 1L)).thenReturn(token);
+		// when
+		when(authService.signIn(any(OAuthTokenDto.class), any(OAuthPlatform.class))).thenReturn(jwtTokenDto);
 
 		mockMvc.perform(post("/auth/sign-in/apple")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(appleTokenDto)))
+						.content(objectMapper.writeValueAsString(oAuthTokenDto)))
 				.andExpect(status().isOk());
 	}
 

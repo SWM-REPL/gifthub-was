@@ -94,7 +94,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/sign-in/naver")
-	@Operation(summary = "네이버 로그인 콜백 메서드", description = "네이버 로그인 콜백을 하기 위한 메서드입니다.")
+	@Operation(summary = "네이버 로그인 메서드", description = "네이버 로그인 콜백을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "네이버 로그인 성공"),
 			@ApiResponse(responseCode = "400", description = "네이버 로그인 실패"),

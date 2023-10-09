@@ -8,7 +8,6 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.config.KakaoConfig;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
@@ -26,7 +25,6 @@ import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@PropertySource("classpath:application.yml")
 @RequiredArgsConstructor
 public class KakaoService implements OAuth2Service {
 	private final KakaoConfig kakaoConfig;

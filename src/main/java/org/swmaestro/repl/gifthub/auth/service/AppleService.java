@@ -7,7 +7,6 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,6 @@ import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonParser;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
@@ -35,10 +33,8 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@PropertySource("classpath:application.yml")
 public class AppleService implements OAuth2Service {
 	private final AppleConfig appleConfig;
-	private final JsonParser parser = new JsonParser();
 	private final OAuthRepository oAuthRepository;
 
 	@Override
