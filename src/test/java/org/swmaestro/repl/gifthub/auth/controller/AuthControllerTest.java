@@ -241,9 +241,9 @@ public class AuthControllerTest {
 				.refreshToken("refreshtoken")
 				.build();
 
-		when(appleService.getUserInfo(idToken)).thenReturn(appleDto);
-		when(appleService.signUp(appleDto)).thenReturn(member);
-		when(appleService.signIn(appleDto, 1L)).thenReturn(token);
+		// when(appleService.getUserInfo(idToken)).thenReturn(appleDto);
+		// when(appleService.signUp(appleDto)).thenReturn(member);
+		// when(appleService.signIn(appleDto, 1L)).thenReturn(token);
 
 		mockMvc.perform(post("/auth/sign-in/apple")
 						.contentType(MediaType.APPLICATION_JSON)
