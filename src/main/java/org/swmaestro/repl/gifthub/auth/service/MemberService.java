@@ -37,7 +37,7 @@ public class MemberService {
 				.build();
 	}
 
-	public Optional<Member> create(Member member) {
+	public Member create(Member member) {
 		if (isDuplicateUsername(member.getUsername())) {
 			throw new BusinessException("이미 존재하는 아이디입니다.", StatusEnum.CONFLICT);
 		}

@@ -1,7 +1,5 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
-import java.util.Optional;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
@@ -42,13 +40,8 @@ public class AuthService {
 				.password(passwordEncoder.encode(signUpDto.getPassword()))
 				.build();
 
-		Optional<Member> savedMember = memberService.create(member);
-
-		if (!savedMember.isPresent()) {
-			throw new BusinessException("회원가입에 실패하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		}
-
-		return generateJwtTokenDto(savedMember.get());
+		Member savedMember = memberService.create(member);
+		return generateJwtTokenDto(savedMember);
 	}
 
 	/**
@@ -97,7 +90,7 @@ public class AuthService {
 					.username(memberService.generateOAuthUsername())
 					.build();
 			// 회원 정보 저장
-			member = memberService.create(newMember).get();
+			member = memberService.create(newMember);
 			// oauth 정보 저장
 			oAuth = oAuthService.create(member, userInfo, platform);
 		}
