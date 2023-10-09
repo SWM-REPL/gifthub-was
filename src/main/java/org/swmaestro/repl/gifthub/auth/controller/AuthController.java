@@ -63,9 +63,7 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(409)", description = "이미 존재하는 아이디")
 	})
 	public ResponseEntity<Message> signUp(HttpServletRequest request, @RequestBody SignUpDto signUpDto) {
-		Member member = authService.signUp(signUpDto);
-		SignInDto signInDto = authService.convertMemberToSignInDto(member);
-		JwtTokenDto jwtTokenDto = authService.signIn(signInDto);
+		JwtTokenDto jwtTokenDto = authService.signUp(signUpDto);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())

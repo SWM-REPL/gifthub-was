@@ -31,7 +31,7 @@ public class AuthService {
 	 * 회원가입
 	 * @param signUpDto
 	 */
-	public Member signUp(SignUpDto signUpDto) {
+	public JwtTokenDto signUp(SignUpDto signUpDto) {
 		Member member = Member.builder()
 				.username(signUpDto.getUsername())
 				.password(passwordEncoder.encode(signUpDto.getPassword()))
@@ -43,7 +43,7 @@ public class AuthService {
 			throw new BusinessException("회원가입에 실패하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		}
 
-		return savedMember.get();
+		return generateJwtTokenDto(savedMember.get());
 	}
 
 	/**
@@ -92,13 +92,6 @@ public class AuthService {
 		}
 
 		return generateJwtTokenDto(oAuth.getMember());
-	}
-
-	public SignInDto convertMemberToSignInDto(Member member) {
-		return SignInDto.builder()
-				.username(member.getUsername())
-				.password(member.getPassword())
-				.build();
 	}
 
 	private JwtTokenDto generateJwtTokenDto(Member member) {
