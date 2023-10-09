@@ -11,11 +11,7 @@ import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
-import org.swmaestro.repl.gifthub.auth.service.AppleService;
 import org.swmaestro.repl.gifthub.auth.service.AuthService;
-import org.swmaestro.repl.gifthub.auth.service.GoogleService;
-import org.swmaestro.repl.gifthub.auth.service.KakaoService;
-import org.swmaestro.repl.gifthub.auth.service.NaverService;
 import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -34,15 +30,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Tag(name = "Auth", description = "사용자 인증 관련 API")
 public class AuthController {
-	// private final MemberService memberService;
 	private final AuthService authService;
 	private final RefreshTokenService refreshTokenService;
 	private final JwtProvider jwtProvider;
-	// private final NaverService naverService;
-	private final NaverService naverService;
-	private final KakaoService kakaoService;
-	private final GoogleService googleService;
-	private final AppleService appleService;
 
 	@PostMapping("/sign-up")
 	@Operation(summary = "회원가입 메서드", description = "사용자가 회원가입을 하기 위한 메서드입니다.")

@@ -38,6 +38,7 @@ public class AuthService {
 		Member member = Member.builder()
 				.username(signUpDto.getUsername())
 				.password(passwordEncoder.encode(signUpDto.getPassword()))
+				.nickname(signUpDto.getNickname())
 				.build();
 
 		Member savedMember = memberService.create(member);
