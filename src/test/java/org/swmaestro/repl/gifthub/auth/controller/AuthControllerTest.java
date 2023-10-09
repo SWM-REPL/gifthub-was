@@ -29,6 +29,7 @@ import org.swmaestro.repl.gifthub.auth.service.GoogleService;
 import org.swmaestro.repl.gifthub.auth.service.KakaoService;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.auth.service.NaverService;
+import org.swmaestro.repl.gifthub.auth.service.OAuthService;
 import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 

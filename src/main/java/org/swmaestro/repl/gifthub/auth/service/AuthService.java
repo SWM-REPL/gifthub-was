@@ -8,14 +8,17 @@ import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
+import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
+import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -23,9 +26,11 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 	private final MemberService memberService;
 	private final PasswordEncoder passwordEncoder;
-	private final NaverService naverService;
 	private final JwtProvider jwtProvider;
 	private final OAuthService oAuthService;
+	private final MemberRepository memberRepository;
+	private final RefreshTokenService refreshTokenService;
+	private final DeviceTokenService deviceTokenService;
 
 	/**
 	 * 회원가입
@@ -72,6 +77,12 @@ public class AuthService {
 		return jwtTokenDto;
 	}
 
+	/**
+	 * OAuth 로그인
+	 * @param oAuthTokenDto
+	 * @param platform
+	 * @return
+	 */
 	public JwtTokenDto signIn(OAuthTokenDto oAuthTokenDto, OAuthPlatform platform) {
 		OAuth oAuth;
 		Member member;
@@ -94,6 +105,11 @@ public class AuthService {
 		return generateJwtTokenDto(oAuth.getMember());
 	}
 
+	/**
+	 * JWT 토큰 생성
+	 * @param member
+	 * @return
+	 */
 	private JwtTokenDto generateJwtTokenDto(Member member) {
 		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
 		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
@@ -105,14 +121,19 @@ public class AuthService {
 
 		return jwtTokenDto;
 	}
-	//
-	// @Transactional
-	// public void signOut(String username, SignOutDto signOutDto) {
-	// 	Member member = memberRepository.findByUsername(username);
-	// 	if (member == null) {
-	// 		throw new BusinessException("존재하지 않는 사용자입니다.", StatusEnum.UNAUTHORIZED);
-	// 	}
-	// 	refreshTokenService.deleteRefreshToken(username);
-	// 	deviceTokenService.delete(signOutDto.getDeviceToken());
-	// }
+
+	/**
+	 * 로그아웃
+	 * @param username
+	 * @param signOutDto
+	 */
+	@Transactional
+	public void signOut(String username, SignOutDto signOutDto) {
+		Member member = memberRepository.findByUsername(username);
+		if (member == null) {
+			throw new BusinessException("존재하지 않는 사용자입니다.", StatusEnum.UNAUTHORIZED);
+		}
+		refreshTokenService.deleteRefreshToken(username);
+		deviceTokenService.delete(signOutDto.getDeviceToken());
+	}
 }
