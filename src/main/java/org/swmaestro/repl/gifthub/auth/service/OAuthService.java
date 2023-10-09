@@ -15,13 +15,14 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OAuthService {
 	private final NaverService naverService;
+	private final KakaoService kakaoService;
 
 	public OAuthUserInfoDto getUserInfo(OAuthTokenDto oAuthTokenDto, OAuthPlatform platform) {
 		switch (platform) {
 			case NAVER:
 				return naverService.getUserInfo(oAuthTokenDto);
 			case KAKAO:
-				return null;
+				return kakaoService.getUserInfo(oAuthTokenDto);
 			case GOOGLE:
 				return null;
 			case APPLE:
@@ -36,7 +37,7 @@ public class OAuthService {
 			case NAVER:
 				return naverService.create(member, oAuthUserInfoDto);
 			case KAKAO:
-				return null;
+				return kakaoService.create(member, oAuthUserInfoDto);
 			case GOOGLE:
 				return null;
 			case APPLE:
@@ -51,7 +52,7 @@ public class OAuthService {
 			case NAVER:
 				return naverService.read(oAuthUserInfoDto);
 			case KAKAO:
-				return null;
+				return kakaoService.read(oAuthUserInfoDto);
 			case GOOGLE:
 				return null;
 			case APPLE:
@@ -66,7 +67,7 @@ public class OAuthService {
 			case NAVER:
 				return naverService.isExists(member);
 			case KAKAO:
-				return null;
+				return kakaoService.isExists(member);
 			case GOOGLE:
 				return null;
 			case APPLE:
@@ -81,7 +82,7 @@ public class OAuthService {
 			case NAVER:
 				return naverService.isExists(oAuthUserInfoDto);
 			case KAKAO:
-				return null;
+				return kakaoService.isExists(oAuthUserInfoDto);
 			case GOOGLE:
 				return null;
 			case APPLE:

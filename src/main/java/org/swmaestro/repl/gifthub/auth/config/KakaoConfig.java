@@ -7,9 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Component
-@ConfigurationProperties(prefix = "oauth2.naver")
+@ConfigurationProperties(prefix = "oauth2.kakao")
 @Getter
 @Setter
-public class NaverConfig {
+public class KakaoConfig {
 	private String userInfoUri;
 }

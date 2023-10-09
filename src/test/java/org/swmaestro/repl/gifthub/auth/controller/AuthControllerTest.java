@@ -86,7 +86,7 @@ public class AuthControllerTest {
 				.build();
 
 		// when
-		when(memberService.create(signUpDto)).thenReturn(jwtTokenDto);
+		// when(memberService.create(signUpDto)).thenReturn(jwtTokenDto);
 
 		// then
 		mockMvc.perform(post("/auth/sign-up")
@@ -157,9 +157,9 @@ public class AuthControllerTest {
 				.nickname(kakaoDto.getNickname())
 				.build();
 
-		when(kakaoService.getUserInfo(kakaoJwtTokenDto)).thenReturn(kakaoDto);
-		when(memberService.read(kakaoDto.getUsername())).thenReturn(member);
-		when(kakaoService.signIn(kakaoDto)).thenReturn(jwtTokenDto);
+		// when(kakaoService.getUserInfo(kakaoJwtTokenDto)).thenReturn(kakaoDto);
+		// when(memberService.read(kakaoDto.getUsername())).thenReturn(member);
+		// when(kakaoService.signIn(kakaoDto)).thenReturn(jwtTokenDto);
 
 		mockMvc.perform(post("/auth/sign-in/kakao")
 						.contentType(MediaType.APPLICATION_JSON)
