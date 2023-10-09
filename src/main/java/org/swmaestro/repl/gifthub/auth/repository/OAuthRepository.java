@@ -9,4 +9,6 @@ import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 
 public interface OAuthRepository extends JpaRepository<OAuth, Long> {
 	Optional<OAuth> findByMemberAndPlatform(Member member, OAuthPlatform platform);
+
+	Optional<OAuth> findByPlatformAndPlatformId(OAuthPlatform platform, String platformId);
 }

@@ -13,17 +13,15 @@ import org.swmaestro.repl.gifthub.auth.dto.AppleDto;
 import org.swmaestro.repl.gifthub.auth.dto.AppleTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
 import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
-import org.swmaestro.repl.gifthub.auth.dto.NaverDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuth2UserInfoDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.service.AppleService;
-import org.swmaestro.repl.gifthub.auth.service.AuthService;
 import org.swmaestro.repl.gifthub.auth.service.GoogleService;
 import org.swmaestro.repl.gifthub.auth.service.KakaoService;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.auth.service.NaverService;
 import org.swmaestro.repl.gifthub.auth.service.OAuthService;
 import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
@@ -50,6 +48,7 @@ public class AuthController {
 	private final AuthService authService;
 	private final RefreshTokenService refreshTokenService;
 	private final JwtProvider jwtProvider;
+	// private final NaverService naverService;
 	private final NaverService naverService;
 	private final KakaoService kakaoService;
 	private final GoogleService googleService;
@@ -122,7 +121,8 @@ public class AuthController {
 			@ApiResponse(responseCode = "400", description = "네이버 로그인 실패"),
 	})
 	public ResponseEntity<Message> naverSignIn(HttpServletRequest request, @RequestBody TokenDto token) throws IOException {
-		NaverDto naverDto = naverService.getUserInfo(token);
+		OAuth2UserInfoDto oAuth2UserInfoDto = naverService.getUserInfo(token);
+		authService.signIn(naverService);
 		Member member = naverService.signUp(naverDto);
 		oAuthService.save(member, OAuthPlatform.NAVER, naverDto.getId());
 		TokenDto tokenDto = naverService.signIn(naverDto, member.getId());
