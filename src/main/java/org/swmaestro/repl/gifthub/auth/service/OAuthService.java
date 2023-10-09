@@ -23,77 +23,52 @@ public class OAuthService {
 	private final AppleService appleService;
 
 	public OAuthUserInfoDto getUserInfo(OAuthTokenDto oAuthTokenDto, OAuthPlatform platform) {
-		switch (platform) {
-			case NAVER:
-				return naverService.getUserInfo(oAuthTokenDto);
-			case KAKAO:
-				return kakaoService.getUserInfo(oAuthTokenDto);
-			case GOOGLE:
-				return googleService.getUserInfo(oAuthTokenDto);
-			case APPLE:
-				return appleService.getUserInfo(oAuthTokenDto);
-			default:
-				throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		}
+		return switch (platform) {
+			case NAVER -> naverService.getUserInfo(oAuthTokenDto);
+			case KAKAO -> kakaoService.getUserInfo(oAuthTokenDto);
+			case GOOGLE -> googleService.getUserInfo(oAuthTokenDto);
+			case APPLE -> appleService.getUserInfo(oAuthTokenDto);
+			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
+		};
 	}
 
 	public OAuth create(Member member, OAuthUserInfoDto oAuthUserInfoDto, OAuthPlatform platform) {
-		switch (platform) {
-			case NAVER:
-				return naverService.create(member, oAuthUserInfoDto);
-			case KAKAO:
-				return kakaoService.create(member, oAuthUserInfoDto);
-			case GOOGLE:
-				return googleService.create(member, oAuthUserInfoDto);
-			case APPLE:
-				return appleService.create(member, oAuthUserInfoDto);
-			default:
-				throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		}
+		return switch (platform) {
+			case NAVER -> naverService.create(member, oAuthUserInfoDto);
+			case KAKAO -> kakaoService.create(member, oAuthUserInfoDto);
+			case GOOGLE -> googleService.create(member, oAuthUserInfoDto);
+			case APPLE -> appleService.create(member, oAuthUserInfoDto);
+			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
+		};
 	}
 
 	public OAuth read(OAuthUserInfoDto oAuthUserInfoDto, OAuthPlatform platform) {
-		switch (platform) {
-			case NAVER:
-				return naverService.read(oAuthUserInfoDto);
-			case KAKAO:
-				return kakaoService.read(oAuthUserInfoDto);
-			case GOOGLE:
-				return googleService.read(oAuthUserInfoDto);
-			case APPLE:
-				return googleService.read(oAuthUserInfoDto);
-			default:
-				throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		}
+		return switch (platform) {
+			case NAVER -> naverService.read(oAuthUserInfoDto);
+			case KAKAO -> kakaoService.read(oAuthUserInfoDto);
+			case GOOGLE -> googleService.read(oAuthUserInfoDto);
+			case APPLE -> appleService.read(oAuthUserInfoDto);
+			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
+		};
 	}
 
 	public boolean isExists(Member member, OAuthPlatform platform) {
-		switch (platform) {
-			case NAVER:
-				return naverService.isExists(member);
-			case KAKAO:
-				return kakaoService.isExists(member);
-			case GOOGLE:
-				return googleService.isExists(member);
-			case APPLE:
-				return appleService.isExists(member);
-			default:
-				throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		}
+		return switch (platform) {
+			case NAVER -> naverService.isExists(member);
+			case KAKAO -> kakaoService.isExists(member);
+			case GOOGLE -> googleService.isExists(member);
+			case APPLE -> appleService.isExists(member);
+			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
+		};
 	}
 
 	public boolean isExists(OAuthUserInfoDto oAuthUserInfoDto, OAuthPlatform platform) {
-		switch (platform) {
-			case NAVER:
-				return naverService.isExists(oAuthUserInfoDto);
-			case KAKAO:
-				return kakaoService.isExists(oAuthUserInfoDto);
-			case GOOGLE:
-				return googleService.isExists(oAuthUserInfoDto);
-			case APPLE:
-				return appleService.isExists(oAuthUserInfoDto);
-			default:
-				throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		}
+		return switch (platform) {
+			case NAVER -> naverService.isExists(oAuthUserInfoDto);
+			case KAKAO -> kakaoService.isExists(oAuthUserInfoDto);
+			case GOOGLE -> googleService.isExists(oAuthUserInfoDto);
+			case APPLE -> appleService.isExists(oAuthUserInfoDto);
+			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
+		};
 	}
 }
