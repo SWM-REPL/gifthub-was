@@ -3,7 +3,7 @@ package org.swmaestro.repl.gifthub.auth.service;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.RefreshToken;
 import org.swmaestro.repl.gifthub.auth.repository.RefreshTokenRepository;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -22,11 +22,11 @@ public class RefreshTokenService {
 	private final RefreshTokenRepository refreshTokenRepository;
 
 	@Transactional
-	public void storeRefreshToken(TokenDto tokenDto, String username) {
+	public void storeRefreshToken(JwtTokenDto jwtTokenDto, String username) {
 		RefreshToken refreshToken = RefreshToken.builder()
-				.token(tokenDto.getRefreshToken())
+				.token(jwtTokenDto.getRefreshToken())
 				.username(username)
-				.createdAt(jwtProvider.getIssuedAt(tokenDto.getRefreshToken()))
+				.createdAt(jwtProvider.getIssuedAt(jwtTokenDto.getRefreshToken()))
 				.build();
 
 		if (refreshTokenRepository.findByUsername(username).isPresent()) {

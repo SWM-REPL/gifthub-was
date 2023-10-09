@@ -11,8 +11,8 @@ import java.net.URL;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.config.NaverConfig;
-import org.swmaestro.repl.gifthub.auth.dto.OAuth2UserInfoDto;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.repository.OAuthRepository;
@@ -34,15 +34,15 @@ public class NaverService implements OAuth2Service {
 	private final OAuthRepository oAuthRepository;
 
 	@Override
-	public OAuth2UserInfoDto getUserInfo(TokenDto tokenDto) {
+	public OAuthUserInfoDto getUserInfo(OAuthTokenDto oAuthTokenDto) {
 
 		try {
-			String accessToken = tokenDto.getAccessToken();
+			String token = oAuthTokenDto.getToken();
 
 			URL url = new URL(naverConfig.getUserInfoUri());
 			HttpURLConnection con = (HttpURLConnection)url.openConnection();
 			con.setRequestMethod("GET");
-			con.setRequestProperty("Authorization", "Bearer " + accessToken);
+			con.setRequestProperty("Authorization", "Bearer " + token);
 
 			int responseCode = con.getResponseCode();
 			BufferedReader br;
@@ -67,7 +67,7 @@ public class NaverService implements OAuth2Service {
 			String email = getStringOrNull(responseElement, "email");
 			String nickname = getStringOrNull(responseElement, "nickname");
 
-			return OAuth2UserInfoDto.builder()
+			return OAuthUserInfoDto.builder()
 					.id(id)
 					.email(email)
 					.nickname(nickname)
@@ -82,20 +82,30 @@ public class NaverService implements OAuth2Service {
 	}
 
 	@Override
-	public OAuth save(Member member, OAuth2UserInfoDto oAuth2UserInfoDto) {
+	public OAuth create(Member member, OAuthUserInfoDto oAuthUserInfoDto) {
 		if (isExists(member)) {
-			throw new BusinessException("이미 존재하는 OAuth입니다.", StatusEnum.CONFLICT);
+			throw new BusinessException("이미 연동된 계정이 존재하는 플랫폼입니다.", StatusEnum.CONFLICT);
+		}
+
+		if (isExists(oAuthUserInfoDto)) {
+			throw new BusinessException("이미 다른 계정과 연동된 계정입니다.", StatusEnum.CONFLICT);
 		}
 
 		OAuth oAuth = OAuth.builder()
 				.member(member)
 				.platform(OAuthPlatform.NAVER)
-				.platformId(oAuth2UserInfoDto.getId())
-				.email(oAuth2UserInfoDto.getEmail())
-				.nickname(oAuth2UserInfoDto.getNickname())
+				.platformId(oAuthUserInfoDto.getId())
+				.email(oAuthUserInfoDto.getEmail())
+				.nickname(oAuthUserInfoDto.getNickname())
 				.build();
 
 		return oAuthRepository.save(oAuth);
+	}
+
+	@Override
+	public OAuth read(OAuthUserInfoDto oAuthUserInfoDto) {
+		return oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.NAVER, oAuthUserInfoDto.getId())
+				.orElseThrow(() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND));
 	}
 
 	@Override
@@ -104,8 +114,8 @@ public class NaverService implements OAuth2Service {
 	}
 
 	@Override
-	public boolean isExists(OAuth2UserInfoDto oAuth2UserInfoDto) {
-		return oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.NAVER, oAuth2UserInfoDto.getId()).isPresent();
+	public boolean isExists(OAuthUserInfoDto oAuthUserInfoDto) {
+		return oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.NAVER, oAuthUserInfoDto.getId()).isPresent();
 	}
 
 	private String getStringOrNull(JsonElement element, String fieldName) {

@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -35,7 +35,7 @@ public class GoogleService {
 	@Value("${google.user_info_uri}")
 	private String userInfoUri;
 
-	public GoogleDto getUserInfo(TokenDto tokenDto) {
+	public GoogleDto getUserInfo(JwtTokenDto jwtTokenDto) {
 		GoogleDto googleDto = null;
 
 		try {
@@ -45,7 +45,7 @@ public class GoogleService {
 			conn.setRequestMethod("GET");
 			conn.setDoOutput(true);
 
-			conn.setRequestProperty("Authorization", "Bearer " + tokenDto.getAccessToken());
+			conn.setRequestProperty("Authorization", "Bearer " + jwtTokenDto.getAccessToken());
 
 			int responseCode = conn.getResponseCode();
 
@@ -80,10 +80,10 @@ public class GoogleService {
 		return googleDto;
 	}
 
-	public TokenDto signIn(GoogleDto googleDto) {
+	public JwtTokenDto signIn(GoogleDto googleDto) {
 		if (memberService.isDuplicateUsername(googleDto.getUsername())) {
-			TokenDto tokenDto = signInWithExistingMember(googleDto);
-			return tokenDto;
+			JwtTokenDto jwtTokenDto = signInWithExistingMember(googleDto);
+			return jwtTokenDto;
 		}
 		Member member = convertGoogleDtotoMember(googleDto);
 
@@ -92,17 +92,17 @@ public class GoogleService {
 		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
 		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
 
-		TokenDto tokenDto = TokenDto.builder()
+		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
 
-		refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
+		refreshTokenService.storeRefreshToken(jwtTokenDto, member.getUsername());
 
-		return tokenDto;
+		return jwtTokenDto;
 	}
 
-	public TokenDto signInWithExistingMember(GoogleDto googleDto) {
+	public JwtTokenDto signInWithExistingMember(GoogleDto googleDto) {
 		Member member = memberRepository.findByUsername(googleDto.getUsername());
 		if (member == null) {
 			throw new BusinessException("존재하지 않는 아이디입니다.", StatusEnum.BAD_REQUEST);
@@ -110,14 +110,14 @@ public class GoogleService {
 		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
 		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
 
-		TokenDto tokenDto = TokenDto.builder()
+		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
 
-		refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
+		refreshTokenService.storeRefreshToken(jwtTokenDto, member.getUsername());
 
-		return tokenDto;
+		return jwtTokenDto;
 	}
 
 	public Member convertGoogleDtotoMember(GoogleDto googleDto) {

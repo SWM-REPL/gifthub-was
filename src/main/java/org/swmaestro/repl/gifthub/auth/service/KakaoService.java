@@ -11,8 +11,8 @@ import java.net.URL;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -35,7 +35,7 @@ public class KakaoService {
 	@Value("${kakao.user_info_uri}")
 	private String userInfoUri;
 
-	public KakaoDto getUserInfo(TokenDto tokenDto) {
+	public KakaoDto getUserInfo(JwtTokenDto jwtTokenDto) {
 
 		KakaoDto kakaoDto = null;
 
@@ -47,7 +47,7 @@ public class KakaoService {
 			conn.setRequestMethod("POST");
 			conn.setDoOutput(true);
 
-			conn.setRequestProperty("Authorization", "Bearer " + tokenDto.getAccessToken());
+			conn.setRequestProperty("Authorization", "Bearer " + jwtTokenDto.getAccessToken());
 
 			int responseCode = conn.getResponseCode();
 
@@ -88,10 +88,10 @@ public class KakaoService {
 		return kakaoDto;
 	}
 
-	public TokenDto signIn(KakaoDto kakaoDto) {
+	public JwtTokenDto signIn(KakaoDto kakaoDto) {
 		if (memberService.isDuplicateUsername(kakaoDto.getUsername())) {
-			TokenDto tokenDto = signInWithExistingMember(kakaoDto);
-			return tokenDto;
+			JwtTokenDto jwtTokenDto = signInWithExistingMember(kakaoDto);
+			return jwtTokenDto;
 		}
 		Member member = convertKakaoDtotoMember(kakaoDto);
 
@@ -100,17 +100,17 @@ public class KakaoService {
 		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
 		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
 
-		TokenDto tokenDto = TokenDto.builder()
+		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
 
-		refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
+		refreshTokenService.storeRefreshToken(jwtTokenDto, member.getUsername());
 
-		return tokenDto;
+		return jwtTokenDto;
 	}
 
-	public TokenDto signInWithExistingMember(KakaoDto kakaoDto) {
+	public JwtTokenDto signInWithExistingMember(KakaoDto kakaoDto) {
 		Member member = memberRepository.findByUsername(kakaoDto.getUsername());
 		if (member == null) {
 			throw new BusinessException("존재하지 않는 아이디입니다.", StatusEnum.NOT_FOUND);
@@ -118,14 +118,14 @@ public class KakaoService {
 		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
 		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
 
-		TokenDto tokenDto = TokenDto.builder()
+		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
 
-		refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
+		refreshTokenService.storeRefreshToken(jwtTokenDto, member.getUsername());
 
-		return tokenDto;
+		return jwtTokenDto;
 	}
 
 	public Member convertKakaoDtotoMember(KakaoDto kakaoDto) {

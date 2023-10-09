@@ -3,6 +3,7 @@ package org.swmaestro.repl.gifthub.auth.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,8 +13,6 @@ import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateResponseDto;
-import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -51,26 +50,6 @@ public class MemberService {
 
 		Member encodedMember = passwordEncryption(member);
 		return memberRepository.save(encodedMember);
-
-		String accessToken = jwtProvider.generateToken(encodedMember.getUsername(), encodedMember.getId());
-		String refreshToken = jwtProvider.generateRefreshToken(encodedMember.getUsername(), encodedMember.getId());
-
-		TokenDto tokenDto = TokenDto.builder()
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
-				.build();
-
-		refreshTokenService.storeRefreshToken(tokenDto, encodedMember.getUsername());
-
-		return tokenDto;
-	}
-
-	public Member convertSignUpDTOtoMember(SignUpDto signUpDTO) {
-		return Member.builder()
-				.username(signUpDTO.getUsername())
-				.password(signUpDTO.getPassword())
-				.nickname(signUpDTO.getNickname())
-				.build();
 	}
 
 	public boolean isDuplicateUsername(String username) {
@@ -160,4 +139,7 @@ public class MemberService {
 				.build();
 	}
 
+	public String generateOAuthUsername() {
+		return UUID.randomUUID().toString();
+	}
 }

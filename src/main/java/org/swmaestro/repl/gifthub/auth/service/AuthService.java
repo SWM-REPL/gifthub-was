@@ -4,10 +4,14 @@ import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.OAuth;
+import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
@@ -21,6 +25,7 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final NaverService naverService;
 	private final JwtProvider jwtProvider;
+	private final OAuthService oAuthService;
 
 	/**
 	 * 회원가입
@@ -45,7 +50,7 @@ public class AuthService {
 	 * 일반 로그인
 	 * @param signInDto
 	 */
-	public TokenDto signIn(SignInDto signInDto) {
+	public JwtTokenDto signIn(SignInDto signInDto) {
 		Member member = memberService.read(signInDto.getUsername());
 
 		if (member == null) {
@@ -59,63 +64,54 @@ public class AuthService {
 		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
 		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
 
-		TokenDto tokenDto = TokenDto.builder()
+		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
 
-		return tokenDto;
+		return jwtTokenDto;
 	}
 
-	// /**
-	//  * 소셜 로그인(회원가입)
-	//  * @param oAuth2UserInfoDto
-	//  * @param platform
-	//  * @return
-	//  */
-	// public TokenDto signIn(OAuth2UserInfoDto oAuth2UserInfoDto, OAuthPlatform platform) {
-	// 	boolean isExists = false;
-	//
-	// 	switch (platform) {
-	// 		case NAVER:
-	// 			isExists = naverService.isExists(oAuth2UserInfoDto);
-	// 			break;
-	// 		default:
-	// 			throw new IllegalArgumentException("지원하지 않는 플랫폼입니다.");
-	// 	}
-	//
-	// 	if (!isExists) {
-	// 		naverService.save()
-	// 	}
-	// }
+	public JwtTokenDto signIn(OAuthTokenDto oAuthTokenDto, OAuthPlatform platform) {
+		OAuth oAuth;
+		Member member;
 
-	private SignInDto convertMemberToSignInDto(Member member) {
+		OAuthUserInfoDto userInfo = oAuthService.getUserInfo(oAuthTokenDto, platform);
+		if (oAuthService.isExists(userInfo, platform)) {
+			// 존재할 경우 -> 로그인
+			oAuth = oAuthService.read(userInfo, platform);
+		} else {
+			// 존재하지 않을 경우 -> 회원 가입 -> 로그인
+			Member newMember = Member.builder()
+					.username(memberService.generateOAuthUsername())
+					.build();
+			// 회원 정보 저장
+			member = memberService.create(newMember).get();
+			// oauth 정보 저장
+			oAuth = oAuthService.create(member, userInfo, platform);
+		}
+
+		return generateJwtTokenDto(oAuth.getMember());
+	}
+
+	public SignInDto convertMemberToSignInDto(Member member) {
 		return SignInDto.builder()
 				.username(member.getUsername())
 				.password(member.getPassword())
 				.build();
 	}
 
-	// public TokenDto signIn(SignInDto loginDto) {
-	// 	Member member = memberRepository.findByUsername(loginDto.getUsername());
-	// 	if (member == null) {
-	// 		throw new BusinessException("존재하지 않는 아이디입니다.", StatusEnum.BAD_REQUEST);
-	// 	}
-	// 	if (!passwordEncoder.matches(loginDto.getPassword(), member.getPassword())) {
-	// 		throw new BusinessException("비밀번호가 일치하지 않습니다.", StatusEnum.BAD_REQUEST);
-	// 	}
-	// 	String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
-	// 	String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
-	//
-	// 	TokenDto tokenDto = TokenDto.builder()
-	// 			.accessToken(accessToken)
-	// 			.refreshToken(refreshToken)
-	// 			.build();
-	//
-	// 	refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
-	//
-	// 	return tokenDto;
-	// }
+	private JwtTokenDto generateJwtTokenDto(Member member) {
+		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
+		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
+
+		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
+				.accessToken(accessToken)
+				.refreshToken(refreshToken)
+				.build();
+
+		return jwtTokenDto;
+	}
 	//
 	// @Transactional
 	// public void signOut(String username, SignOutDto signOutDto) {

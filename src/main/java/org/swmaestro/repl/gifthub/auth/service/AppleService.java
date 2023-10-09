@@ -13,7 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.swmaestro.repl.gifthub.auth.dto.AppleDto;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -107,8 +107,8 @@ public class AppleService {
 		}
 	}
 
-	public TokenDto signIn(AppleDto appleDto, Long userId) {
-		return TokenDto.builder()
+	public JwtTokenDto signIn(AppleDto appleDto, Long userId) {
+		return JwtTokenDto.builder()
 				.accessToken(jwtProvider.generateToken(appleDto.getEmail(), userId))
 				.refreshToken(jwtProvider.generateRefreshToken(appleDto.getEmail(), userId))
 				.build();
