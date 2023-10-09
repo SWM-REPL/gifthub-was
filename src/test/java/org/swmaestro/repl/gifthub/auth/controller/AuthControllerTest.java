@@ -180,8 +180,8 @@ public class AuthControllerTest {
 				.username("dls@gmail.com")
 				.build();
 
-		when(googleService.getUserInfo(googleJwtTokenDto)).thenReturn(googleDto);
-		when(googleService.signIn(googleDto)).thenReturn(googleJwtTokenDto);
+		// when(googleService.getUserInfo(googleJwtTokenDto)).thenReturn(googleDto);
+		// when(googleService.signIn(googleDto)).thenReturn(googleJwtTokenDto);
 
 		mockMvc.perform(post("/auth/sign-in/google")
 						.contentType(MediaType.APPLICATION_JSON)

@@ -25,7 +25,7 @@ import org.swmaestro.repl.gifthub.util.JwtProvider;
 @ExtendWith(MockitoExtension.class)
 class MemberServiceTest {
 	@Mock
-	private MemberServiceImpl memberService;
+	private MemberService memberService;
 
 	@Mock
 	private MemberRepository memberRepository;
