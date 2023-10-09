@@ -2,6 +2,7 @@ package org.swmaestro.repl.gifthub.auth.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.swmaestro.repl.gifthub.auth.config.AuthConfig;
 import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
@@ -29,6 +30,7 @@ public class AuthService {
 	private final MemberRepository memberRepository;
 	private final RefreshTokenService refreshTokenService;
 	private final DeviceTokenService deviceTokenService;
+	private final AuthConfig authConfig;
 
 	/**
 	 * 회원가입
@@ -89,6 +91,7 @@ public class AuthService {
 			// 존재하지 않을 경우 -> 회원 가입 -> 로그인
 			Member newMember = Member.builder()
 					.username(memberService.generateOAuthUsername())
+					.nickname(authConfig.getDefaultNickname())
 					.build();
 			// 회원 정보 저장
 			member = memberService.create(newMember);
