@@ -1,10 +1,6 @@
 package org.swmaestro.repl.gifthub.vouchers.service;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -108,46 +104,5 @@ public class VoucherSaveService {
 				voucherSaveRequestDto.getBrandName(),
 				voucherSaveRequestDto.getProductName());
 	}
-
-	private VoucherSaveRequestDto preprocessing(VoucherSaveRequestDto voucherSaveRequestDto) {
-		Pattern pattern = Pattern.compile("[\\d,]+(?=원)");
-		String productName = voucherSaveRequestDto.getProductName();
-		Matcher matcher = pattern.matcher(productName);
-
-		while (matcher.find()) {
-			String match = matcher.group();
-			int number = Integer.parseInt(match.replace(",", ""));
-
-			String koreanNumber = convertNumberToKorean(number);
-
-			productName = productName.replace(match, koreanNumber);
-			voucherSaveRequestDto.setProductName(productName);
-		}
-		return voucherSaveRequestDto;
-	}
-
-	private String convertNumberToKorean(int number) {
-		Map<Integer, String> koreanUnits = new HashMap<>();
-		koreanUnits.put(100, "백");
-		koreanUnits.put(1000, "천");
-		koreanUnits.put(10000, "만");
-
-		String result = "";
-		int start = 1000;
-		int x = number / start;
-		int y = number % start;
-
-		if (x >= 10) {
-			start *= 10;
-			x = number / start;
-			y = number % start;
-		}
-
-		if (String.valueOf(y).charAt(0) == '0') {
-			result = x + koreanUnits.get(start);
-		} else {
-			result = x + koreanUnits.get(start) + String.valueOf(y).charAt(0) + koreanUnits.get(start / 10);
-		}
-		return result;
-	}
 }
+
