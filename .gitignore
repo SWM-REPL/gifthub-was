@@ -54,3 +54,7 @@ src/.DS_Store
 
 # Actions Secrets
 actions-secrets.yml
+
+# log
+*.log
+*.jfr
