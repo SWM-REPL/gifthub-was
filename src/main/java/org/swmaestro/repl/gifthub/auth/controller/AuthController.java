@@ -1,38 +1,22 @@
 package org.swmaestro.repl.gifthub.auth.controller;
 
-import java.io.IOException;
-import java.text.ParseException;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.swmaestro.repl.gifthub.auth.dto.AppleDto;
-import org.swmaestro.repl.gifthub.auth.dto.AppleTokenDto;
-import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
-import org.swmaestro.repl.gifthub.auth.dto.KakaoDto;
-import org.swmaestro.repl.gifthub.auth.dto.NaverDto;
+import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.service.AppleService;
 import org.swmaestro.repl.gifthub.auth.service.AuthService;
-import org.swmaestro.repl.gifthub.auth.service.GoogleService;
-import org.swmaestro.repl.gifthub.auth.service.KakaoService;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
-import org.swmaestro.repl.gifthub.auth.service.NaverService;
-import org.swmaestro.repl.gifthub.auth.service.OAuthService;
 import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.Message;
 import org.swmaestro.repl.gifthub.util.SuccessMessage;
-
-import com.nimbusds.jose.JOSEException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -46,15 +30,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Tag(name = "Auth", description = "사용자 인증 관련 API")
 public class AuthController {
-	private final MemberService memberService;
 	private final AuthService authService;
 	private final RefreshTokenService refreshTokenService;
 	private final JwtProvider jwtProvider;
-	private final NaverService naverService;
-	private final KakaoService kakaoService;
-	private final GoogleService googleService;
-	private final AppleService appleService;
-	private final OAuthService oAuthService;
 
 	@PostMapping("/sign-up")
 	@Operation(summary = "회원가입 메서드", description = "사용자가 회원가입을 하기 위한 메서드입니다.")
@@ -65,11 +43,11 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(409)", description = "이미 존재하는 아이디")
 	})
 	public ResponseEntity<Message> signUp(HttpServletRequest request, @RequestBody SignUpDto signUpDto) {
-		TokenDto tokenDto = memberService.create(signUpDto);
+		JwtTokenDto jwtTokenDto = authService.signUp(signUpDto);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
-						.data(tokenDto)
+						.data(jwtTokenDto)
 						.build());
 	}
 
@@ -81,12 +59,12 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(400-2)", description = "비밀번호 불일치"),
 			@ApiResponse(responseCode = "400(409)", description = "이미 존재하는 아이디")
 	})
-	public ResponseEntity<Message> signIn(HttpServletRequest request, @RequestBody SignInDto loginDto) {
-		TokenDto tokenDto = authService.signIn(loginDto);
+	public ResponseEntity<Message> signIn(HttpServletRequest request, @RequestBody SignInDto signInDto) {
+		JwtTokenDto jwtTokenDto = authService.signIn(signInDto);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
-						.data(tokenDto)
+						.data(jwtTokenDto)
 						.build());
 	}
 
@@ -100,36 +78,33 @@ public class AuthController {
 		String newAccessToken = refreshTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken);
 		String newRefreshToken = refreshTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken);
 
-		TokenDto tokenDto = TokenDto.builder()
+		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
 				.accessToken(newAccessToken)
 				.refreshToken(newRefreshToken)
 				.build();
 
 		refreshToken = refreshToken.substring(7);
-		refreshTokenService.storeRefreshToken(tokenDto, jwtProvider.getUsername(refreshToken));
+		refreshTokenService.storeRefreshToken(jwtTokenDto, jwtProvider.getUsername(refreshToken));
 
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
-						.data(tokenDto)
+						.data(jwtTokenDto)
 						.build());
 	}
 
 	@PostMapping("/sign-in/naver")
-	@Operation(summary = "네이버 로그인 콜백 메서드", description = "네이버 로그인 콜백을 하기 위한 메서드입니다.")
+	@Operation(summary = "네이버 로그인 메서드", description = "네이버 로그인 콜백을 하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "네이버 로그인 성공"),
 			@ApiResponse(responseCode = "400", description = "네이버 로그인 실패"),
 	})
-	public ResponseEntity<Message> naverSignIn(HttpServletRequest request, @RequestBody TokenDto token) throws IOException {
-		NaverDto naverDto = naverService.getUserInfo(token);
-		Member member = naverService.signUp(naverDto);
-		oAuthService.save(member, OAuthPlatform.NAVER, naverDto.getId());
-		TokenDto tokenDto = naverService.signIn(naverDto, member.getId());
+	public ResponseEntity<Message> naverSignIn(HttpServletRequest request, @RequestBody OAuthTokenDto oAuthTokenDto) {
+		JwtTokenDto jwtTokenDto = authService.signIn(oAuthTokenDto, OAuthPlatform.KAKAO);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
-						.data(tokenDto)
+						.data(jwtTokenDto)
 						.build());
 	}
 
@@ -141,15 +116,12 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(400-2)", description = "잘못된 URL 요쳥"),
 			@ApiResponse(responseCode = "400(500)", description = "HTTP 연결 수행 실패"),
 	})
-	public ResponseEntity<Message> kakaoSignIn(HttpServletRequest request, @RequestBody TokenDto dto) throws IOException {
-		KakaoDto kakaoDto = kakaoService.getUserInfo(dto);
-		TokenDto tokenDto = kakaoService.signIn(kakaoDto);
-		Member member = memberService.read(kakaoDto.getUsername());
-		oAuthService.save(member, OAuthPlatform.KAKAO, kakaoDto.getId());
+	public ResponseEntity<Message> kakaoSignIn(HttpServletRequest request, @RequestBody OAuthTokenDto oAuthTokenDto) {
+		JwtTokenDto jwtTokenDto = authService.signIn(oAuthTokenDto, OAuthPlatform.KAKAO);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
-						.data(tokenDto)
+						.data(jwtTokenDto)
 						.build());
 	}
 
@@ -160,15 +132,12 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(400)", description = "잘못된 프로토콜 혹은 URL 요쳥"),
 			@ApiResponse(responseCode = "400(500)", description = "HTTP 연결 수행 실패"),
 	})
-	public ResponseEntity<Message> googleSignIn(HttpServletRequest request, @RequestBody TokenDto dto) throws IOException {
-		GoogleDto googleDto = googleService.getUserInfo(dto);
-		TokenDto tokenDto = googleService.signIn(googleDto);
-		Member member = memberService.read(googleDto.getUsername());
-		oAuthService.save(member, OAuthPlatform.GOOGLE, googleDto.getId());
+	public ResponseEntity<Message> googleSignIn(HttpServletRequest request, @RequestBody OAuthTokenDto oAuthTokenDto) {
+		JwtTokenDto jwtTokenDto = authService.signIn(oAuthTokenDto, OAuthPlatform.GOOGLE);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
-						.data(tokenDto)
+						.data(jwtTokenDto)
 						.build());
 	}
 
@@ -178,18 +147,12 @@ public class AuthController {
 			@ApiResponse(responseCode = "200", description = "애플 로그인 성공"),
 			@ApiResponse(responseCode = "400", description = "애플 로그인 실패"),
 	})
-	public ResponseEntity<Message> appleSignIn(HttpServletRequest request, @RequestBody AppleTokenDto appleTestDto) throws
-			IOException,
-			ParseException,
-			JOSEException {
-		AppleDto appleDto = appleService.getUserInfo(appleTestDto.getIdentityToken());
-		Member member = appleService.signUp(appleDto);
-		oAuthService.save(member, OAuthPlatform.APPLE, appleDto.getId());
-		TokenDto tokenDto = appleService.signIn(appleDto, member.getId());
+	public ResponseEntity<Message> appleSignIn(HttpServletRequest request, @RequestBody OAuthTokenDto oAuthTokenDto) {
+		JwtTokenDto jwtTokenDto = authService.signIn(oAuthTokenDto, OAuthPlatform.APPLE);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
-						.data(tokenDto)
+						.data(jwtTokenDto)
 						.build());
 	}
 

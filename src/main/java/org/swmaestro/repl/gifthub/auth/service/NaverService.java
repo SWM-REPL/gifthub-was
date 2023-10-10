@@ -4,16 +4,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.dto.NaverDto;
-import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
+import org.swmaestro.repl.gifthub.auth.config.NaverConfig;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.util.JwtProvider;
+import org.swmaestro.repl.gifthub.auth.entity.OAuth;
+import org.swmaestro.repl.gifthub.auth.repository.OAuthRepository;
+import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
+import org.swmaestro.repl.gifthub.exception.BusinessException;
+import org.swmaestro.repl.gifthub.util.StatusEnum;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -22,75 +26,98 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-@PropertySource("classpath:application.yml")
-public class NaverService {
-	private final MemberService memberService;
-
-	@Value("${naver.user-info-uri}")
-	private String userInfoUri;
+public class NaverService implements OAuth2Service {
+	private final NaverConfig naverConfig;
 	private final JsonParser parser = new JsonParser();
-	private final JwtProvider jwtProvider;
-	private final RefreshTokenService refreshTokenService;
+	private final OAuthRepository oAuthRepository;
 
-	public NaverDto getUserInfo(TokenDto token) throws IOException {
-		String accessToken = token.getAccessToken();
+	@Override
+	public OAuthUserInfoDto getUserInfo(OAuthTokenDto oAuthTokenDto) {
 
-		URL url = new URL(userInfoUri);
-		HttpURLConnection con = (HttpURLConnection)url.openConnection();
-		con.setRequestMethod("GET");
-		con.setRequestProperty("Authorization", "Bearer " + accessToken);
+		try {
+			String token = oAuthTokenDto.getToken();
 
-		int responseCode = con.getResponseCode();
-		BufferedReader br;
+			URL url = new URL(naverConfig.getUserInfoUri());
+			HttpURLConnection con = (HttpURLConnection)url.openConnection();
+			con.setRequestMethod("GET");
+			con.setRequestProperty("Authorization", "Bearer " + token);
 
-		if (responseCode == 200) { // 정상 호출
-			br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-		} else {  // 에러 발생
-			br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+			int responseCode = con.getResponseCode();
+			BufferedReader br;
+
+			if (responseCode == 200) { // 정상 호출
+				br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			} else {  // 에러 발생
+				br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
+			}
+
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+			while ((inputLine = br.readLine()) != null) {
+				response.append(inputLine);
+			}
+
+			br.close();
+
+			JsonElement responseElement = parser.parse(response.toString()).getAsJsonObject().get("response").getAsJsonObject();
+
+			String id = getStringOrNull(responseElement, "id");
+			String email = getStringOrNull(responseElement, "email");
+			String nickname = getStringOrNull(responseElement, "nickname");
+
+			return OAuthUserInfoDto.builder()
+					.id(id)
+					.email(email)
+					.nickname(nickname)
+					.build();
+		} catch (MalformedURLException e) {
+			throw new BusinessException("잘못된 URL을 통해 요청하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
+		} catch (ProtocolException e) {
+			throw new BusinessException("잘못된 Protocol을 통해 요청하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
+		} catch (IOException e) {
+			throw new BusinessException("IO Exception이 발생하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		}
-
-		String inputLine;
-		StringBuffer response = new StringBuffer();
-		while ((inputLine = br.readLine()) != null) {
-			response.append(inputLine);
-		}
-
-		br.close();
-
-		JsonElement element = parser.parse(response.toString());
-
-		return NaverDto.builder()
-				.id(element.getAsJsonObject().get("response").getAsJsonObject().get("id").getAsString())
-				.email(element.getAsJsonObject().get("response").getAsJsonObject().get("email").getAsString())
-				.nickname(element.getAsJsonObject().get("response").getAsJsonObject().get("nickname").getAsString())
-				.build();
 	}
 
-	public Member signUp(NaverDto naverDto) {
-		SignUpDto signUpDto = SignUpDto.builder()
-				.username(naverDto.getEmail())
-				.nickname(naverDto.getNickname())
-				.password(naverDto.getId())
-				.build();
-
-		if (!memberService.isDuplicateUsername(naverDto.getEmail())) {
-			memberService.create(signUpDto);
+	@Override
+	public OAuth create(Member member, OAuthUserInfoDto oAuthUserInfoDto) {
+		if (isExists(member)) {
+			throw new BusinessException("이미 연동된 계정이 존재하는 플랫폼입니다.", StatusEnum.CONFLICT);
 		}
 
-		return memberService.read(naverDto.getEmail());
-	}
+		if (isExists(oAuthUserInfoDto)) {
+			throw new BusinessException("이미 다른 계정과 연동된 계정입니다.", StatusEnum.CONFLICT);
+		}
 
-	public TokenDto signIn(NaverDto naverDto, Long userId) {
-		String accessToken = jwtProvider.generateToken(naverDto.getEmail(), userId);
-		String refreshToken = jwtProvider.generateRefreshToken(naverDto.getEmail(), userId);
-
-		TokenDto tokenDto = TokenDto.builder()
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
+		OAuth oAuth = OAuth.builder()
+				.member(member)
+				.platform(OAuthPlatform.NAVER)
+				.platformId(oAuthUserInfoDto.getId())
+				.email(oAuthUserInfoDto.getEmail())
+				.nickname(oAuthUserInfoDto.getNickname())
 				.build();
 
-		refreshTokenService.storeRefreshToken(tokenDto, naverDto.getEmail());
+		return oAuthRepository.save(oAuth);
+	}
 
-		return tokenDto;
+	@Override
+	public OAuth read(OAuthUserInfoDto oAuthUserInfoDto) {
+		return oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.NAVER, oAuthUserInfoDto.getId())
+				.orElseThrow(() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND));
+	}
+
+	@Override
+	public boolean isExists(Member member) {
+		return oAuthRepository.findByMemberAndPlatform(member, OAuthPlatform.NAVER).isPresent();
+	}
+
+	@Override
+	public boolean isExists(OAuthUserInfoDto oAuthUserInfoDto) {
+		return oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.NAVER, oAuthUserInfoDto.getId()).isPresent();
+	}
+
+	private String getStringOrNull(JsonElement element, String fieldName) {
+		JsonElement fieldElement = element.getAsJsonObject().get(fieldName);
+		return !fieldElement.isJsonNull() ? fieldElement.getAsString() : null;
 	}
 }

@@ -6,13 +6,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NaverDto {
+public class OAuthUserInfoDto {
 	private String id;
 	private String email;
 	private String nickname;
 
 	@Builder
-	public NaverDto(String id, String email, String nickname) {
+	public OAuthUserInfoDto(String id, String email, String nickname) {
 		this.id = id;
 		this.email = email;
 		this.nickname = nickname;

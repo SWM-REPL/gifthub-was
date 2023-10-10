@@ -27,18 +27,25 @@ public class OAuth {
 	@Column(columnDefinition = "TINYINT", nullable = false)
 	private OAuthPlatform platform;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String platformId;
+
+	@Column
+	private String email;
+
+	@Column
+	private String nickname;
 
 	@JoinColumn(name = "member_id", nullable = false)
 	@ManyToOne
 	private Member member;
 
 	@Builder
-	public OAuth(Long id, OAuthPlatform platform, String platformId, Member member) {
-		this.id = id;
+	public OAuth(OAuthPlatform platform, String platformId, String email, String nickname, Member member) {
 		this.platform = platform;
 		this.platformId = platformId;
+		this.email = email;
+		this.nickname = nickname;
 		this.member = member;
 	}
 }

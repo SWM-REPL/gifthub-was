@@ -8,15 +8,15 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.dto.GoogleDto;
-import org.swmaestro.repl.gifthub.auth.dto.TokenDto;
+import org.swmaestro.repl.gifthub.auth.config.GoogleConfig;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+import org.swmaestro.repl.gifthub.auth.entity.OAuth;
+import org.swmaestro.repl.gifthub.auth.repository.OAuthRepository;
+import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
-import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 
 import com.google.gson.JsonElement;
@@ -25,27 +25,24 @@ import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@PropertySource("classpath:application.yml")
 @RequiredArgsConstructor
-public class GoogleService {
-	private final MemberService memberService;
-	private final MemberRepository memberRepository;
-	private final RefreshTokenService refreshTokenService;
-	private final JwtProvider jwtProvider;
-	@Value("${google.user_info_uri}")
-	private String userInfoUri;
+public class GoogleService implements OAuth2Service {
+	private final GoogleConfig googleConfig;
+	private final JsonParser parser = new JsonParser();
+	private final OAuthRepository oAuthRepository;
 
-	public GoogleDto getUserInfo(TokenDto tokenDto) {
-		GoogleDto googleDto = null;
-
+	@Override
+	public OAuthUserInfoDto getUserInfo(OAuthTokenDto oAuthTokenDto) {
 		try {
-			URL url = new URL(userInfoUri);
+			String token = oAuthTokenDto.getToken();
+
+			URL url = new URL(googleConfig.getUserInfoUri());
 			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 
 			conn.setRequestMethod("GET");
 			conn.setDoOutput(true);
 
-			conn.setRequestProperty("Authorization", "Bearer " + tokenDto.getAccessToken());
+			conn.setRequestProperty("Authorization", "Bearer " + token);
 
 			int responseCode = conn.getResponseCode();
 
@@ -57,73 +54,67 @@ public class GoogleService {
 				result += line;
 			}
 
-			JsonParser parser = new JsonParser();
-			JsonElement element = parser.parse(result);
-
-			String id = element.getAsJsonObject().get("id").getAsString();
-			String nickname = element.getAsJsonObject().get("name").getAsString();
-			String email = element.getAsJsonObject().get("email").getAsString();
-
 			br.close();
-			googleDto = GoogleDto.builder()
+
+			JsonElement responseElement = parser.parse(result).getAsJsonObject().get("response").getAsJsonObject();
+
+			String id = getStringOrNull(responseElement, "id");
+			String email = getStringOrNull(responseElement, "email");
+			String nickname = getStringOrNull(responseElement, "name");
+
+			return OAuthUserInfoDto.builder()
 					.id(id)
+					.email(email)
 					.nickname(nickname)
-					.username(email)
 					.build();
-		} catch (ProtocolException e) {
-			throw new BusinessException("잘못된 프로토콜을 사용하였습니다.", StatusEnum.BAD_REQUEST);
 		} catch (MalformedURLException e) {
-			throw new BusinessException("잘못된 URL 형식을 사용하였습니다.", StatusEnum.BAD_REQUEST);
+			throw new BusinessException("잘못된 URL을 통해 요청하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
+		} catch (ProtocolException e) {
+			throw new BusinessException("잘못된 Protocol을 통해 요청하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		} catch (IOException e) {
-			throw new BusinessException("HTTP 연결을 수행하는 동안 입출력 관련 오류가 발생하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
+			throw new BusinessException("IO Exception이 발생하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		}
-		return googleDto;
 	}
 
-	public TokenDto signIn(GoogleDto googleDto) {
-		if (memberService.isDuplicateUsername(googleDto.getUsername())) {
-			TokenDto tokenDto = signInWithExistingMember(googleDto);
-			return tokenDto;
+	@Override
+	public OAuth create(Member member, OAuthUserInfoDto oAuthUserInfoDto) {
+		if (isExists(member)) {
+			throw new BusinessException("이미 연동된 계정이 존재하는 플랫폼입니다.", StatusEnum.CONFLICT);
 		}
-		Member member = convertGoogleDtotoMember(googleDto);
 
-		memberRepository.save(member);
+		if (isExists(oAuthUserInfoDto)) {
+			throw new BusinessException("이미 다른 계정과 연동된 계정입니다.", StatusEnum.CONFLICT);
+		}
 
-		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
-		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
-
-		TokenDto tokenDto = TokenDto.builder()
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
+		OAuth oAuth = OAuth.builder()
+				.member(member)
+				.platform(OAuthPlatform.GOOGLE)
+				.platformId(oAuthUserInfoDto.getId())
+				.email(oAuthUserInfoDto.getEmail())
+				.nickname(oAuthUserInfoDto.getNickname())
 				.build();
 
-		refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
-
-		return tokenDto;
+		return oAuthRepository.save(oAuth);
 	}
 
-	public TokenDto signInWithExistingMember(GoogleDto googleDto) {
-		Member member = memberRepository.findByUsername(googleDto.getUsername());
-		if (member == null) {
-			throw new BusinessException("존재하지 않는 아이디입니다.", StatusEnum.BAD_REQUEST);
-		}
-		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
-		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
-
-		TokenDto tokenDto = TokenDto.builder()
-				.accessToken(accessToken)
-				.refreshToken(refreshToken)
-				.build();
-
-		refreshTokenService.storeRefreshToken(tokenDto, member.getUsername());
-
-		return tokenDto;
+	@Override
+	public OAuth read(OAuthUserInfoDto oAuthUserInfoDto) {
+		return oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.GOOGLE, oAuthUserInfoDto.getId())
+				.orElseThrow(() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND));
 	}
 
-	public Member convertGoogleDtotoMember(GoogleDto googleDto) {
-		return Member.builder()
-				.nickname(googleDto.getNickname())
-				.username(googleDto.getUsername())
-				.build();
+	@Override
+	public boolean isExists(Member member) {
+		return oAuthRepository.findByMemberAndPlatform(member, OAuthPlatform.GOOGLE).isPresent();
+	}
+
+	@Override
+	public boolean isExists(OAuthUserInfoDto oAuthUserInfoDto) {
+		return oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.GOOGLE, oAuthUserInfoDto.getId()).isPresent();
+	}
+
+	private String getStringOrNull(JsonElement element, String fieldName) {
+		JsonElement fieldElement = element.getAsJsonObject().get(fieldName);
+		return !fieldElement.isJsonNull() ? fieldElement.getAsString() : null;
 	}
 }

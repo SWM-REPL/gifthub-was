@@ -3,17 +3,18 @@ package org.swmaestro.repl.gifthub.auth.dto;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
-@Builder
+@Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class TokenDto {
-	private String accessToken;
-	private String refreshToken;
+public class OAuthTokenDto {
+	private String token;
+
+	@Builder
+	public OAuthTokenDto(String token) {
+		this.token = token;
+	}
 }
