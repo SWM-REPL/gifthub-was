@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationService;
+import org.swmaestro.repl.gifthub.util.ProductNameProcessor;
 import org.swmaestro.repl.gifthub.util.QueryTemplateReader;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.dto.GptResponseDto;
@@ -26,6 +27,7 @@ public class VoucherSaveService {
 	private final ObjectMapper objectMapper;
 	private final FCMNotificationService fcmNotificationService;
 	private final QueryTemplateReader queryTemplateReader;
+	private final ProductNameProcessor productNameProcessor;
 
 	public void execute(OCRDto ocrDto, String username) throws IOException {
 		handleGptResponse(ocrDto, username)
@@ -59,7 +61,7 @@ public class VoucherSaveService {
 	}
 
 	public Mono<VoucherSaveRequestDto> handleSearchResponse(VoucherSaveRequestDto voucherSaveRequestDto, String username) {
-		return searchService.search(createQuery(voucherSaveRequestDto)).flatMap(searchResponseDto -> {
+		return searchService.search(createQuery(productNameProcessor.preprocessing(voucherSaveRequestDto))).flatMap(searchResponseDto -> {
 			try {
 				String brandName = searchResponseDto.getHits().getHitsList().get(0).getSource().getBrandName();
 				String productName = searchResponseDto.getHits().getHitsList().get(0).getSource().getProductName();
@@ -96,9 +98,11 @@ public class VoucherSaveService {
 	}
 
 	private String createQuery(VoucherSaveRequestDto voucherSaveRequestDto) {
+		System.out.println("voucherSaveRequestDto.getproductname() = " + voucherSaveRequestDto.getProductName());
 		String queryTemplate = queryTemplateReader.readQueryTemplate();
 		return String.format(queryTemplate,
 				voucherSaveRequestDto.getBrandName(),
 				voucherSaveRequestDto.getProductName());
 	}
 }
+

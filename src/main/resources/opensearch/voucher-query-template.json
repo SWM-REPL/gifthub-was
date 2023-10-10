@@ -1,12 +1,14 @@
 {
   "query": {
     "bool": {
-      "should": [
+      "filter": [
         {
-          "match": {
-            "brand_name": "%s"
+          "term": {
+            "brand_name.keyword": "%s"
           }
-        },
+        }
+      ],
+      "must": [
         {
           "match": {
             "product_name": "%s"
