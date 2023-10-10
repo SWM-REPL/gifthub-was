@@ -15,11 +15,11 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.service.AuthService;
-import org.swmaestro.repl.gifthub.auth.service.OAuthService;
 import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -29,7 +29,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SpringBootTest
 @AutoConfigureMockMvc
 public class AuthControllerTest {
-
 	@Autowired
 	private MockMvc mockMvc;
 
@@ -44,9 +43,6 @@ public class AuthControllerTest {
 
 	@MockBean
 	private JwtProvider jwtProvider;
-
-	@MockBean
-	private OAuthService oAuthService;
 
 	@Test
 	public void signUpTest() throws Exception {
@@ -118,8 +114,14 @@ public class AuthControllerTest {
 				.build();
 
 		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
-				.accessToken("myawesomejwt")
-				.refreshToken("myawesomejwt")
+				.accessToken("my.awesome.access-token")
+				.refreshToken("my.awesome.refresh-token")
+				.build();
+
+		OAuthUserInfoDto oAuthUserInfoDto = OAuthUserInfoDto.builder()
+				.id("123456789")
+				.email("jinlee@kakao.com")
+				.nickname("이진우")
 				.build();
 
 		// when

@@ -81,7 +81,6 @@ public class AuthService {
 	 */
 	public JwtTokenDto signIn(OAuthTokenDto oAuthTokenDto, OAuthPlatform platform) {
 		OAuth oAuth;
-		Member member;
 
 		OAuthUserInfoDto userInfo = oAuthService.getUserInfo(oAuthTokenDto, platform);
 		if (oAuthService.isExists(userInfo, platform)) {
@@ -94,7 +93,7 @@ public class AuthService {
 					.nickname(authConfig.getDefaultNickname())
 					.build();
 			// 회원 정보 저장
-			member = memberService.create(newMember);
+			Member member = memberService.create(newMember);
 			// oauth 정보 저장
 			oAuth = oAuthService.create(member, userInfo, platform);
 		}
