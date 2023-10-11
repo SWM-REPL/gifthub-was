@@ -13,6 +13,7 @@ import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.DateConverter;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherListResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
@@ -39,6 +40,7 @@ public class VoucherService {
 	private final VoucherRepository voucherRepository;
 	private final MemberService memberService;
 	private final VoucherUsageHistoryRepository voucherUsageHistoryRepository;
+	private final PendingVoucherService pendingVoucherService;
 
 	/*
 		기프티콘 저장 메서드
@@ -118,7 +120,7 @@ public class VoucherService {
 	/*
 	사용자 별 기프티콘 목록 조회 메서드(userId로 조회, username으로 권한 대조)
 	 */
-	public List<Long> list(Long userId, String username) {
+	public VoucherListResponseDto list(Long userId, String username) {
 		if (!memberService.read(userId).getUsername().equals(username)) {
 			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
@@ -132,7 +134,11 @@ public class VoucherService {
 			}
 			voucherIdList.add(voucher.getId());
 		}
-		return voucherIdList;
+
+		return VoucherListResponseDto.builder()
+				.voucherIds(voucherIdList)
+				.pendingCount(pendingVoucherService.count(userId))
+				.build();
 	}
 
 	/*
