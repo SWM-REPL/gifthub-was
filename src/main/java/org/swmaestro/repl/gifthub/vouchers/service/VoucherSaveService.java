@@ -3,14 +3,18 @@ package org.swmaestro.repl.gifthub.vouchers.service;
 import java.io.IOException;
 
 import org.springframework.stereotype.Service;
+import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
+import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationService;
+import org.swmaestro.repl.gifthub.notifications.service.NotificationService;
 import org.swmaestro.repl.gifthub.util.ProductNameProcessor;
 import org.swmaestro.repl.gifthub.util.QueryTemplateReader;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.dto.GptResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.OCRDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,33 +32,56 @@ public class VoucherSaveService {
 	private final FCMNotificationService fcmNotificationService;
 	private final QueryTemplateReader queryTemplateReader;
 	private final ProductNameProcessor productNameProcessor;
+	private final NotificationService notificationService;
+	private final MemberService memberService;
+	private final PendingVoucherService pendingVoucherService;
 
 	public void execute(OCRDto ocrDto, String username) throws IOException {
+		pendingVoucherService.create(memberService.read(username));
 		handleGptResponse(ocrDto, username)
 				.flatMap(voucherSaveRequestDto -> handleSearchResponse(voucherSaveRequestDto, username))
 				.flatMap(voucherSaveRequestDto -> handleVoucherSaving(voucherSaveRequestDto, username))
 				.subscribe(
 						// onSuccess
-						aVoid -> {
+						voucherSaveResponseDto -> {
+							System.out.println("등록 성공");
+							//notification 저장(알림 성공 저장)
+							notificationService.save(memberService.read(username), voucherService.read(voucherSaveResponseDto.getId()),
+									NotificationType.REGISTERED,
+									"기프티콘 등록에 성공했습니다.");
 							fcmNotificationService.sendNotification("기프티콘 등록 성공", "기프티콘 등록에 성공했습니다!", username);
+							// 처리 완료
+							pendingVoucherService.delete(memberService.read(username));
 						},
 						// onError
 						throwable -> {
+							System.out.println("등록 실패");
 							throwable.printStackTrace();
+							// notification 저장(알림 실패 저장)
+							notificationService.save(memberService.read(username), null,
+									NotificationType.REGISTERED,
+									"기프티콘 등록에 실패했습니다.");
 							fcmNotificationService.sendNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
+							// 처리 완료
+							pendingVoucherService.delete(memberService.read(username));
 						});
 	}
 
 	public Mono<VoucherSaveRequestDto> handleGptResponse(OCRDto ocrDto, String username) throws IOException {
+
 		return gptService.getGptResponse(ocrDto).flatMap(response -> {
 			try {
 				VoucherSaveRequestDto voucherSaveRequestDto = createVoucherSaveRequestDto(response);
 				System.out.println("GPT response");
 				System.out.println(voucherSaveRequestDto.getBrandName());
 				System.out.println(voucherSaveRequestDto.getProductName());
+
+				if (voucherSaveRequestDto.getBrandName() == "" || voucherSaveRequestDto.getProductName() == "") {
+					throw new BusinessException("GPT 응답이 올바르지 않습니다.", StatusEnum.NOT_FOUND);
+				}
 				return Mono.just(voucherSaveRequestDto);
 			} catch (JsonProcessingException e) {
-				fcmNotificationService.sendNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
+				// fcmNotificationService.sendNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
 				return Mono.error(new BusinessException("GPT 응답이 올바르지 않습니다.", StatusEnum.NOT_FOUND));
 			}
 		});
@@ -78,14 +105,11 @@ public class VoucherSaveService {
 		});
 	}
 
-	public Mono<Void> handleVoucherSaving(VoucherSaveRequestDto voucherSaveRequestDto, String username) {
+	public Mono<VoucherSaveResponseDto> handleVoucherSaving(VoucherSaveRequestDto voucherSaveRequestDto, String username) {
 		return Mono.fromCallable(() -> {
 			try {
-				voucherService.save(username, voucherSaveRequestDto);
-				fcmNotificationService.sendNotification("기프티콘 등록 성공", "기프티콘 등록에 성공했습니다!", username);
-				return null;
+				return voucherService.save(username, voucherSaveRequestDto);
 			} catch (IOException e) {
-				fcmNotificationService.sendNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
 				throw new RuntimeException(e);
 			}
 		});
@@ -98,11 +122,11 @@ public class VoucherSaveService {
 	}
 
 	private String createQuery(VoucherSaveRequestDto voucherSaveRequestDto) {
-		System.out.println("voucherSaveRequestDto.getproductname() = " + voucherSaveRequestDto.getProductName());
 		String queryTemplate = queryTemplateReader.readQueryTemplate();
 		return String.format(queryTemplate,
 				voucherSaveRequestDto.getBrandName(),
 				voucherSaveRequestDto.getProductName());
 	}
+
 }
 
