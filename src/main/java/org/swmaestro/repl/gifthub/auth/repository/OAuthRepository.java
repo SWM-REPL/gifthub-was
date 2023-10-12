@@ -11,4 +11,6 @@ public interface OAuthRepository extends JpaRepository<OAuth, Long> {
 	Optional<OAuth> findByMemberAndPlatform(Member member, OAuthPlatform platform);
 
 	Optional<OAuth> findByPlatformAndPlatformId(OAuthPlatform platform, String platformId);
+
+	Optional<OAuth> deleteByMemberAndPlatform(Member member, OAuthPlatform platform);
 }
