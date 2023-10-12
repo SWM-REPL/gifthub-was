@@ -13,10 +13,13 @@ import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
-import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 
 import lombok.RequiredArgsConstructor;
@@ -26,8 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
-	private final JwtProvider jwtProvider;
-	private final RefreshTokenService refreshTokenService;
+	private final OAuthService oAuthService;
 
 	public Member passwordEncryption(Member member) {
 		return Member.builder()
@@ -141,5 +143,10 @@ public class MemberService {
 
 	public String generateOAuthUsername() {
 		return UUID.randomUUID().toString();
+	}
+
+	public OAuth createOAuthInfo(Member member, OAuthPlatform oAuthPlatform, OAuthTokenDto oAuthTokenDto) {
+		OAuthUserInfoDto oAuthUserInfoDto = oAuthService.getUserInfo(oAuthTokenDto, oAuthPlatform);
+		return oAuthService.create(member, oAuthUserInfoDto, oAuthPlatform);
 	}
 }
