@@ -3,6 +3,7 @@ package org.swmaestro.repl.gifthub.auth.service;
 import java.io.IOException;
 import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -117,15 +118,23 @@ public class AppleService implements OAuth2Service {
 
 	@Override
 	public OAuth read(OAuthUserInfoDto oAuthUserInfoDto) {
-		return oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.APPLE, oAuthUserInfoDto.getId())
+		OAuth oAuth = oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.APPLE, oAuthUserInfoDto.getId())
 				.orElseThrow(() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND));
+
+		if (oAuth.getDeletedAt() != null) {
+			throw new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND);
+		} else {
+			return oAuth;
+		}
 	}
 
 	@Override
 	public OAuth delete(Member member) {
-		return oAuthRepository.deleteByMemberAndPlatform(member, OAuthPlatform.APPLE).orElseThrow(
+		OAuth oAuth = oAuthRepository.findByMemberAndPlatform(member, OAuthPlatform.APPLE).orElseThrow(
 				() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND)
 		);
+		oAuth.setDeletedAt(LocalDateTime.now());
+		return oAuthRepository.save(oAuth);
 	}
 
 	@Override

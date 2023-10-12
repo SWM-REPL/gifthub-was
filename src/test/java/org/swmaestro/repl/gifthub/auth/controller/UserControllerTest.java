@@ -16,6 +16,7 @@ import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
@@ -103,8 +104,8 @@ class UserControllerTest {
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
-  
-  @Test
+
+	@Test
 	@WithMockUser(username = "이진우", roles = "USER")
 	void createOAuthInfo() throws Exception {
 		// given
@@ -136,8 +137,8 @@ class UserControllerTest {
 						.content(objectMapper.writeValueAsString(oAuthTokenDto)))
 				.andExpect(status().isOk());
 	}
-  
-  @Test
+
+	@Test
 	@WithMockUser(username = "이진우", roles = "USER")
 	void deleteOAuthInfo() throws Exception {
 		// given

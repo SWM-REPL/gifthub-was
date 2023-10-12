@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.config.GoogleConfig;
@@ -99,15 +100,23 @@ public class GoogleService implements OAuth2Service {
 
 	@Override
 	public OAuth read(OAuthUserInfoDto oAuthUserInfoDto) {
-		return oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.GOOGLE, oAuthUserInfoDto.getId())
+		OAuth oAuth = oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.GOOGLE, oAuthUserInfoDto.getId())
 				.orElseThrow(() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND));
+
+		if (oAuth.getDeletedAt() != null) {
+			throw new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND);
+		} else {
+			return oAuth;
+		}
 	}
 
 	@Override
 	public OAuth delete(Member member) {
-		return oAuthRepository.deleteByMemberAndPlatform(member, OAuthPlatform.GOOGLE).orElseThrow(
+		OAuth oAuth = oAuthRepository.findByMemberAndPlatform(member, OAuthPlatform.GOOGLE).orElseThrow(
 				() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND)
 		);
+		oAuth.setDeletedAt(LocalDateTime.now());
+		return oAuthRepository.save(oAuth);
 	}
 
 	@Override
