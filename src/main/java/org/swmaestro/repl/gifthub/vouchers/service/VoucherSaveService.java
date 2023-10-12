@@ -81,7 +81,6 @@ public class VoucherSaveService {
 				}
 				return Mono.just(voucherSaveRequestDto);
 			} catch (JsonProcessingException e) {
-				// fcmNotificationService.sendNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
 				return Mono.error(new BusinessException("GPT 응답이 올바르지 않습니다.", StatusEnum.NOT_FOUND));
 			}
 		});
