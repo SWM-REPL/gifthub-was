@@ -42,6 +42,16 @@ public class OAuthService {
 		};
 	}
 
+	public OAuth delete(Member member, OAuthPlatform platform) {
+		return switch (platform) {
+			case NAVER -> naverService.delete(member);
+			case KAKAO -> kakaoService.delete(member);
+			case GOOGLE -> googleService.delete(member);
+			case APPLE -> appleService.delete(member);
+			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
+		};
+	}
+
 	public OAuth read(OAuthUserInfoDto oAuthUserInfoDto, OAuthPlatform platform) {
 		return switch (platform) {
 			case NAVER -> naverService.read(oAuthUserInfoDto);

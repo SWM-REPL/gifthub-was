@@ -109,4 +109,29 @@ public class UserController {
 				.path(request.getRequestURI())
 				.build());
 	}
+
+	@DeleteMapping("/oauth/{platform}")
+	@Operation(summary = "OAuth 연동 계정 삭제 메서드", description = "사용자의 기존 계정에 연동된 OAuth 계정을 삭제하기 위한 메서드입니다.\n 파라미터로는 'naver', 'kakao', 'google', 'apple'를 받을 수 있습니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "OAuth 연동 계정 삭제 성공"),
+			@ApiResponse(responseCode = "400", description = "OAuth 연동 계정 삭제 실패")
+	})
+	public ResponseEntity<Message> deleteOAuthInfo(HttpServletRequest request, @PathVariable String platform) {
+		OAuthPlatform oAuthPlatform;
+
+		switch (platform) {
+			case "naver" -> oAuthPlatform = OAuthPlatform.NAVER;
+			case "kakao" -> oAuthPlatform = OAuthPlatform.KAKAO;
+			case "google" -> oAuthPlatform = OAuthPlatform.GOOGLE;
+			case "apple" -> oAuthPlatform = OAuthPlatform.APPLE;
+			default -> throw new BusinessException("올바르지 않은 플랫폼에 대한 요청입니다.", StatusEnum.BAD_REQUEST);
+		}
+
+		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
+		Member member = memberService.read(username);
+		memberService.deleteOAuthInfo(member, oAuthPlatform);
+		return ResponseEntity.ok(SuccessMessage.builder()
+				.path(request.getRequestURI())
+				.build());
+	}
 }

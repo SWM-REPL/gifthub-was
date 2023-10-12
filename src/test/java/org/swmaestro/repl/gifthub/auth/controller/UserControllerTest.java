@@ -137,4 +137,32 @@ class UserControllerTest {
 						.content(objectMapper.writeValueAsString(oAuthTokenDto)))
 				.andExpect(status().isOk());
 	}
+
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	void deleteOAuthInfo() throws Exception {
+		// given
+		Member member = Member.builder()
+				.username("my_username")
+				.nickname("my_nickname")
+				.password("my_password")
+				.build();
+
+		OAuth oAuth = OAuth.builder()
+				.platform(OAuthPlatform.NAVER)
+				.platformId("my_naver_unique_id")
+				.member(member)
+				.email("my_naver_email")
+				.nickname("my_naver_nickname")
+				.build();
+
+		// when
+		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
+		when(memberService.deleteOAuthInfo(any(Member.class), any(OAuthPlatform.class))).thenReturn(oAuth);
+
+		// then
+		mockMvc.perform(delete("/users/oauth/naver")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
 }

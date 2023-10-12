@@ -1,5 +1,7 @@
 package org.swmaestro.repl.gifthub.auth.entity;
 
+import java.time.LocalDateTime;
+
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 
 import jakarta.persistence.Column;
@@ -39,6 +41,9 @@ public class OAuth {
 	@JoinColumn(name = "member_id", nullable = false)
 	@ManyToOne
 	private Member member;
+
+	@Column
+	private LocalDateTime deletedAt;
 
 	@Builder
 	public OAuth(OAuthPlatform platform, String platformId, String email, String nickname, Member member) {

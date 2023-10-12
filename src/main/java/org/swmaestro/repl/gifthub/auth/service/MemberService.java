@@ -144,9 +144,13 @@ public class MemberService {
 	public String generateOAuthUsername() {
 		return UUID.randomUUID().toString();
 	}
-
-	public OAuth createOAuthInfo(Member member, OAuthPlatform oAuthPlatform, OAuthTokenDto oAuthTokenDto) {
+  
+  public OAuth createOAuthInfo(Member member, OAuthPlatform oAuthPlatform, OAuthTokenDto oAuthTokenDto) {
 		OAuthUserInfoDto oAuthUserInfoDto = oAuthService.getUserInfo(oAuthTokenDto, oAuthPlatform);
 		return oAuthService.create(member, oAuthUserInfoDto, oAuthPlatform);
 	}
+
+	public OAuth deleteOAuthInfo(Member member, OAuthPlatform oAuthPlatform) {
+		return oAuthService.delete(member, oAuthPlatform);
+  }
 }
