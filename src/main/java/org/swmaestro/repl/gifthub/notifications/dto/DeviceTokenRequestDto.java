@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class DeviceTokenSaveRequestDto {
+public class DeviceTokenRequestDto {
 	private String token;
 
 	@Builder
-	public DeviceTokenSaveRequestDto(String token) {
+	public DeviceTokenRequestDto(String token) {
 		this.token = token;
 	}
 }

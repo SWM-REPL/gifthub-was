@@ -3,6 +3,7 @@ package org.swmaestro.repl.gifthub.notifications.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenSaveRequestDto;
+import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenRequestDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NoticeNotificationDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NotificationReadResponseDto;
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationService;
@@ -33,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 public class NotificationController {
 	private final NotificationService notificationService;
 	private final FCMNotificationService fcmNotificationService;
+	private final MemberService memberService;
 	private final JwtProvider jwtProvider;
 
 	@GetMapping
@@ -62,9 +66,29 @@ public class NotificationController {
 	public ResponseEntity<Message> registerDeviceToken(
 			HttpServletRequest request,
 			@RequestHeader("Authorization") String accessToken,
-			@RequestBody DeviceTokenSaveRequestDto deviceTokenSaveRequestDto) {
+			@RequestBody DeviceTokenRequestDto deviceTokenRequestDto) {
 		String username = jwtProvider.getUsername(accessToken.substring(7));
-		notificationService.saveDeviceToken(username, deviceTokenSaveRequestDto.getToken());
+		notificationService.saveDeviceToken(username, deviceTokenRequestDto.getToken());
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.build());
+	}
+
+	@DeleteMapping("/device")
+	@Operation(summary = "디바이스 토큰 삭제 메서드", description = "알림 서비스를 위한 디바이스 토큰을 삭제하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "디바이스 토큰 등록 성공"),
+			@ApiResponse(responseCode = "400(400)", description = "존재하지 토큰 등록 시도"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원"),
+	})
+	public ResponseEntity<Message> deleteDeviceToken(
+			HttpServletRequest request,
+			@RequestHeader("Authorization") String accessToken,
+			@RequestBody DeviceTokenRequestDto deviceTokenRequestDto) {
+		String username = jwtProvider.getUsername(accessToken.substring(7));
+		Member member = memberService.read(username);
+		notificationService.deleteDeviceToken(member, deviceTokenRequestDto.getToken());
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())

@@ -69,6 +69,15 @@ public class NotificationService {
 
 	}
 
+	public boolean deleteDeviceToken(Member member, String deviceToken) {
+		try {
+			deviceTokenService.delete(member, deviceToken);
+			return true;
+		} catch (Exception e) {
+			throw new BusinessException("디바이스 토큰 삭제에 실패하였습니다.", StatusEnum.BAD_REQUEST);
+		}
+	}
+
 	/**
 	 * Notification 저장 메서드
 	 */
