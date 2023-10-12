@@ -88,7 +88,7 @@ public class GoogleService implements OAuth2Service {
 		}
 
 		OAuth oAuth = OAuth.builder()
-				.member(user)
+				.user(user)
 				.platform(OAuthPlatform.GOOGLE)
 				.platformId(oAuthUserInfoDto.getId())
 				.email(oAuthUserInfoDto.getEmail())

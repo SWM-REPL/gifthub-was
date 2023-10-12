@@ -20,7 +20,7 @@ import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.entity.User;
-import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+import org.swmaestro.repl.gifthub.auth.repository.UserRepository;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
@@ -30,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
-	private final MemberRepository memberRepository;
+	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final OAuthService oAuthService;
 
@@ -54,11 +54,11 @@ public class UserService implements UserDetailsService {
 		}
 
 		User encodedUser = passwordEncryption(user);
-		return memberRepository.save(encodedUser);
+		return userRepository.save(encodedUser);
 	}
 
 	public boolean isDuplicateUsername(String username) {
-		return memberRepository.findByUsername(username) != null;
+		return userRepository.findByUsername(username) != null;
 	}
 
 	public boolean isValidatePassword(String password) {
@@ -70,7 +70,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	public User read(String username) {
-		User user = memberRepository.findByUsername(username);
+		User user = userRepository.findByUsername(username);
 		if (user == null) {
 			return null;
 		}
@@ -78,7 +78,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	public MemberReadResponseDto read(Long id) {
-		Optional<User> member = memberRepository.findById(id);
+		Optional<User> member = userRepository.findById(id);
 		if (member.isEmpty()) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
@@ -90,15 +90,15 @@ public class UserService implements UserDetailsService {
 	}
 
 	public int count() {
-		return (int)memberRepository.count();
+		return (int)userRepository.count();
 	}
 
 	public List<User> list() {
-		return memberRepository.findAll();
+		return userRepository.findAll();
 	}
 
 	public MemberUpdateResponseDto update(String username, Long userId, MemberUpdateRequestDto memberUpdateRequestDto) {
-		User user = memberRepository.findByUsername(username);
+		User user = userRepository.findByUsername(username);
 		if (user == null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
@@ -117,7 +117,7 @@ public class UserService implements UserDetailsService {
 			}
 			user.setPassword(passwordEncoder.encode(memberUpdateRequestDto.getPassword()));
 		}
-		memberRepository.save(user);
+		userRepository.save(user);
 		return MemberUpdateResponseDto.builder()
 				.id(user.getId())
 				.nickname(user.getNickname())
@@ -125,11 +125,11 @@ public class UserService implements UserDetailsService {
 	}
 
 	public boolean isDuplicateNickname(String nickname) {
-		return memberRepository.findByNickname(nickname) != null;
+		return userRepository.findByNickname(nickname) != null;
 	}
 
 	public MemberDeleteResponseDto delete(Long id) {
-		User user = memberRepository.findById(id)
+		User user = userRepository.findById(id)
 				.orElseThrow(() -> new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND));
 
 		if (!user.getDeletedAt().equals(null)) {
@@ -137,7 +137,7 @@ public class UserService implements UserDetailsService {
 		}
 
 		user.setDeletedAt(LocalDateTime.now());
-		memberRepository.save(user);
+		userRepository.save(user);
 
 		return MemberDeleteResponseDto.builder()
 				.id(id)

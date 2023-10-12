@@ -11,7 +11,7 @@ import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.entity.User;
-import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+import org.swmaestro.repl.gifthub.auth.repository.UserRepository;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -23,11 +23,11 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-	private final MemberService memberService;
+	private final UserService memberService;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
 	private final OAuthService oAuthService;
-	private final MemberRepository memberRepository;
+	private final UserRepository userRepository;
 	private final RefreshTokenService refreshTokenService;
 	private final DeviceTokenService deviceTokenService;
 	private final AuthConfig authConfig;
@@ -125,7 +125,7 @@ public class AuthService {
 	 */
 	@Transactional
 	public void signOut(String username, SignOutDto signOutDto) {
-		User user = memberRepository.findByUsername(username);
+		User user = userRepository.findByUsername(username);
 		if (user == null) {
 			throw new BusinessException("존재하지 않는 사용자입니다.", StatusEnum.UNAUTHORIZED);
 		}

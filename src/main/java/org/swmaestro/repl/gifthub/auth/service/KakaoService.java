@@ -86,7 +86,7 @@ public class KakaoService implements OAuth2Service {
 		}
 
 		OAuth oAuth = OAuth.builder()
-				.member(user)
+				.user(user)
 				.platform(OAuthPlatform.KAKAO)
 				.platformId(oAuthUserInfoDto.getId())
 				.email(oAuthUserInfoDto.getEmail())

@@ -13,8 +13,8 @@ import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.User;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.auth.service.OAuthService;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -34,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Tag(name = "Users", description = "사용자 관련 API")
 public class UserController {
-	private final MemberService memberService;
+	private final UserService userService;
 	private final OAuthService oAuthService;
 	private final JwtProvider jwtProvider;
 
@@ -46,7 +46,7 @@ public class UserController {
 			@ApiResponse(responseCode = "400(404-2)", description = "이미 삭제된 회원 아이디 입력")
 	})
 	public ResponseEntity<Message> deleteMember(HttpServletRequest request, @PathVariable Long userId) {
-		MemberDeleteResponseDto deletedMember = memberService.delete(userId);
+		MemberDeleteResponseDto deletedMember = userService.delete(userId);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
@@ -66,7 +66,7 @@ public class UserController {
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
-						.data(memberService.update(username, userId, memberUpdateRequestDto))
+						.data(userService.update(username, userId, memberUpdateRequestDto))
 						.build());
 	}
 
@@ -80,7 +80,7 @@ public class UserController {
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
-						.data(memberService.read(userId))
+						.data(userService.read(userId))
 						.build());
 	}
 
@@ -103,8 +103,8 @@ public class UserController {
 		}
 
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		User user = memberService.read(username);
-		memberService.createOAuthInfo(user, oAuthPlatform, oAuthTokenDto);
+		User user = userService.read(username);
+		userService.createOAuthInfo(user, oAuthPlatform, oAuthTokenDto);
 		return ResponseEntity.ok(SuccessMessage.builder()
 				.path(request.getRequestURI())
 				.build());
@@ -128,8 +128,8 @@ public class UserController {
 		}
 
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		User user = memberService.read(username);
-		memberService.deleteOAuthInfo(user, oAuthPlatform);
+		User user = userService.read(username);
+		userService.deleteOAuthInfo(user, oAuthPlatform);
 		return ResponseEntity.ok(SuccessMessage.builder()
 				.path(request.getRequestURI())
 				.build());

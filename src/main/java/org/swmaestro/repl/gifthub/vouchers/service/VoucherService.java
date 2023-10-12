@@ -9,7 +9,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.DateConverter;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
@@ -38,7 +38,7 @@ public class VoucherService {
 	private final BrandService brandService;
 	private final ProductService productService;
 	private final VoucherRepository voucherRepository;
-	private final MemberService memberService;
+	private final UserService userService;
 	private final VoucherUsageHistoryRepository voucherUsageHistoryRepository;
 	private final PendingVoucherService pendingVoucherService;
 
@@ -76,7 +76,7 @@ public class VoucherService {
 				.expiresAt(DateConverter.stringToLocalDate(voucherSaveRequestDto.getExpiresAt()))
 				.imageUrl(imageUrl)
 				.balance(product.getPrice())
-				.user(memberService.read(username))
+				.user(userService.read(username))
 				.build();
 
 		return VoucherSaveResponseDto.builder()
@@ -121,7 +121,7 @@ public class VoucherService {
 	사용자 별 기프티콘 목록 조회 메서드(userId로 조회, username으로 권한 대조)
 	 */
 	public VoucherListResponseDto list(Long userId, String username) {
-		if (!memberService.read(userId).getUsername().equals(username)) {
+		if (!userService.read(userId).getUsername().equals(username)) {
 			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
 
@@ -227,7 +227,7 @@ public class VoucherService {
 		}
 
 		VoucherUsageHistory voucherUsageHistory = VoucherUsageHistory.builder()
-				.user(memberService.read(username))
+				.user(userService.read(username))
 				.voucher(voucher.get())
 				.amount(voucherUseRequestDto.getAmount())
 				.place(voucherUseRequestDto.getPlace())

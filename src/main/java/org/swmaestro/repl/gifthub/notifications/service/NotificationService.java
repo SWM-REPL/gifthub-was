@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.dto.NotificationReadResponseDto;
@@ -22,13 +22,13 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
-	private final MemberService memberService;
+	private final UserService userService;
 	private final NotificationRepository notificationRepository;
 	private final DeviceTokenService deviceTokenService;
 	private final VoucherService voucherService;
 
 	public List<NotificationReadResponseDto> list(String username) {
-		if (memberService.read(username) == null) {
+		if (userService.read(username) == null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
 		List<Notification> notifications = notificationRepository.findAllByReceiverUsername(username);
@@ -96,7 +96,7 @@ public class NotificationService {
 	 * Notification 상세 조회 메서드
 	 */
 	public NotificationReadResponseDto read(Long id, String username) {
-		if (memberService.read(username) == null) {
+		if (userService.read(username) == null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
 		Notification notification = notificationRepository.findById(id).orElseThrow(() -> new BusinessException("존재하지 않는 알림입니다.", StatusEnum.NOT_FOUND));

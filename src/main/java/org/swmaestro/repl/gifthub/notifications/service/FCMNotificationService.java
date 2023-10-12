@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
 import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.dto.FCMNotificationRequestDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NoticeNotificationDto;
@@ -24,7 +24,7 @@ public class FCMNotificationService {
 	private final FirebaseMessaging firebaseMessaging;
 	private final DeviceTokenService deviceTokenService;
 	private final NotificationService notificationService;
-	private final MemberService memberService;
+	private final UserService userService;
 
 	public void sendNotificationByToken(FCMNotificationRequestDto requestDto) {
 		List<DeviceToken> deviceTokenList = deviceTokenService.list(requestDto.getTargetUser().getId());
@@ -87,7 +87,7 @@ public class FCMNotificationService {
 	 * title과 body를 받아서 특정 회원에게 알림을 보내는 메서드(username으로 검색)
 	 */
 	public void sendNotification(String title, String body, String username) {
-		User user = memberService.read(username);
+		User user = userService.read(username);
 
 		NoticeNotificationDto noticeNotificationDto = NoticeNotificationDto.builder()
 				.title(title)

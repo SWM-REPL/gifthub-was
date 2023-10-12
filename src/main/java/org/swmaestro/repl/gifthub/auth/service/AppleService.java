@@ -106,7 +106,7 @@ public class AppleService implements OAuth2Service {
 		}
 
 		OAuth oAuth = OAuth.builder()
-				.member(user)
+				.user(user)
 				.platform(OAuthPlatform.APPLE)
 				.platformId(oAuthUserInfoDto.getId())
 				.email(oAuthUserInfoDto.getEmail())

@@ -5,7 +5,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.entity.User;
-import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+import org.swmaestro.repl.gifthub.auth.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class JpaUserDetailsService implements UserDetailsService {
-	private final MemberRepository memberRepository;
+	private final UserRepository userRepository;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		User user = memberRepository.findByUsername(username);
+		User user = userRepository.findByUsername(username);
 		if (user != null) {
 			log.info("user: {}", user);
 			return User.builder()

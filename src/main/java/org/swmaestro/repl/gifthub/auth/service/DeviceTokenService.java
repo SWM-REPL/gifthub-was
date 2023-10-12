@@ -17,13 +17,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DeviceTokenService {
 	private final DeviceTokenRepository deviceTokenRepository;
-	private final MemberService memberService;
+	private final UserService userService;
 
 	/*
 	 * DeviceToken 저장 메서드
 	 */
 	public void save(String username, String token) {
-		User user = memberService.read(username);
+		User user = userService.read(username);
 
 		if (user == null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
@@ -36,7 +36,7 @@ public class DeviceTokenService {
 		DeviceToken deviceToken;
 		if (!isExist(token)) {
 			deviceToken = DeviceToken.builder()
-					.member(user)
+					.user(user)
 					.token(token)
 					.build();
 
@@ -58,8 +58,8 @@ public class DeviceTokenService {
 	 * DeviceToken 존재 여부 반환 메서드 (회원 아이디와 토큰으로)
 	 */
 	public boolean isExist(Long memberId, String deviceToken) {
-		MemberReadResponseDto memberDto = memberService.read(memberId);
-		User user = memberService.read(memberDto.getUsername());
+		MemberReadResponseDto memberDto = userService.read(memberId);
+		User user = userService.read(memberDto.getUsername());
 
 		return deviceTokenRepository.findByMemberAndToken(user, deviceToken).isPresent();
 	}
@@ -75,8 +75,8 @@ public class DeviceTokenService {
 	 * DeviceToken 전체 조회 메서드(memberId)
 	 */
 	public List<DeviceToken> list(Long memberId) {
-		MemberReadResponseDto memberDto = memberService.read(memberId);
-		User user = memberService.read(memberDto.getUsername());
+		MemberReadResponseDto memberDto = userService.read(memberId);
+		User user = userService.read(memberDto.getUsername());
 		return deviceTokenRepository.findAllByMember(user);
 	}
 
