@@ -52,6 +52,11 @@ public class FCMNotificationService {
 		}
 	}
 
+	/**
+	 * 모든 회원에게 알림을 보내는 메서드
+	 * @param noticeNotificationDto
+	 */
+
 	public void sendNotification(NoticeNotificationDto noticeNotificationDto) {
 		List<DeviceToken> deviceTokenList = deviceTokenService.list();
 
@@ -79,11 +84,18 @@ public class FCMNotificationService {
 	}
 
 	/**
-	 * 특정 회원에게 알림을 보내는 메서드(username으로 검색)
+	 * title과 body를 받아서 특정 회원에게 알림을 보내는 메서드(username으로 검색)
 	 */
-	public void sendNotification(NoticeNotificationDto noticeNotificationDto, String username) {
+	public void sendNotification(String title, String body, String username) {
 		Member member = memberService.read(username);
+
+		NoticeNotificationDto noticeNotificationDto = NoticeNotificationDto.builder()
+				.title(title)
+				.body(body)
+				.build();
+
 		List<DeviceToken> deviceTokenList = deviceTokenService.list(member.getId());
+
 		for (DeviceToken deviceToken : deviceTokenList) {
 			Notification notification = Notification.builder()
 					.setTitle(noticeNotificationDto.getTitle())
@@ -93,6 +105,7 @@ public class FCMNotificationService {
 			Message message = Message.builder()
 					.setToken(deviceToken.getToken())
 					.setNotification(notification)
+					.putData("notification_type", NotificationType.REGISTERED.toString())
 					.build();
 
 			try {
@@ -101,13 +114,5 @@ public class FCMNotificationService {
 				deviceTokenService.delete(deviceToken.getToken());
 			}
 		}
-	}
-
-	/**
-	 * title과 body를 받아서 특정 회원에게 알림을 보내는 메서드(username으로 검색)
-	 */
-	public void sendNotification(String title, String body, String username) {
-		NoticeNotificationDto noticeNotificationDto = NoticeNotificationDto.builder().title(title).body(body).build();
-		sendNotification(noticeNotificationDto, username);
 	}
 }

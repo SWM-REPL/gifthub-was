@@ -11,6 +11,8 @@ import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,7 +40,8 @@ public class Notification {
 	@JoinColumn(name = "voucher_id", nullable = true)
 	private Voucher voucher;
 
-	@Column(columnDefinition = "TINYINT", length = 1, nullable = false)
+	@Enumerated(EnumType.ORDINAL)
+	@Column(columnDefinition = "TINYINT", nullable = false)
 	private NotificationType type;
 
 	@Column(columnDefinition = "TINYTEXT", length = 200, nullable = false)

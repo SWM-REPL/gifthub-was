@@ -33,7 +33,7 @@ public class Product {
 	private String description;
 
 	@Column(columnDefinition = "TINYINT", nullable = false)
-	@ColumnDefault("0")
+	@ColumnDefault("1")
 	private int isReusable;
 
 	@Column
