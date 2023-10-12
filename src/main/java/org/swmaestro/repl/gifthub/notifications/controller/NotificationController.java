@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
-import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenSaveRequestDto;
+import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenRequestDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NoticeNotificationDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NotificationReadResponseDto;
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationService;
@@ -65,9 +65,9 @@ public class NotificationController {
 	public ResponseEntity<Message> registerDeviceToken(
 			HttpServletRequest request,
 			@RequestHeader("Authorization") String accessToken,
-			@RequestBody DeviceTokenSaveRequestDto deviceTokenSaveRequestDto) {
+			@RequestBody DeviceTokenRequestDto deviceTokenRequestDto) {
 		String username = jwtProvider.getUsername(accessToken.substring(7));
-		notificationService.saveDeviceToken(username, deviceTokenSaveRequestDto.getToken());
+		notificationService.saveDeviceToken(username, deviceTokenRequestDto.getToken());
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
@@ -84,10 +84,10 @@ public class NotificationController {
 	public ResponseEntity<Message> deleteDeviceToken(
 			HttpServletRequest request,
 			@RequestHeader("Authorization") String accessToken,
-			@RequestBody DeviceTokenSaveRequestDto deviceTokenSaveRequestDto) {
+			@RequestBody DeviceTokenRequestDto deviceTokenRequestDto) {
 		String username = jwtProvider.getUsername(accessToken.substring(7));
 		Member member = memberService.read(username);
-		notificationService.deleteDeviceToken(member, deviceTokenSaveRequestDto.getToken());
+		notificationService.deleteDeviceToken(member, deviceTokenRequestDto.getToken());
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
