@@ -97,6 +97,17 @@ public class DeviceTokenService {
 	}
 
 	/*
+	 * DeviceToken 삭제 메서드
+	 */
+	public void delete(Member member, String token) {
+		DeviceToken deviceToken = read(token);
+		if (!deviceToken.getMember().equals(member)) {
+			throw new BusinessException("토큰을 삭제할 권한이 없습니다.", StatusEnum.FORBIDDEN);
+		}
+		deviceTokenRepository.delete(deviceToken);
+	}
+
+	/*
 	 * DeviceToken 삭제 메서드 (token)
 	 */
 	public void delete(String token) {
