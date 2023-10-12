@@ -33,6 +33,13 @@ public interface OAuth2Service {
 	OAuth read(OAuthUserInfoDto oAuthUserInfoDto);
 
 	/**
+	 * 연동된 OAuth 계정 정보를 삭제한다.
+	 * @param member
+	 * @return
+	 */
+	OAuth delete(Member member);
+
+	/**
 	 * OAuth 플랫폼 존재 여부를 확인한다.
 	 * @param member
 	 * @return
