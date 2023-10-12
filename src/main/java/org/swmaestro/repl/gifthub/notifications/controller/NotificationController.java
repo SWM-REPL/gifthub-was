@@ -3,6 +3,7 @@ package org.swmaestro.repl.gifthub.notifications.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -74,7 +75,7 @@ public class NotificationController {
 						.build());
 	}
 
-	@PostMapping("/device")
+	@DeleteMapping("/device")
 	@Operation(summary = "디바이스 토큰 삭제 메서드", description = "알림 서비스를 위한 디바이스 토큰을 삭제하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "디바이스 토큰 등록 성공"),
