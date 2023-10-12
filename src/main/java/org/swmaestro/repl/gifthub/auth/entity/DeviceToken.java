@@ -24,15 +24,15 @@ public class DeviceToken extends BaseTimeEntity {
 
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)
-	private Member member;
+	private User user;
 
 	@Column(length = 200)
 	private String token;
 
 	@Builder
-	public DeviceToken(Long id, Member member, String token) {
+	public DeviceToken(Long id, User user, String token) {
 		this.id = id;
-		this.member = member;
+		this.user = user;
 		this.token = token;
 	}
 }

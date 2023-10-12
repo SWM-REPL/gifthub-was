@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.auth.service.OAuthService;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
@@ -103,8 +103,8 @@ public class UserController {
 		}
 
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		Member member = memberService.read(username);
-		memberService.createOAuthInfo(member, oAuthPlatform, oAuthTokenDto);
+		User user = memberService.read(username);
+		memberService.createOAuthInfo(user, oAuthPlatform, oAuthTokenDto);
 		return ResponseEntity.ok(SuccessMessage.builder()
 				.path(request.getRequestURI())
 				.build());
@@ -128,8 +128,8 @@ public class UserController {
 		}
 
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		Member member = memberService.read(username);
-		memberService.deleteOAuthInfo(member, oAuthPlatform);
+		User user = memberService.read(username);
+		memberService.deleteOAuthInfo(user, oAuthPlatform);
 		return ResponseEntity.ok(SuccessMessage.builder()
 				.path(request.getRequestURI())
 				.build());

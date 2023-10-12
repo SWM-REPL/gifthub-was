@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.config.GoogleConfig;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.repository.OAuthRepository;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -78,8 +78,8 @@ public class GoogleService implements OAuth2Service {
 	}
 
 	@Override
-	public OAuth create(Member member, OAuthUserInfoDto oAuthUserInfoDto) {
-		if (isExists(member)) {
+	public OAuth create(User user, OAuthUserInfoDto oAuthUserInfoDto) {
+		if (isExists(user)) {
 			throw new BusinessException("이미 연동된 계정이 존재하는 플랫폼입니다.", StatusEnum.CONFLICT);
 		}
 
@@ -88,7 +88,7 @@ public class GoogleService implements OAuth2Service {
 		}
 
 		OAuth oAuth = OAuth.builder()
-				.member(member)
+				.member(user)
 				.platform(OAuthPlatform.GOOGLE)
 				.platformId(oAuthUserInfoDto.getId())
 				.email(oAuthUserInfoDto.getEmail())
@@ -111,8 +111,8 @@ public class GoogleService implements OAuth2Service {
 	}
 
 	@Override
-	public OAuth delete(Member member) {
-		OAuth oAuth = oAuthRepository.findByMemberAndPlatform(member, OAuthPlatform.GOOGLE).orElseThrow(
+	public OAuth delete(User user) {
+		OAuth oAuth = oAuthRepository.findByMemberAndPlatform(user, OAuthPlatform.GOOGLE).orElseThrow(
 				() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND)
 		);
 		oAuth.setDeletedAt(LocalDateTime.now());
@@ -120,8 +120,8 @@ public class GoogleService implements OAuth2Service {
 	}
 
 	@Override
-	public boolean isExists(Member member) {
-		return oAuthRepository.findByMemberAndPlatform(member, OAuthPlatform.GOOGLE).isPresent();
+	public boolean isExists(User user) {
+		return oAuthRepository.findByMemberAndPlatform(user, OAuthPlatform.GOOGLE).isPresent();
 	}
 
 	@Override

@@ -2,8 +2,8 @@ package org.swmaestro.repl.gifthub.auth.service;
 
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 
 /**
  * OAuth2 인증을 위한 인터페이스
@@ -18,12 +18,12 @@ public interface OAuth2Service {
 
 	/**
 	 * OAuth 플랫폼 정보를 저장한다.
-	 * @param member
+	 * @param user
 	 * @param oAuthUserInfoDto
 	 * @return
 	 */
 
-	OAuth create(Member member, OAuthUserInfoDto oAuthUserInfoDto);
+	OAuth create(User user, OAuthUserInfoDto oAuthUserInfoDto);
 
 	/**
 	 * OAuth 플랫폼 정보를 가져온다.
@@ -34,17 +34,17 @@ public interface OAuth2Service {
 
 	/**
 	 * 연동된 OAuth 계정 정보를 삭제한다.
-	 * @param member
+	 * @param user
 	 * @return
 	 */
-	OAuth delete(Member member);
+	OAuth delete(User user);
 
 	/**
 	 * OAuth 플랫폼 존재 여부를 확인한다.
-	 * @param member
+	 * @param user
 	 * @return
 	 */
-	boolean isExists(Member member);
+	boolean isExists(User user);
 
 	/**
 	 * OAuth 플랫폼 존재 여부를 확인한다.

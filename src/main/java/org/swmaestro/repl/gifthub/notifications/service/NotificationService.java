@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -69,9 +69,9 @@ public class NotificationService {
 
 	}
 
-	public boolean deleteDeviceToken(Member member, String deviceToken) {
+	public boolean deleteDeviceToken(User user, String deviceToken) {
 		try {
-			deviceTokenService.delete(member, deviceToken);
+			deviceTokenService.delete(user, deviceToken);
 			return true;
 		} catch (Exception e) {
 			throw new BusinessException("디바이스 토큰 삭제에 실패하였습니다.", StatusEnum.BAD_REQUEST);
@@ -81,9 +81,9 @@ public class NotificationService {
 	/**
 	 * Notification 저장 메서드
 	 */
-	public Notification save(Member member, Voucher voucher, NotificationType type, String message) {
+	public Notification save(User user, Voucher voucher, NotificationType type, String message) {
 		Notification notification = Notification.builder()
-				.receiver(member)
+				.receiver(user)
 				.type(type)
 				.message(message)
 				.voucher(voucher)

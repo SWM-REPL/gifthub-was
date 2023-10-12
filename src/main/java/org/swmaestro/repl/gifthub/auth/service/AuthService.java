@@ -9,8 +9,8 @@ import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -37,14 +37,14 @@ public class AuthService {
 	 * @param signUpDto
 	 */
 	public JwtTokenDto signUp(SignUpDto signUpDto) {
-		Member member = Member.builder()
+		User user = User.builder()
 				.username(signUpDto.getUsername())
 				.password(passwordEncoder.encode(signUpDto.getPassword()))
 				.nickname(signUpDto.getNickname())
 				.build();
 
-		Member savedMember = memberService.create(member);
-		return generateJwtTokenDto(savedMember);
+		User savedUser = memberService.create(user);
+		return generateJwtTokenDto(savedUser);
 	}
 
 	/**
@@ -52,18 +52,18 @@ public class AuthService {
 	 * @param signInDto
 	 */
 	public JwtTokenDto signIn(SignInDto signInDto) {
-		Member member = memberService.read(signInDto.getUsername());
+		User user = memberService.read(signInDto.getUsername());
 
-		if (member == null) {
+		if (user == null) {
 			throw new BusinessException("존재하지 않는 아이디입니다.", StatusEnum.BAD_REQUEST);
 		}
 
-		if (!passwordEncoder.matches(signInDto.getPassword(), member.getPassword())) {
+		if (!passwordEncoder.matches(signInDto.getPassword(), user.getPassword())) {
 			throw new BusinessException("비밀번호가 일치하지 않습니다.", StatusEnum.BAD_REQUEST);
 		}
 
-		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
-		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
+		String accessToken = jwtProvider.generateToken(user.getUsername(), user.getId());
+		String refreshToken = jwtProvider.generateRefreshToken(user.getUsername(), user.getId());
 
 		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
 				.accessToken(accessToken)
@@ -88,27 +88,27 @@ public class AuthService {
 			oAuth = oAuthService.read(userInfo, platform);
 		} else {
 			// 존재하지 않을 경우 -> 회원 가입 -> 로그인
-			Member newMember = Member.builder()
+			User newUser = User.builder()
 					.username(memberService.generateOAuthUsername())
 					.nickname(authConfig.getDefaultNickname())
 					.build();
 			// 회원 정보 저장
-			Member member = memberService.create(newMember);
+			User user = memberService.create(newUser);
 			// oauth 정보 저장
-			oAuth = oAuthService.create(member, userInfo, platform);
+			oAuth = oAuthService.create(user, userInfo, platform);
 		}
 
-		return generateJwtTokenDto(oAuth.getMember());
+		return generateJwtTokenDto(oAuth.getUser());
 	}
 
 	/**
 	 * JWT 토큰 생성
-	 * @param member
+	 * @param user
 	 * @return
 	 */
-	private JwtTokenDto generateJwtTokenDto(Member member) {
-		String accessToken = jwtProvider.generateToken(member.getUsername(), member.getId());
-		String refreshToken = jwtProvider.generateRefreshToken(member.getUsername(), member.getId());
+	private JwtTokenDto generateJwtTokenDto(User user) {
+		String accessToken = jwtProvider.generateToken(user.getUsername(), user.getId());
+		String refreshToken = jwtProvider.generateRefreshToken(user.getUsername(), user.getId());
 
 		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
 				.accessToken(accessToken)
@@ -125,8 +125,8 @@ public class AuthService {
 	 */
 	@Transactional
 	public void signOut(String username, SignOutDto signOutDto) {
-		Member member = memberRepository.findByUsername(username);
-		if (member == null) {
+		User user = memberRepository.findByUsername(username);
+		if (user == null) {
 			throw new BusinessException("존재하지 않는 사용자입니다.", StatusEnum.UNAUTHORIZED);
 		}
 		refreshTokenService.deleteRefreshToken(username);

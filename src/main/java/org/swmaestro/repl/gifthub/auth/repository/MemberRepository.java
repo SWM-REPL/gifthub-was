@@ -1,11 +1,11 @@
 package org.swmaestro.repl.gifthub.auth.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<User, Long> {
 
-	Member findByUsername(String username);
+	User findByUsername(String username);
 
-	Member findByNickname(String nickname);
+	User findByNickname(String nickname);
 }

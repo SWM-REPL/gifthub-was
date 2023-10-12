@@ -1,20 +1,20 @@
 package org.swmaestro.repl.gifthub.security;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
-
 import java.util.Collection;
 
-public class CustomUserDetails implements UserDetails {
-	private final Member member;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 
-	public CustomUserDetails(Member member) {
-		this.member = member;
+public class CustomUserDetails implements UserDetails {
+	private final User user;
+
+	public CustomUserDetails(User user) {
+		this.user = user;
 	}
 
-	public final Member getMember() {
-		return member;
+	public final User getMember() {
+		return user;
 	}
 
 	@Override
@@ -24,12 +24,12 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public String getPassword() {
-		return member.getPassword();
+		return user.getPassword();
 	}
 
 	@Override
 	public String getUsername() {
-		return member.getUsername();
+		return user.getUsername();
 	}
 
 	@Override

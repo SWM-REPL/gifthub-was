@@ -40,17 +40,17 @@ public class OAuth {
 
 	@JoinColumn(name = "member_id", nullable = false)
 	@ManyToOne
-	private Member member;
+	private User user;
 
 	@Column
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public OAuth(OAuthPlatform platform, String platformId, String email, String nickname, Member member) {
+	public OAuth(OAuthPlatform platform, String platformId, String email, String nickname, User user) {
 		this.platform = platform;
 		this.platformId = platformId;
 		this.email = email;
 		this.nickname = nickname;
-		this.member = member;
+		this.user = user;
 	}
 }

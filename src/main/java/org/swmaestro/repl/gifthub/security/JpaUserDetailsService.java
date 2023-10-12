@@ -1,12 +1,13 @@
 package org.swmaestro.repl.gifthub.security;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -15,11 +16,11 @@ public class JpaUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		Member member = memberRepository.findByUsername(username);
-		if (member != null) {
-			return new CustomUserDetails(member);
+		User user = memberRepository.findByUsername(username);
+		if (user != null) {
+			return new CustomUserDetails(user);
 		} else {
-			return (UserDetails) new UsernameNotFoundException("User not found with username: " + username);
+			return (UserDetails)new UsernameNotFoundException("User not found with username: " + username);
 		}
 
 	}

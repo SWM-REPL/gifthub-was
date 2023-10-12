@@ -3,7 +3,7 @@ package org.swmaestro.repl.gifthub.vouchers.entity;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,7 +27,7 @@ public class VoucherUsageHistory {
 
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)
-	private Member member;
+	private User user;
 
 	@ManyToOne
 	@JoinColumn(name = "voucher_id", nullable = false)
@@ -42,10 +42,10 @@ public class VoucherUsageHistory {
 	private LocalDateTime createdAt;
 
 	@Builder
-	public VoucherUsageHistory(Long id, Member member, Voucher voucher, int amount, String place,
-		LocalDateTime createdAt) {
+	public VoucherUsageHistory(Long id, User user, Voucher voucher, int amount, String place,
+			LocalDateTime createdAt) {
 		this.id = id;
-		this.member = member;
+		this.user = user;
 		this.voucher = voucher;
 		this.amount = amount;
 		this.place = place;

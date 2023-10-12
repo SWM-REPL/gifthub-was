@@ -3,8 +3,8 @@ package org.swmaestro.repl.gifthub.auth.service;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
@@ -32,22 +32,22 @@ public class OAuthService {
 		};
 	}
 
-	public OAuth create(Member member, OAuthUserInfoDto oAuthUserInfoDto, OAuthPlatform platform) {
+	public OAuth create(User user, OAuthUserInfoDto oAuthUserInfoDto, OAuthPlatform platform) {
 		return switch (platform) {
-			case NAVER -> naverService.create(member, oAuthUserInfoDto);
-			case KAKAO -> kakaoService.create(member, oAuthUserInfoDto);
-			case GOOGLE -> googleService.create(member, oAuthUserInfoDto);
-			case APPLE -> appleService.create(member, oAuthUserInfoDto);
+			case NAVER -> naverService.create(user, oAuthUserInfoDto);
+			case KAKAO -> kakaoService.create(user, oAuthUserInfoDto);
+			case GOOGLE -> googleService.create(user, oAuthUserInfoDto);
+			case APPLE -> appleService.create(user, oAuthUserInfoDto);
 			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		};
 	}
 
-	public OAuth delete(Member member, OAuthPlatform platform) {
+	public OAuth delete(User user, OAuthPlatform platform) {
 		return switch (platform) {
-			case NAVER -> naverService.delete(member);
-			case KAKAO -> kakaoService.delete(member);
-			case GOOGLE -> googleService.delete(member);
-			case APPLE -> appleService.delete(member);
+			case NAVER -> naverService.delete(user);
+			case KAKAO -> kakaoService.delete(user);
+			case GOOGLE -> googleService.delete(user);
+			case APPLE -> appleService.delete(user);
 			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		};
 	}
@@ -62,12 +62,12 @@ public class OAuthService {
 		};
 	}
 
-	public boolean isExists(Member member, OAuthPlatform platform) {
+	public boolean isExists(User user, OAuthPlatform platform) {
 		return switch (platform) {
-			case NAVER -> naverService.isExists(member);
-			case KAKAO -> kakaoService.isExists(member);
-			case GOOGLE -> googleService.isExists(member);
-			case APPLE -> appleService.isExists(member);
+			case NAVER -> naverService.isExists(user);
+			case KAKAO -> kakaoService.isExists(user);
+			case GOOGLE -> googleService.isExists(user);
+			case APPLE -> appleService.isExists(user);
 			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		};
 	}

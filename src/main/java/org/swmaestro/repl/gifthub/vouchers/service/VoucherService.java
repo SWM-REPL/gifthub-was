@@ -76,7 +76,7 @@ public class VoucherService {
 				.expiresAt(DateConverter.stringToLocalDate(voucherSaveRequestDto.getExpiresAt()))
 				.imageUrl(imageUrl)
 				.balance(product.getPrice())
-				.member(memberService.read(username))
+				.user(memberService.read(username))
 				.build();
 
 		return VoucherSaveResponseDto.builder()
@@ -227,7 +227,7 @@ public class VoucherService {
 		}
 
 		VoucherUsageHistory voucherUsageHistory = VoucherUsageHistory.builder()
-				.member(memberService.read(username))
+				.user(memberService.read(username))
 				.voucher(voucher.get())
 				.amount(voucherUseRequestDto.getAmount())
 				.place(voucherUseRequestDto.getPlace())
