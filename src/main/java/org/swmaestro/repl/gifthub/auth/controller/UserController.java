@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.service.OAuthService;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -81,8 +83,8 @@ public class UserController {
 						.data(memberService.read(userId))
 						.build());
 	}
-  
-  @PostMapping("/oauth/{platform}")
+
+	@PostMapping("/oauth/{platform}")
 	@Operation(summary = "OAuth 연동 계정 추가 메서드", description = "사용자의 기존 계정에 OAuth 계정을 추가 연동하기 위한 메서드입니다.\n 파라미터로는 'naver', 'kakao', 'google', 'apple'를 받을 수 있습니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "OAuth 연동 계정 추가 성공"),
@@ -107,8 +109,8 @@ public class UserController {
 				.path(request.getRequestURI())
 				.build());
 	}
-  
-  @DeleteMapping("/oauth/{platform}")
+
+	@DeleteMapping("/oauth/{platform}")
 	@Operation(summary = "OAuth 연동 계정 삭제 메서드", description = "사용자의 기존 계정에 연동된 OAuth 계정을 삭제하기 위한 메서드입니다.\n 파라미터로는 'naver', 'kakao', 'google', 'apple'를 받을 수 있습니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "OAuth 연동 계정 삭제 성공"),
