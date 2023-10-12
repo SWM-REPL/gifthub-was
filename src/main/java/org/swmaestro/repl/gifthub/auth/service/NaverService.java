@@ -107,6 +107,13 @@ public class NaverService implements OAuth2Service {
 	}
 
 	@Override
+	public OAuth delete(Member member) {
+		return oAuthRepository.deleteByMemberAndPlatform(member, OAuthPlatform.NAVER).orElseThrow(
+				() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND)
+		);
+	}
+
+	@Override
 	public boolean isExists(Member member) {
 		return oAuthRepository.findByMemberAndPlatform(member, OAuthPlatform.NAVER).isPresent();
 	}
