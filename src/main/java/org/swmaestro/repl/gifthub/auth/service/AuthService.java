@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-	private final UserService memberService;
+	private final UserService userService;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
 	private final OAuthService oAuthService;
@@ -43,7 +43,7 @@ public class AuthService {
 				.nickname(signUpDto.getNickname())
 				.build();
 
-		User savedUser = memberService.create(user);
+		User savedUser = userService.create(user);
 		return generateJwtTokenDto(savedUser);
 	}
 
@@ -52,7 +52,7 @@ public class AuthService {
 	 * @param signInDto
 	 */
 	public JwtTokenDto signIn(SignInDto signInDto) {
-		User user = memberService.read(signInDto.getUsername());
+		User user = userService.read(signInDto.getUsername());
 
 		if (user == null) {
 			throw new BusinessException("존재하지 않는 아이디입니다.", StatusEnum.BAD_REQUEST);
@@ -89,11 +89,11 @@ public class AuthService {
 		} else {
 			// 존재하지 않을 경우 -> 회원 가입 -> 로그인
 			User newUser = User.builder()
-					.username(memberService.generateOAuthUsername())
+					.username(userService.generateOAuthUsername())
 					.nickname(authConfig.getDefaultNickname())
 					.build();
 			// 회원 정보 저장
-			User user = memberService.create(newUser);
+			User user = userService.create(newUser);
 			// oauth 정보 저장
 			oAuth = oAuthService.create(user, userInfo, platform);
 		}

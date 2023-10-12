@@ -97,7 +97,7 @@ public class VoucherService {
 	 */
 	public VoucherReadResponseDto read(Long id, String username) {
 		Optional<Voucher> voucher = voucherRepository.findById(id);
-		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
+		List<Voucher> vouchers = voucherRepository.findAllByUserUsername(username);
 
 		if (voucher.isEmpty()) {
 			throw new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND);
@@ -125,7 +125,7 @@ public class VoucherService {
 			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
 
-		List<Voucher> vouchers = voucherRepository.findAllByMemberId(userId);
+		List<Voucher> vouchers = voucherRepository.findAllByUserId(userId);
 		List<Long> voucherIdList = new ArrayList<>();
 		for (Voucher voucher : vouchers) {
 			// 삭제된 기프티콘은 조회되지 않도록 함
@@ -145,7 +145,7 @@ public class VoucherService {
 	사용자 별 기프티콘 목록 조회 메서드(username으로 조회)
 	 */
 	public List<Long> list(String username) {
-		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
+		List<Voucher> vouchers = voucherRepository.findAllByUserUsername(username);
 		List<Long> voucherIdList = new ArrayList<>();
 		for (Voucher voucher : vouchers) {
 			voucherIdList.add(voucher.getId());
@@ -201,7 +201,7 @@ public class VoucherService {
 			throw new BusinessException("사용처를 입력해주세요.", StatusEnum.BAD_REQUEST);
 		}
 		Optional<Voucher> voucher = voucherRepository.findById(voucherId);
-		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
+		List<Voucher> vouchers = voucherRepository.findAllByUserUsername(username);
 		List<VoucherUsageHistory> voucherUsageHistories = voucherUsageHistoryRepository.findAllByVoucherId(voucherId);
 
 		if (voucher.isEmpty()) {
@@ -251,7 +251,7 @@ public class VoucherService {
 	 */
 	public boolean delete(String username, Long voucherId) {
 		Optional<Voucher> voucher = voucherRepository.findById(voucherId);
-		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
+		List<Voucher> vouchers = voucherRepository.findAllByUserUsername(username);
 
 		if (voucher.isEmpty()) {
 			throw new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND);
@@ -290,7 +290,7 @@ public class VoucherService {
 	 *  사용자 별 중복 기프티콘 검사 메서드
 	 */
 	public boolean isDuplicateVoucher(String username, String barcode) {
-		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
+		List<Voucher> vouchers = voucherRepository.findAllByUserUsername(username);
 		for (Voucher voucher : vouchers) {
 			if (voucher.getBarcode().equals(barcode)) {
 				return true;

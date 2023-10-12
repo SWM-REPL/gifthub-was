@@ -115,7 +115,7 @@ public class NaverService implements OAuth2Service {
 
 	@Override
 	public OAuth delete(User user) {
-		OAuth oAuth = oAuthRepository.findByMemberAndPlatform(user, OAuthPlatform.NAVER).orElseThrow(
+		OAuth oAuth = oAuthRepository.findByUserAndPlatform(user, OAuthPlatform.NAVER).orElseThrow(
 				() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND)
 		);
 		oAuth.setDeletedAt(LocalDateTime.now());
@@ -124,7 +124,7 @@ public class NaverService implements OAuth2Service {
 
 	@Override
 	public boolean isExists(User user) {
-		return oAuthRepository.findByMemberAndPlatform(user, OAuthPlatform.NAVER).isPresent();
+		return oAuthRepository.findByUserAndPlatform(user, OAuthPlatform.NAVER).isPresent();
 	}
 
 	@Override

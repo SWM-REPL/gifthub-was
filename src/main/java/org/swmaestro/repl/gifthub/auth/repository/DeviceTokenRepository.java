@@ -10,7 +10,7 @@ import org.swmaestro.repl.gifthub.auth.entity.User;
 public interface DeviceTokenRepository extends JpaRepository<DeviceToken, Long> {
 	Optional<DeviceToken> findByToken(String token);
 
-	Optional<DeviceToken> findByMemberAndToken(User user, String token);
+	Optional<DeviceToken> findByUserAndToken(User user, String token);
 
-	List<DeviceToken> findAllByMember(User user);
+	List<DeviceToken> findAllByUser(User user);
 }

@@ -61,7 +61,7 @@ public class DeviceTokenService {
 		MemberReadResponseDto memberDto = userService.read(memberId);
 		User user = userService.read(memberDto.getUsername());
 
-		return deviceTokenRepository.findByMemberAndToken(user, deviceToken).isPresent();
+		return deviceTokenRepository.findByUserAndToken(user, deviceToken).isPresent();
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class DeviceTokenService {
 	public List<DeviceToken> list(Long memberId) {
 		MemberReadResponseDto memberDto = userService.read(memberId);
 		User user = userService.read(memberDto.getUsername());
-		return deviceTokenRepository.findAllByMember(user);
+		return deviceTokenRepository.findAllByUser(user);
 	}
 
 	/*

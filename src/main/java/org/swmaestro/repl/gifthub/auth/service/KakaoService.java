@@ -110,7 +110,7 @@ public class KakaoService implements OAuth2Service {
 
 	@Override
 	public OAuth delete(User user) {
-		OAuth oAuth = oAuthRepository.findByMemberAndPlatform(user, OAuthPlatform.KAKAO).orElseThrow(
+		OAuth oAuth = oAuthRepository.findByUserAndPlatform(user, OAuthPlatform.KAKAO).orElseThrow(
 				() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND)
 		);
 		oAuth.setDeletedAt(LocalDateTime.now());
@@ -119,7 +119,7 @@ public class KakaoService implements OAuth2Service {
 
 	@Override
 	public boolean isExists(User user) {
-		return oAuthRepository.findByMemberAndPlatform(user, OAuthPlatform.KAKAO).isPresent();
+		return oAuthRepository.findByUserAndPlatform(user, OAuthPlatform.KAKAO).isPresent();
 	}
 
 	@Override
