@@ -7,6 +7,9 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
@@ -26,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class MemberService {
+public class UserService implements UserDetailsService {
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final OAuthService oAuthService;
@@ -152,5 +155,10 @@ public class MemberService {
 
 	public OAuth deleteOAuthInfo(User user, OAuthPlatform oAuthPlatform) {
 		return oAuthService.delete(user, oAuthPlatform);
+	}
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		return null;
 	}
 }

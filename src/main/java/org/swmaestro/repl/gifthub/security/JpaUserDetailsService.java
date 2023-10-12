@@ -8,9 +8,11 @@ import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class JpaUserDetailsService implements UserDetailsService {
 	private final MemberRepository memberRepository;
 
@@ -18,9 +20,15 @@ public class JpaUserDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		User user = memberRepository.findByUsername(username);
 		if (user != null) {
-			return new CustomUserDetails(user);
+			log.info("user: {}", user);
+			return User.builder()
+					.id(user.getId())
+					.username(user.getUsername())
+					.password(user.getPassword())
+					.nickname(user.getNickname())
+					.build();
 		} else {
-			return (UserDetails)new UsernameNotFoundException("User not found with username: " + username);
+			return null;
 		}
 
 	}
