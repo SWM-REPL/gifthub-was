@@ -13,6 +13,8 @@ import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.repository.MemberRepository;
@@ -142,8 +144,13 @@ public class MemberService {
 	public String generateOAuthUsername() {
 		return UUID.randomUUID().toString();
 	}
+  
+  public OAuth createOAuthInfo(Member member, OAuthPlatform oAuthPlatform, OAuthTokenDto oAuthTokenDto) {
+		OAuthUserInfoDto oAuthUserInfoDto = oAuthService.getUserInfo(oAuthTokenDto, oAuthPlatform);
+		return oAuthService.create(member, oAuthUserInfoDto, oAuthPlatform);
+	}
 
 	public OAuth deleteOAuthInfo(Member member, OAuthPlatform oAuthPlatform) {
 		return oAuthService.delete(member, oAuthPlatform);
-	}
+  }
 }

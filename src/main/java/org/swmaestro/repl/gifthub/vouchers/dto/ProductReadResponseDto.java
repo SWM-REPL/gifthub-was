@@ -19,11 +19,11 @@ public class ProductReadResponseDto {
 	private String name;
 	private String description;
 	private int isReusable;
-	private int price;
+	private Integer price;
 	private String imageUrl;
 
 	@Builder
-	public ProductReadResponseDto(Long id, Long brandId, String name, String description, int isReusable, int price, String imageUrl) {
+	public ProductReadResponseDto(Long id, Long brandId, String name, String description, int isReusable, Integer price, String imageUrl) {
 		this.id = id;
 		this.brandId = brandId;
 		this.name = name;

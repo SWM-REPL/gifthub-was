@@ -1,7 +1,6 @@
 package org.swmaestro.repl.gifthub.vouchers.controller;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +18,7 @@ import org.swmaestro.repl.gifthub.util.Message;
 import org.swmaestro.repl.gifthub.util.SuccessMessage;
 import org.swmaestro.repl.gifthub.vouchers.dto.OCRDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.PresignedUrlResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherListResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
@@ -109,11 +109,11 @@ public class VoucherController {
 	})
 	public ResponseEntity<Message> listVoucher(HttpServletRequest request, @RequestParam(value = "user_id", required = true) Long memberId) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		List<Long> voucherIdList = voucherService.list(memberId, username);
+		VoucherListResponseDto voucherListResponseDto = voucherService.list(memberId, username);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
-						.data(voucherIdList)
+						.data(voucherListResponseDto)
 						.build());
 	}
 

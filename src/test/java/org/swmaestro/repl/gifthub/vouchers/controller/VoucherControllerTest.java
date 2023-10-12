@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherListResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
@@ -113,9 +114,16 @@ class VoucherControllerTest {
 		voucherIdList.add(1L);
 		voucherIdList.add(2L);
 
+		int pendingCount = 2;
+
+		VoucherListResponseDto voucherListResponseDto = VoucherListResponseDto.builder()
+				.voucherIds(voucherIdList)
+				.pendingCount(pendingCount)
+				.build();
+
 		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
 		when(jwtProvider.getUsername(anyString())).thenReturn(username);
-		when(voucherService.list(memberId, username)).thenReturn(voucherIdList);
+		when(voucherService.list(memberId, username)).thenReturn(voucherListResponseDto);
 
 		mockMvc.perform(get("/vouchers?user_id=" + memberId)
 						.header("Authorization", "Bearer " + accessToken))
