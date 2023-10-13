@@ -23,9 +23,7 @@ import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.entity.Brand;
 import org.swmaestro.repl.gifthub.vouchers.entity.Product;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
-import org.swmaestro.repl.gifthub.vouchers.entity.VoucherUsageHistory;
 import org.swmaestro.repl.gifthub.vouchers.repository.VoucherRepository;
-import org.swmaestro.repl.gifthub.vouchers.repository.VoucherUsageHistoryRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,8 +37,8 @@ public class VoucherService {
 	private final ProductService productService;
 	private final VoucherRepository voucherRepository;
 	private final MemberService memberService;
-	private final VoucherUsageHistoryRepository voucherUsageHistoryRepository;
 	private final PendingVoucherService pendingVoucherService;
+	private final VoucherUsageHistoryService voucherUsageHistoryService;
 
 	/*
 		기프티콘 저장 메서드
@@ -56,6 +54,7 @@ public class VoucherService {
 					.brand(brand)
 					.name(voucherSaveRequestDto.getProductName())
 					.imageUrl(storageService.getDefaultImagePath(voucherDirName))
+					.isReusable(1)
 					.build();
 			return productService.save(newProduct);
 		});
@@ -194,56 +193,19 @@ public class VoucherService {
 	기프티콘 사용 등록 메서드
 	 */
 	public VoucherUseResponseDto use(String username, Long voucherId, VoucherUseRequestDto voucherUseRequestDto) {
-		if (voucherUseRequestDto.getAmount() == null || voucherUseRequestDto.getAmount() <= 0) {
-			throw new BusinessException("사용 금액을 입력해주세요.", StatusEnum.BAD_REQUEST);
+		validateVoucherUseRequest(voucherUseRequestDto);
+		Voucher voucher = getValidVoucherForUser(username, voucherId);
+		if (voucher.getProduct().getPrice() == null) {
+			validateVoucherWithoutPriceInfo(voucher, voucherUseRequestDto);
+		} else {
+			validateVoucherWithPriceInfo(voucher, voucherUseRequestDto);
 		}
-		if (voucherUseRequestDto.getPlace() == null) {
-			throw new BusinessException("사용처를 입력해주세요.", StatusEnum.BAD_REQUEST);
+		Long usageId = voucherUsageHistoryService.create(voucher, voucherUseRequestDto, username);
+		if (voucher.getBalance() == null || voucher.getProduct().getIsReusable() == 0) {
+			return use(voucher, voucherId, usageId);
+		} else {
+			return use(voucher, voucherUseRequestDto, voucherId, usageId);
 		}
-		Optional<Voucher> voucher = voucherRepository.findById(voucherId);
-		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
-		List<VoucherUsageHistory> voucherUsageHistories = voucherUsageHistoryRepository.findAllByVoucherId(voucherId);
-
-		if (voucher.isEmpty()) {
-			throw new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND);
-		}
-		if (!vouchers.contains(voucher.get())) {
-			throw new BusinessException("상품권을 사용할 권한이 없습니다.", StatusEnum.FORBIDDEN);
-		}
-
-		if (voucher.get().getBalance() == 0) {
-			throw new BusinessException("이미 사용된 상품권 입니다.", StatusEnum.NOT_FOUND);
-		}
-
-		int remainingBalance = voucher.get().getBalance();
-		int requestedAmount = voucherUseRequestDto.getAmount();
-
-		if (requestedAmount > remainingBalance) {
-			throw new BusinessException("잔액이 부족합니다.", StatusEnum.CONFLICT);
-		}
-
-		if (voucher.get().getExpiresAt().isBefore(LocalDate.now())) {
-			throw new BusinessException("유효기간이 만료된 상품권 입니다.", StatusEnum.CONFLICT);
-		}
-
-		VoucherUsageHistory voucherUsageHistory = VoucherUsageHistory.builder()
-				.member(memberService.read(username))
-				.voucher(voucher.get())
-				.amount(voucherUseRequestDto.getAmount())
-				.place(voucherUseRequestDto.getPlace())
-				.createdAt(LocalDateTime.now())
-				.build();
-		voucherUsageHistoryRepository.save(voucherUsageHistory);
-
-		voucher.get().setBalance(remainingBalance - requestedAmount);
-		voucherRepository.save(voucher.get());
-
-		return VoucherUseResponseDto.builder()
-				.usageId(voucherUsageHistory.getId())
-				.voucherId(voucherId)
-				.balance(remainingBalance - requestedAmount)
-				.price(voucher.get().getProduct().getPrice())
-				.build();
 	}
 
 	/*
@@ -297,5 +259,101 @@ public class VoucherService {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * 기프티콘 사용 등록 메서드 (non-reusabel voucher 이거나 voucher balance가 null인 경우)
+	 */
+	public VoucherUseResponseDto use(Voucher voucher, Long voucherId, Long usageId) {
+		voucher.setBalance(0);
+		voucherRepository.save(voucher);
+		return VoucherUseResponseDto.builder()
+				.usageId(usageId)
+				.voucherId(voucherId)
+				.balance(0)
+				.price(voucher.getProduct().getPrice())
+				.build();
+	}
+
+	/**
+	 * 기프티콘 사용 등록 메서드 (usable voucher)
+	 */
+	public VoucherUseResponseDto use(Voucher voucher, VoucherUseRequestDto voucherUseRequestDto,
+			Long voucherId, Long usageId) {
+		int remainingBalance = voucher.getBalance();
+		int requestedAmount = voucherUseRequestDto.getAmount();
+
+		if (requestedAmount > remainingBalance) {
+			throw new BusinessException("잔액이 부족합니다.", StatusEnum.CONFLICT);
+		}
+		voucher.setBalance(remainingBalance - requestedAmount);
+		voucherRepository.save(voucher);
+
+		return VoucherUseResponseDto.builder()
+				.usageId(usageId)
+				.voucherId(voucherId)
+				.balance(remainingBalance - requestedAmount)
+				.price(voucher.getProduct().getPrice())
+				.build();
+	}
+
+	/**
+	 * 기프티콘 사용 요청 유효성 검사 메소드
+	 */
+	private void validateVoucherUseRequest(VoucherUseRequestDto voucherUseRequestDto) {
+		if (voucherUseRequestDto.getAmount() != null && voucherUseRequestDto.getAmount() <= 0) {
+			throw new BusinessException("사용 금액을 입력해주세요.", StatusEnum.BAD_REQUEST);
+		}
+		if (voucherUseRequestDto.getPlace() == null) {
+			throw new BusinessException("사용처를 입력해주세요.", StatusEnum.BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * Voucher 유효성 검사 메서드
+	 */
+	private Voucher getValidVoucherForUser(String username, Long voucherId) {
+		Optional<Voucher> optionalVoucher = voucherRepository.findById(voucherId);
+		if (optionalVoucher.isEmpty()) {
+			throw new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND);
+		}
+
+		Voucher voucher = optionalVoucher.get();
+		if (!voucherRepository.findAllByMemberUsername(username).contains(voucher)) {
+			throw new BusinessException("상품권을 사용할 권한이 없습니다.", StatusEnum.FORBIDDEN);
+		}
+		if (voucher.getBalance() != null && voucher.getBalance() == 0) {
+			throw new BusinessException("이미 사용된 상품권 입니다.", StatusEnum.NOT_FOUND);
+		}
+		if (voucher.getExpiresAt().isBefore(LocalDate.now())) {
+			throw new BusinessException("유효기간이 만료된 상품권 입니다.", StatusEnum.CONFLICT);
+		}
+		return voucher;
+	}
+
+	/**
+	 * DB에 없는 정보의 기프티콘 사용 요청 유효성 검사 메서드
+	 */
+	private void validateVoucherWithoutPriceInfo(Voucher voucher, VoucherUseRequestDto voucherUseRequestDto) {
+		if (voucher.getBalance() == null && voucherUseRequestDto.getAmount() != null) {
+			throw new BusinessException("사용 금액을 입력할 수 없는 상품권입니다.", StatusEnum.BAD_REQUEST);
+		}
+
+		if (voucher.getBalance() != null && voucherUseRequestDto.getAmount() == null) {
+			throw new BusinessException("사용 금액을 입력해주세요.", StatusEnum.BAD_REQUEST);
+		}
+	}
+
+	/**
+	 * DB에 있는 정보의 기프티콘 사용 요청 유효성 검사 메서드
+	 */
+	private void validateVoucherWithPriceInfo(Voucher voucher, VoucherUseRequestDto voucherUseRequestDto) {
+		if (voucher.getProduct().getIsReusable() == 1) {
+			if (voucherUseRequestDto.getAmount() == null) {
+				throw new BusinessException("사용 금액을 입력해주세요.", StatusEnum.BAD_REQUEST);
+			}
+		} else if (voucherUseRequestDto.getAmount() != null) {
+			throw new BusinessException("사용 금액을 입력할 수 없는 상품권입니다.", StatusEnum.BAD_REQUEST);
+		}
 	}
 }

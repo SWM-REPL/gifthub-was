@@ -15,10 +15,10 @@ public class VoucherUseResponseDto {
 	private Long usageId;
 	private Long voucherId;
 	private int balance;
-	private int price;
+	private Integer price;
 
 	@Builder
-	public VoucherUseResponseDto(Long usageId, Long voucherId, int balance, int price) {
+	public VoucherUseResponseDto(Long usageId, Long voucherId, int balance, Integer price) {
 		this.usageId = usageId;
 		this.voucherId = voucherId;
 		this.balance = balance;
