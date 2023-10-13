@@ -12,4 +12,5 @@ import lombok.Setter;
 @Setter
 public class AuthConfig {
 	private String defaultNickname;
+	private String defaultPassword;
 }
