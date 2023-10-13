@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -50,14 +51,16 @@ public class User extends BaseTimeEntity implements UserDetails {
 
 	@Enumerated(EnumType.ORDINAL)
 	@Column(columnDefinition = "TINYINT", nullable = false)
-	private Role role;
+	@ColumnDefault("1")
+	private Role role = Role.USER;
 
 	@Builder
-	public User(Long id, String username, String password, String nickname) {
+	public User(Long id, String username, String password, String nickname, Role role) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
 		this.nickname = nickname;
+		this.role = role;
 	}
 
 	@Override
