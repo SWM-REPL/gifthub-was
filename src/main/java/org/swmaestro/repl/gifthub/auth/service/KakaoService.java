@@ -129,6 +129,6 @@ public class KakaoService implements OAuth2Service {
 
 	private String getStringOrNull(JsonElement element, String fieldName) {
 		JsonElement fieldElement = element.getAsJsonObject().get(fieldName);
-		return !fieldElement.isJsonNull() ? fieldElement.getAsString() : null;
+		return fieldElement != null ? fieldElement.getAsString() : null;
 	}
 }

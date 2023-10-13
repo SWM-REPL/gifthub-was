@@ -7,7 +7,6 @@ import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
-import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
@@ -91,6 +90,7 @@ public class AuthService {
 			Member newMember = Member.builder()
 					.username(memberService.generateOAuthUsername())
 					.nickname(authConfig.getDefaultNickname())
+					.password(passwordEncoder.encode(authConfig.getDefaultPassword()))
 					.build();
 			// 회원 정보 저장
 			Member member = memberService.create(newMember);
@@ -115,21 +115,22 @@ public class AuthService {
 				.refreshToken(refreshToken)
 				.build();
 
+		refreshTokenService.storeRefreshToken(jwtTokenDto, member.getUsername());
+
 		return jwtTokenDto;
 	}
 
 	/**
 	 * 로그아웃
 	 * @param username
-	 * @param signOutDto
 	 */
 	@Transactional
-	public void signOut(String username, SignOutDto signOutDto) {
+	public void signOut(String username) {
 		Member member = memberRepository.findByUsername(username);
+		System.out.println("member = " + member.getUsername());
 		if (member == null) {
 			throw new BusinessException("존재하지 않는 사용자입니다.", StatusEnum.UNAUTHORIZED);
 		}
 		refreshTokenService.deleteRefreshToken(username);
-		deviceTokenService.delete(signOutDto.getDeviceToken());
 	}
 }
