@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,8 +12,6 @@ import org.swmaestro.repl.gifthub.util.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -49,10 +46,8 @@ public class User extends BaseTimeEntity implements UserDetails {
 	@Transient
 	private Collection<SimpleGrantedAuthority> authorities;
 
-	@Enumerated(EnumType.ORDINAL)
 	@Column(columnDefinition = "TINYINT", nullable = false)
-	@ColumnDefault("1")
-	private Role role = Role.USER;
+	private Role role;
 
 	@Builder
 	public User(Long id, String username, String password, String nickname, Role role) {

@@ -13,6 +13,7 @@ import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.repository.UserRepository;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
+import org.swmaestro.repl.gifthub.auth.type.Role;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
@@ -41,6 +42,7 @@ public class AuthService {
 				.username(signUpDto.getUsername())
 				.password(passwordEncoder.encode(signUpDto.getPassword()))
 				.nickname(signUpDto.getNickname())
+				.role(Role.USER)
 				.build();
 
 		User savedUser = userService.create(user);
