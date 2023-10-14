@@ -17,9 +17,9 @@ import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.entity.User;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
@@ -32,7 +32,7 @@ class UserControllerTest {
 	private MockMvc mockMvc;
 
 	@MockBean
-	private MemberService memberService;
+	private UserService userService;
 
 	@MockBean
 	private JwtProvider jwtProvider;
@@ -51,7 +51,7 @@ class UserControllerTest {
 		// when
 		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
 		when(jwtProvider.getUsername(anyString())).thenReturn("이진우");
-		when(memberService.delete(1L)).thenReturn(userDeleteResponseDto);
+		when(userService.delete(1L)).thenReturn(userDeleteResponseDto);
 
 		// then
 		mockMvc.perform(delete("/users/1")
@@ -76,7 +76,7 @@ class UserControllerTest {
 		//when
 		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
 		when(jwtProvider.getUsername(anyString())).thenReturn("이진우");
-		when(memberService.update(anyString(), anyLong(), any(MemberUpdateRequestDto.class))).thenReturn(memberUpdateResponseDto);
+		when(userService.update(anyString(), anyLong(), any(MemberUpdateRequestDto.class))).thenReturn(memberUpdateResponseDto);
 
 		//then
 		mockMvc.perform(patch("/users/1")
@@ -97,7 +97,7 @@ class UserControllerTest {
 				.nickname("이진우")
 				.build();
 		//when
-		when(memberService.read(anyLong())).thenReturn(memberReadResponseDto);
+		when(userService.read(anyLong())).thenReturn(memberReadResponseDto);
 
 		//then
 		mockMvc.perform(get("/users/1")
@@ -109,7 +109,7 @@ class UserControllerTest {
 	@WithMockUser(username = "이진우", roles = "USER")
 	void createOAuthInfo() throws Exception {
 		// given
-		Member member = Member.builder()
+		User user = User.builder()
 				.username("my_username")
 				.nickname("my_nickname")
 				.password("my_password")
@@ -118,7 +118,7 @@ class UserControllerTest {
 		OAuth oAuth = OAuth.builder()
 				.platform(OAuthPlatform.NAVER)
 				.platformId("my_naver_unique_id")
-				.member(member)
+				.user(user)
 				.email("my_naver_email")
 				.nickname("my_naver_nickname")
 				.build();
@@ -129,7 +129,7 @@ class UserControllerTest {
 
 		// when
 		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
-		when(memberService.createOAuthInfo(any(Member.class), any(OAuthPlatform.class), any(OAuthTokenDto.class))).thenReturn(oAuth);
+		when(userService.createOAuthInfo(any(User.class), any(OAuthPlatform.class), any(OAuthTokenDto.class))).thenReturn(oAuth);
 
 		// then
 		mockMvc.perform(post("/users/oauth/naver")
@@ -142,7 +142,7 @@ class UserControllerTest {
 	@WithMockUser(username = "이진우", roles = "USER")
 	void deleteOAuthInfo() throws Exception {
 		// given
-		Member member = Member.builder()
+		User user = User.builder()
 				.username("my_username")
 				.nickname("my_nickname")
 				.password("my_password")
@@ -151,14 +151,14 @@ class UserControllerTest {
 		OAuth oAuth = OAuth.builder()
 				.platform(OAuthPlatform.NAVER)
 				.platformId("my_naver_unique_id")
-				.member(member)
+				.user(user)
 				.email("my_naver_email")
 				.nickname("my_naver_nickname")
 				.build();
 
 		// when
 		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
-		when(memberService.deleteOAuthInfo(any(Member.class), any(OAuthPlatform.class))).thenReturn(oAuth);
+		when(userService.deleteOAuthInfo(any(User.class), any(OAuthPlatform.class))).thenReturn(oAuth);
 
 		// then
 		mockMvc.perform(delete("/users/oauth/naver")

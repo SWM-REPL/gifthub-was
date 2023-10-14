@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.repository.DeviceTokenRepository;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
@@ -17,15 +17,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DeviceTokenService {
 	private final DeviceTokenRepository deviceTokenRepository;
-	private final MemberService memberService;
+	private final UserService userService;
 
 	/*
 	 * DeviceToken 저장 메서드
 	 */
 	public void save(String username, String token) {
-		Member member = memberService.read(username);
+		User user = userService.read(username);
 
-		if (member == null) {
+		if (user == null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
 
@@ -36,7 +36,7 @@ public class DeviceTokenService {
 		DeviceToken deviceToken;
 		if (!isExist(token)) {
 			deviceToken = DeviceToken.builder()
-					.member(member)
+					.user(user)
 					.token(token)
 					.build();
 
@@ -58,10 +58,10 @@ public class DeviceTokenService {
 	 * DeviceToken 존재 여부 반환 메서드 (회원 아이디와 토큰으로)
 	 */
 	public boolean isExist(Long memberId, String deviceToken) {
-		MemberReadResponseDto memberDto = memberService.read(memberId);
-		Member member = memberService.read(memberDto.getUsername());
+		MemberReadResponseDto memberDto = userService.read(memberId);
+		User user = userService.read(memberDto.getUsername());
 
-		return deviceTokenRepository.findByMemberAndToken(member, deviceToken).isPresent();
+		return deviceTokenRepository.findByUserAndToken(user, deviceToken).isPresent();
 	}
 
 	/**
@@ -75,9 +75,9 @@ public class DeviceTokenService {
 	 * DeviceToken 전체 조회 메서드(memberId)
 	 */
 	public List<DeviceToken> list(Long memberId) {
-		MemberReadResponseDto memberDto = memberService.read(memberId);
-		Member member = memberService.read(memberDto.getUsername());
-		return deviceTokenRepository.findAllByMember(member);
+		MemberReadResponseDto memberDto = userService.read(memberId);
+		User user = userService.read(memberDto.getUsername());
+		return deviceTokenRepository.findAllByUser(user);
 	}
 
 	/*
@@ -99,9 +99,9 @@ public class DeviceTokenService {
 	/*
 	 * DeviceToken 삭제 메서드
 	 */
-	public void delete(Member member, String token) {
+	public void delete(User user, String token) {
 		DeviceToken deviceToken = read(token);
-		if (!deviceToken.getMember().equals(member)) {
+		if (!deviceToken.getUser().equals(user)) {
 			throw new BusinessException("토큰을 삭제할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
 		deviceTokenRepository.delete(deviceToken);

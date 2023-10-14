@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,16 +29,16 @@ public class PendingVoucher {
 	private Long id;
 
 	@ManyToOne
-	@JoinColumn(name = "member_id", nullable = false)
-	private Member member;
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
 	@CreatedDate
 	@Column(nullable = false)
 	private LocalDateTime createdAt;
 
 	@Builder
-	public PendingVoucher(Long id, Member member) {
+	public PendingVoucher(Long id, User user) {
 		this.id = id;
-		this.member = member;
+		this.user = user;
 	}
 }

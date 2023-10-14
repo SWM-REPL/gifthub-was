@@ -3,7 +3,7 @@ package org.swmaestro.repl.gifthub.vouchers.service;
 import java.io.IOException;
 
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationService;
@@ -33,11 +33,11 @@ public class VoucherSaveService {
 	private final QueryTemplateReader queryTemplateReader;
 	private final ProductNameProcessor productNameProcessor;
 	private final NotificationService notificationService;
-	private final MemberService memberService;
+	private final UserService userService;
 	private final PendingVoucherService pendingVoucherService;
 
 	public void execute(OCRDto ocrDto, String username) throws IOException {
-		pendingVoucherService.create(memberService.read(username));
+		pendingVoucherService.create(userService.read(username));
 		handleGptResponse(ocrDto, username)
 				.flatMap(voucherSaveRequestDto -> handleSearchResponse(voucherSaveRequestDto, username))
 				.flatMap(voucherSaveRequestDto -> handleVoucherSaving(voucherSaveRequestDto, username))
@@ -46,24 +46,24 @@ public class VoucherSaveService {
 						voucherSaveResponseDto -> {
 							System.out.println("등록 성공");
 							//notification 저장(알림 성공 저장)
-							notificationService.save(memberService.read(username), voucherService.read(voucherSaveResponseDto.getId()),
+							notificationService.save(userService.read(username), voucherService.read(voucherSaveResponseDto.getId()),
 									NotificationType.REGISTERED,
 									"기프티콘 등록에 성공했습니다.");
 							fcmNotificationService.sendNotification("기프티콘 등록 성공", "기프티콘 등록에 성공했습니다!", username);
 							// 처리 완료
-							pendingVoucherService.delete(memberService.read(username));
+							pendingVoucherService.delete(userService.read(username));
 						},
 						// onError
 						throwable -> {
 							System.out.println("등록 실패");
 							throwable.printStackTrace();
 							// notification 저장(알림 실패 저장)
-							notificationService.save(memberService.read(username), null,
+							notificationService.save(userService.read(username), null,
 									NotificationType.REGISTERED,
 									"기프티콘 등록에 실패했습니다.");
 							fcmNotificationService.sendNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
 							// 처리 완료
-							pendingVoucherService.delete(memberService.read(username));
+							pendingVoucherService.delete(userService.read(username));
 						});
 	}
 
@@ -128,4 +128,3 @@ public class VoucherSaveService {
 	}
 
 }
-

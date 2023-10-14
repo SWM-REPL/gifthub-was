@@ -3,7 +3,7 @@ package org.swmaestro.repl.gifthub.vouchers.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.util.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -49,22 +49,22 @@ public class Voucher extends BaseTimeEntity {
 	private String imageUrl;
 
 	@ManyToOne
-	@JoinColumn(name = "member_id", nullable = false)
-	private Member member;
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
 	@Column
 	private LocalDateTime deletedAt;
 
 	@Builder
 	public Voucher(Long id, Brand brand, Product product, String barcode, Integer balance, LocalDate expiresAt,
-			String imageUrl, Member member) {
+			String imageUrl, User user) {
 		this.id = id;
 		this.brand = brand;
 		this.product = product;
 		this.barcode = barcode;
 		this.balance = balance;
 		this.expiresAt = expiresAt;
-		this.member = member;
+		this.user = user;
 		this.imageUrl = imageUrl;
 	}
 }

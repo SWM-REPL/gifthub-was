@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.dto.FCMNotificationRequestDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NoticeNotificationDto;
@@ -24,10 +24,10 @@ public class FCMNotificationService {
 	private final FirebaseMessaging firebaseMessaging;
 	private final DeviceTokenService deviceTokenService;
 	private final NotificationService notificationService;
-	private final MemberService memberService;
+	private final UserService userService;
 
 	public void sendNotificationByToken(FCMNotificationRequestDto requestDto) {
-		List<DeviceToken> deviceTokenList = deviceTokenService.list(requestDto.getTargetMember().getId());
+		List<DeviceToken> deviceTokenList = deviceTokenService.list(requestDto.getTargetUser().getId());
 
 		for (DeviceToken deviceToken : deviceTokenList) {
 			Notification notification = Notification.builder()
@@ -36,7 +36,7 @@ public class FCMNotificationService {
 					.build();
 
 			org.swmaestro.repl.gifthub.notifications.entity.Notification savedNotification
-					= notificationService.save(requestDto.getTargetMember(), requestDto.getTargetVoucher(), NotificationType.EXPIRATION, requestDto.getBody());
+					= notificationService.save(requestDto.getTargetUser(), requestDto.getTargetVoucher(), NotificationType.EXPIRATION, requestDto.getBody());
 
 			Message message = Message.builder()
 					.setToken(deviceToken.getToken())
@@ -67,7 +67,7 @@ public class FCMNotificationService {
 					.build();
 
 			org.swmaestro.repl.gifthub.notifications.entity.Notification savedNotification
-					= notificationService.save(deviceToken.getMember(), null, NotificationType.NOTICE, noticeNotificationDto.getBody());
+					= notificationService.save(deviceToken.getUser(), null, NotificationType.NOTICE, noticeNotificationDto.getBody());
 
 			Message message = Message.builder()
 					.setToken(deviceToken.getToken())
@@ -87,14 +87,14 @@ public class FCMNotificationService {
 	 * title과 body를 받아서 특정 회원에게 알림을 보내는 메서드(username으로 검색)
 	 */
 	public void sendNotification(String title, String body, String username) {
-		Member member = memberService.read(username);
+		User user = userService.read(username);
 
 		NoticeNotificationDto noticeNotificationDto = NoticeNotificationDto.builder()
 				.title(title)
 				.body(body)
 				.build();
 
-		List<DeviceToken> deviceTokenList = deviceTokenService.list(member.getId());
+		List<DeviceToken> deviceTokenList = deviceTokenService.list(user.getId());
 
 		for (DeviceToken deviceToken : deviceTokenList) {
 			Notification notification = Notification.builder()

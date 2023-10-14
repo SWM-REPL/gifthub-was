@@ -12,8 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.swmaestro.repl.gifthub.auth.repository.RefreshTokenRepository;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
-import org.swmaestro.repl.gifthub.security.JpaUserDetailsService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -26,16 +26,16 @@ public class JwtProvider {
 	private final String secretKey;
 	private final long expiration;
 	private final String issuer;
-	private final JpaUserDetailsService userDetailsService;
+	private final UserService userService;
 	private final RefreshTokenRepository refreshTokenRepository;
 
 	public JwtProvider(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration,
-			@Value("${issuer}") String issuer, JpaUserDetailsService userDetailsService,
+			@Value("${issuer}") String issuer, UserService userService,
 			RefreshTokenRepository refreshTokenRepository) {
 		this.secretKey = secretKey;
 		this.expiration = expiration;
 		this.issuer = issuer;
-		this.userDetailsService = userDetailsService;
+		this.userService = userService;
 		this.refreshTokenRepository = refreshTokenRepository;
 	}
 
@@ -95,7 +95,7 @@ public class JwtProvider {
 	 * @return 인증 정보
 	 */
 	public Authentication getAuthentication(String token) {
-		UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUsername(token));
+		UserDetails userDetails = userService.loadUserByUsername(this.getUsername(token));
 		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 	}
 

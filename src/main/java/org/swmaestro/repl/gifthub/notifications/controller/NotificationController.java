@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.entity.User;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenRequestDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NoticeNotificationDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NotificationReadResponseDto;
@@ -36,7 +36,7 @@ import lombok.RequiredArgsConstructor;
 public class NotificationController {
 	private final NotificationService notificationService;
 	private final FCMNotificationService fcmNotificationService;
-	private final MemberService memberService;
+	private final UserService userService;
 	private final JwtProvider jwtProvider;
 
 	@GetMapping
@@ -87,8 +87,8 @@ public class NotificationController {
 			@RequestHeader("Authorization") String accessToken,
 			@RequestBody DeviceTokenRequestDto deviceTokenRequestDto) {
 		String username = jwtProvider.getUsername(accessToken.substring(7));
-		Member member = memberService.read(username);
-		notificationService.deleteDeviceToken(member, deviceTokenRequestDto.getToken());
+		User user = userService.read(username);
+		notificationService.deleteDeviceToken(user, deviceTokenRequestDto.getToken());
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())

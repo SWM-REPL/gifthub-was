@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 
@@ -34,7 +34,7 @@ public class Notification {
 
 	@ManyToOne
 	@JoinColumn(name = "receiver_id", nullable = false)
-	private Member receiver;
+	private User receiver;
 
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "voucher_id", nullable = true)
@@ -56,7 +56,7 @@ public class Notification {
 	private LocalDateTime checkedAt;
 
 	@Builder
-	public Notification(Long id, Member receiver, Voucher voucher, NotificationType type, String message, LocalDateTime deletedAt, LocalDateTime checkedAt) {
+	public Notification(Long id, User receiver, Voucher voucher, NotificationType type, String message, LocalDateTime deletedAt, LocalDateTime checkedAt) {
 		this.id = id;
 		this.receiver = receiver;
 		this.voucher = voucher;

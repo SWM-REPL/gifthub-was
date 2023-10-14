@@ -9,7 +9,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.DateConverter;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
@@ -36,7 +36,7 @@ public class VoucherService {
 	private final BrandService brandService;
 	private final ProductService productService;
 	private final VoucherRepository voucherRepository;
-	private final MemberService memberService;
+	private final UserService userService;
 	private final PendingVoucherService pendingVoucherService;
 	private final VoucherUsageHistoryService voucherUsageHistoryService;
 
@@ -75,7 +75,7 @@ public class VoucherService {
 				.expiresAt(DateConverter.stringToLocalDate(voucherSaveRequestDto.getExpiresAt()))
 				.imageUrl(imageUrl)
 				.balance(product.getPrice())
-				.member(memberService.read(username))
+				.user(userService.read(username))
 				.build();
 
 		return VoucherSaveResponseDto.builder()
@@ -96,7 +96,7 @@ public class VoucherService {
 	 */
 	public VoucherReadResponseDto read(Long id, String username) {
 		Optional<Voucher> voucher = voucherRepository.findById(id);
-		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
+		List<Voucher> vouchers = voucherRepository.findAllByUserUsername(username);
 
 		if (voucher.isEmpty()) {
 			throw new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND);
@@ -120,11 +120,11 @@ public class VoucherService {
 	사용자 별 기프티콘 목록 조회 메서드(userId로 조회, username으로 권한 대조)
 	 */
 	public VoucherListResponseDto list(Long userId, String username) {
-		if (!memberService.read(userId).getUsername().equals(username)) {
+		if (!userService.read(userId).getUsername().equals(username)) {
 			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
 
-		List<Voucher> vouchers = voucherRepository.findAllByMemberId(userId);
+		List<Voucher> vouchers = voucherRepository.findAllByUserId(userId);
 		List<Long> voucherIdList = new ArrayList<>();
 		for (Voucher voucher : vouchers) {
 			// 삭제된 기프티콘은 조회되지 않도록 함
@@ -144,7 +144,7 @@ public class VoucherService {
 	사용자 별 기프티콘 목록 조회 메서드(username으로 조회)
 	 */
 	public List<Long> list(String username) {
-		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
+		List<Voucher> vouchers = voucherRepository.findAllByUserUsername(username);
 		List<Long> voucherIdList = new ArrayList<>();
 		for (Voucher voucher : vouchers) {
 			voucherIdList.add(voucher.getId());
@@ -227,7 +227,7 @@ public class VoucherService {
 	 */
 	public boolean delete(String username, Long voucherId) {
 		Optional<Voucher> voucher = voucherRepository.findById(voucherId);
-		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
+		List<Voucher> vouchers = voucherRepository.findAllByUserUsername(username);
 
 		if (voucher.isEmpty()) {
 			throw new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND);
@@ -266,7 +266,7 @@ public class VoucherService {
 	 *  사용자 별 중복 기프티콘 검사 메서드
 	 */
 	public boolean isDuplicateVoucher(String username, String barcode) {
-		List<Voucher> vouchers = voucherRepository.findAllByMemberUsername(username);
+		List<Voucher> vouchers = voucherRepository.findAllByUserUsername(username);
 		for (Voucher voucher : vouchers) {
 			if (voucher.getBarcode().equals(barcode)) {
 				return true;
@@ -333,7 +333,7 @@ public class VoucherService {
 		}
 
 		Voucher voucher = optionalVoucher.get();
-		if (!voucherRepository.findAllByMemberUsername(username).contains(voucher)) {
+		if (!voucherRepository.findAllByUserUsername(username).contains(voucher)) {
 			throw new BusinessException("상품권을 사용할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
 		if (voucher.getBalance() != null && voucher.getBalance() == 0) {
@@ -378,13 +378,15 @@ public class VoucherService {
 		Optional<Product> optionalProduct = productService.read(brand.getId(), voucherUpdateRequestDto.getProductName());
 
 		if (optionalProduct.isEmpty()) {
-			Brand otherBrand = brandService.read("기타").orElseThrow(() -> new BusinessException("해당 상품이 존재하지 않습니다.", StatusEnum.NOT_FOUND));
+			Brand otherBrand = brandService.read("기타").orElseThrow(
+					() -> new BusinessException("해당 상품이 존재하지 않습니다.", StatusEnum.NOT_FOUND));
 			optionalProduct = productService.read(otherBrand.getId(), voucherUpdateRequestDto.getProductName());
 		}
 
 		return optionalProduct.orElseGet(() -> {
 			Product newProduct = Product.builder()
-					.brand(brandService.read("기타").orElseThrow(() -> new BusinessException("기타 브랜드를 찾을 수 없습니다.", StatusEnum.NOT_FOUND)))
+					.brand(brandService.read("기타").orElseThrow(
+							() -> new BusinessException("기타 브랜드를 찾을 수 없습니다.", StatusEnum.NOT_FOUND)))
 					.name(voucherUpdateRequestDto.getProductName())
 					.isReusable(1)
 					.price(oldProduct.getPrice())

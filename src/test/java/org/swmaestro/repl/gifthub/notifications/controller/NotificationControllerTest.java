@@ -16,8 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
-import org.swmaestro.repl.gifthub.auth.service.MemberService;
+import org.swmaestro.repl.gifthub.auth.entity.User;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenRequestDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NotificationReadResponseDto;
 import org.swmaestro.repl.gifthub.notifications.service.NotificationService;
@@ -41,7 +41,7 @@ public class NotificationControllerTest {
 	private NotificationService notificationService;
 
 	@MockBean
-	private MemberService memberService;
+	private UserService userService;
 
 	/**
 	 * 알림 목록 조회 테스트
@@ -130,12 +130,12 @@ public class NotificationControllerTest {
 		String accessToken = "my.access.token";
 		String username = "이진우";
 		DeviceTokenRequestDto deviceTokenRequestDto = DeviceTokenRequestDto.builder().token("my.device.token").build();
-		Member member = Member.builder().username(username).build();
+		User user = User.builder().username(username).build();
 
 		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
 		when(jwtProvider.getUsername(anyString())).thenReturn(username);
-		when(memberService.read(username)).thenReturn(member);
-		when(notificationService.deleteDeviceToken(member, deviceTokenRequestDto.getToken())).thenReturn(true);
+		when(userService.read(username)).thenReturn(user);
+		when(notificationService.deleteDeviceToken(user, deviceTokenRequestDto.getToken())).thenReturn(true);
 
 		mockMvc.perform(delete("/notifications/device").header("Authorization", "Bearer " + accessToken)
 						.contentType("application/json")

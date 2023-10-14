@@ -1,7 +1,7 @@
 package org.swmaestro.repl.gifthub.vouchers.service;
 
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.entity.Member;
+import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.entity.PendingVoucher;
@@ -14,15 +14,15 @@ import lombok.RequiredArgsConstructor;
 public class PendingVoucherService {
 	private final PendingVoucherRepository pendingVoucherRepository;
 
-	public void create(Member member) {
+	public void create(User member) {
 		PendingVoucher pendingVoucher = PendingVoucher.builder()
-				.member(member)
+				.user(member)
 				.build();
 		pendingVoucherRepository.save(pendingVoucher);
 	}
 
-	public void delete(Member member) {
-		PendingVoucher pendingVoucher = pendingVoucherRepository.findByMemberId(member.getId());
+	public void delete(User user) {
+		PendingVoucher pendingVoucher = pendingVoucherRepository.findByUserId(user.getId());
 		//예외 처리
 		if (pendingVoucher == null) {
 			throw new BusinessException("PendingVoucher가 존재하지 않습니다.", StatusEnum.NOT_FOUND);
@@ -31,6 +31,6 @@ public class PendingVoucherService {
 	}
 
 	public int count(Long memberId) {
-		return pendingVoucherRepository.countByMemberId(memberId);
+		return pendingVoucherRepository.countByUserId(memberId);
 	}
 }

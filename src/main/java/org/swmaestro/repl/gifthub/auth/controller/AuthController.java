@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.swmaestro.repl.gifthub.auth.dto.JwtTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
+import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
 import org.swmaestro.repl.gifthub.auth.service.AuthService;
 import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
@@ -161,12 +162,13 @@ public class AuthController {
 			@ApiResponse(responseCode = "200", description = "로그인 성공"),
 			@ApiResponse(responseCode = "400(401)", description = "존재하지 않는 사용자")
 	})
-	public ResponseEntity<Message> signOut(HttpServletRequest request) {
+	public ResponseEntity<Message> signOut(HttpServletRequest request, @RequestBody SignOutDto signOutDto) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		authService.signOut(username);
+		authService.signOut(username, signOutDto);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
+						.data(null)
 						.build());
 	}
 }
