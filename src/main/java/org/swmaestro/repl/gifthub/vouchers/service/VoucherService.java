@@ -158,24 +158,38 @@ public class VoucherService {
 	public VoucherSaveResponseDto update(Long voucherId, VoucherUpdateRequestDto voucherUpdateRequestDto) {
 		Voucher voucher = voucherRepository.findById(voucherId)
 				.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND));
+		// Balance 수정
+		if (voucherUpdateRequestDto.getBalance() != null) {
+			Optional<Product> product = productService.read(voucher.getBrand().getId(), voucher.getProduct().getName());
+			if (product.isEmpty()) {
+				product = productService.read(brandService.read("기타").get().getId(), voucher.getProduct().getName());
+			}
 
-		Product product = productService.read(voucher.getProduct().getName());
+			Integer productPrice = product.get().getPrice();
+			Integer voucherUpdateRequestBalance = voucherUpdateRequestDto.getBalance();
 
-		Integer productPrice = product.getPrice();
-		Integer voucherUpdateRequestBalance = voucherUpdateRequestDto.getBalance();
-
-		if (productPrice != null && voucherUpdateRequestBalance != null && voucherUpdateRequestBalance > productPrice) {
-			throw new BusinessException("잔액은 상품 가격보다 클 수 없습니다.", StatusEnum.BAD_REQUEST);
+			if (productPrice != null && voucherUpdateRequestBalance > productPrice) {
+				throw new BusinessException("잔액은 상품 가격보다 클 수 없습니다.", StatusEnum.BAD_REQUEST);
+			}
 		}
-
 		voucher.setBarcode(
 				voucherUpdateRequestDto.getBarcode() == null ? voucher.getBarcode() :
 						voucherUpdateRequestDto.getBarcode());
-		voucher.setBrand(voucherUpdateRequestDto.getBrandName() == null ? voucher.getBrand() :
-				brandService.read(voucherUpdateRequestDto.getBrandName()).get());
-		voucher.setProduct(voucherUpdateRequestDto.getProductName() == null ? voucher.getProduct() :
-				productService.read(voucherUpdateRequestDto.getProductName()));
-
+		// Brand 수정
+		Brand brand = null;
+		if (voucherUpdateRequestDto.getBrandName() == null) {
+			brand = voucher.getBrand();
+			voucher.setBrand(brand);
+		} else {
+			brand = updateBrand(voucherUpdateRequestDto);
+			voucher.setBrand(brand);
+		}
+		// Product 수정
+		if (voucherUpdateRequestDto.getProductName() == null) {
+			voucher.setProduct(voucher.getProduct());
+		} else {
+			voucher.setProduct(updateProduct(voucherUpdateRequestDto, brand, voucher.getProduct()));
+		}
 		voucher.setExpiresAt(voucherUpdateRequestDto.getExpiresAt() == null ? voucher.getExpiresAt() :
 				DateConverter.stringToLocalDate(voucherUpdateRequestDto.getExpiresAt()));
 
@@ -355,5 +369,39 @@ public class VoucherService {
 		} else if (voucherUseRequestDto.getAmount() != null) {
 			throw new BusinessException("사용 금액을 입력할 수 없는 상품권입니다.", StatusEnum.BAD_REQUEST);
 		}
+	}
+
+	/**
+	 * 기프티콘 정보 수정 메서드 (수정하려고 하는 product name이 존재하지 않을 경우)
+	 */
+	public Product updateProduct(VoucherUpdateRequestDto voucherUpdateRequestDto, Brand brand, Product oldProduct) {
+		Optional<Product> optionalProduct = productService.read(brand.getId(), voucherUpdateRequestDto.getProductName());
+
+		if (optionalProduct.isEmpty()) {
+			Brand otherBrand = brandService.read("기타").orElseThrow(() -> new BusinessException("해당 상품이 존재하지 않습니다.", StatusEnum.NOT_FOUND));
+			optionalProduct = productService.read(otherBrand.getId(), voucherUpdateRequestDto.getProductName());
+		}
+
+		return optionalProduct.orElseGet(() -> {
+			Product newProduct = Product.builder()
+					.brand(brandService.read("기타").orElseThrow(() -> new BusinessException("기타 브랜드를 찾을 수 없습니다.", StatusEnum.NOT_FOUND)))
+					.name(voucherUpdateRequestDto.getProductName())
+					.isReusable(1)
+					.price(oldProduct.getPrice())
+					.imageUrl(storageService.getDefaultImagePath(voucherDirName))
+					.build();
+			return productService.save(newProduct);
+		});
+	}
+
+	/**
+	 * 기프티콘 정보 수정 메서드 (Brand name)
+	 */
+	public Brand updateBrand(VoucherUpdateRequestDto voucherUpdateRequestDto) {
+		Brand brand = brandService.read(voucherUpdateRequestDto.getBrandName()).orElseGet(() -> {
+			Optional<Brand> defaultBrand = brandService.read("기타");
+			return defaultBrand.get();
+		});
+		return brand;
 	}
 }

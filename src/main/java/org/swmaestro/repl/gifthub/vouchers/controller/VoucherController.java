@@ -64,8 +64,8 @@ public class VoucherController {
 						.build());
 	}
 
-	@PostMapping
-	@Operation(summary = "Voucher 등록 메서드", description = "클라이언트에서 요청한 기프티콘 정보를 저장하기 위한 메서드입니다.")
+	@PostMapping("/manual")
+	@Operation(summary = "Voucher 등록 메서드", description = "클라이언트에서 요청한 기프티콘 정보를 수동 저장하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "기프티콘 등록 성공"),
 			@ApiResponse(responseCode = "400(404-1)", description = "존재하지 않는 브랜드 입력"),
@@ -172,8 +172,8 @@ public class VoucherController {
 						.build());
 	}
 
-	@PostMapping("/test")
-	@Operation(summary = "Voucher 등록 확장 메서드", description = "기존 기능의 확장으로, 기프티콘 정보를 저장하기 위한 메서드입니다. 비동기 방식으로 처리되며 현재는 테스트 버전입니다.")
+	@PostMapping
+	@Operation(summary = "Voucher 등록 확장 메서드", description = "클라이언트에서 요청한 기프티콘 자동 등록을 위한 메서드입니다. 비동기 방식으로 처리됩니다. 처리가 완료되면 FCM에 처리 완료 알림 요청을 보냅니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200(202)", description = "기프티콘 등록 요청"),
 	})
