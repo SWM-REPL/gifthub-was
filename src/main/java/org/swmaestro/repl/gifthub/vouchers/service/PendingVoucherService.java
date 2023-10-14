@@ -22,7 +22,7 @@ public class PendingVoucherService {
 	}
 
 	public void delete(User user) {
-		PendingVoucher pendingVoucher = pendingVoucherRepository.findByMemberId(user.getId());
+		PendingVoucher pendingVoucher = pendingVoucherRepository.findByUserId(user.getId());
 		//예외 처리
 		if (pendingVoucher == null) {
 			throw new BusinessException("PendingVoucher가 존재하지 않습니다.", StatusEnum.NOT_FOUND);
@@ -31,6 +31,6 @@ public class PendingVoucherService {
 	}
 
 	public int count(Long memberId) {
-		return pendingVoucherRepository.countByMemberId(memberId);
+		return pendingVoucherRepository.countByUserId(memberId);
 	}
 }
