@@ -14,15 +14,15 @@ import lombok.RequiredArgsConstructor;
 public class PendingVoucherService {
 	private final PendingVoucherRepository pendingVoucherRepository;
 
-	public void create(User user) {
+	public void create(User member) {
 		PendingVoucher pendingVoucher = PendingVoucher.builder()
-				.user(user)
+				.user(member)
 				.build();
 		pendingVoucherRepository.save(pendingVoucher);
 	}
 
 	public void delete(User user) {
-		PendingVoucher pendingVoucher = pendingVoucherRepository.findByUserId(user.getId());
+		PendingVoucher pendingVoucher = pendingVoucherRepository.findByMemberId(user.getId());
 		//예외 처리
 		if (pendingVoucher == null) {
 			throw new BusinessException("PendingVoucher가 존재하지 않습니다.", StatusEnum.NOT_FOUND);
@@ -31,6 +31,6 @@ public class PendingVoucherService {
 	}
 
 	public int count(Long memberId) {
-		return pendingVoucherRepository.countByUserId(memberId);
+		return pendingVoucherRepository.countByMemberId(memberId);
 	}
 }

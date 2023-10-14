@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.swmaestro.repl.gifthub.vouchers.entity.PendingVoucher;
 
 public interface PendingVoucherRepository extends JpaRepository<PendingVoucher, Long> {
-	PendingVoucher findByUserId(Long userId);
+	PendingVoucher findByMemberId(Long memberId);
 
-	int countByUserId(Long userId);
+	int countByMemberId(Long memberId);
 }

@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
-	List<Voucher> findAllByUserUsername(String username);
+	List<Voucher> findAllByMemberUsername(String username);
 
-	List<Voucher> findAllByUserId(Long userId);
+	List<Voucher> findAllByMemberId(Long memberId);
 
 }
