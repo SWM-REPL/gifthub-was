@@ -158,11 +158,10 @@ public class VoucherService {
 	public VoucherSaveResponseDto update(Long voucherId, VoucherUpdateRequestDto voucherUpdateRequestDto) {
 		Voucher voucher = voucherRepository.findById(voucherId)
 				.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND));
-
+		// Balance 수정
 		if (voucherUpdateRequestDto.getBalance() != null) {
 			Optional<Product> product = productService.read(voucher.getBrand().getId(), voucher.getProduct().getName());
 			if (product.isEmpty()) {
-				// 기타 브랜드로 등록된 상품 찾기
 				product = productService.read(brandService.read("기타").get().getId(), voucher.getProduct().getName());
 			}
 
@@ -176,6 +175,7 @@ public class VoucherService {
 		voucher.setBarcode(
 				voucherUpdateRequestDto.getBarcode() == null ? voucher.getBarcode() :
 						voucherUpdateRequestDto.getBarcode());
+		// Brand 수정
 		Brand brand = null;
 		if (voucherUpdateRequestDto.getBrandName() == null) {
 			brand = voucher.getBrand();
@@ -184,6 +184,7 @@ public class VoucherService {
 			brand = updateBrand(voucherUpdateRequestDto);
 			voucher.setBrand(brand);
 		}
+		// Product 수정
 		if (voucherUpdateRequestDto.getProductName() == null) {
 			voucher.setProduct(voucher.getProduct());
 		} else {
@@ -381,7 +382,6 @@ public class VoucherService {
 			optionalProduct = productService.read(otherBrand.getId(), voucherUpdateRequestDto.getProductName());
 		}
 
-		// If the product is still not found, create a new one.
 		return optionalProduct.orElseGet(() -> {
 			Product newProduct = Product.builder()
 					.brand(brandService.read("기타").orElseThrow(() -> new BusinessException("기타 브랜드를 찾을 수 없습니다.", StatusEnum.NOT_FOUND)))
