@@ -38,7 +38,7 @@ public class OAuth {
 	@Column
 	private String nickname;
 
-	@JoinColumn(name = "member_id", nullable = false)
+	@JoinColumn(name = "user_id", nullable = false)
 	@ManyToOne
 	private User user;
 
