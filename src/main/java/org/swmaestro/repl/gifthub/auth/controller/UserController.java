@@ -1,6 +1,7 @@
 package org.swmaestro.repl.gifthub.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -55,6 +56,7 @@ public class UserController {
 	}
 
 	@PatchMapping("/{userId}")
+	@PreAuthorize("hasRole('ROLE_USER')")
 	@Operation(summary = "User 정보 수정 메서드", description = "클라이언트에서 요청한 사용자 정보를 수정하기 위한 메서드입니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "회원 수정 성공"),
