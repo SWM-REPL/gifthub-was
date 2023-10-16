@@ -133,7 +133,7 @@ public class UserService implements UserDetailsService {
 		User user = userRepository.findById(id)
 				.orElseThrow(() -> new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND));
 
-		if (!user.getDeletedAt().equals(null)) {
+		if (user.getDeletedAt() != null) {
 			throw new BusinessException("이미 삭제된 회원입니다.", StatusEnum.NOT_FOUND);
 		}
 
