@@ -128,7 +128,7 @@ public class AuthService {
 	@Transactional
 	public void signOut(String username, SignOutDto signOutDto) {
 		User user = userRepository.findByUsername(username);
-		if (user == null) {
+		if (user == null || user.getDeletedAt() != null) {
 			throw new BusinessException("존재하지 않는 사용자입니다.", StatusEnum.UNAUTHORIZED);
 		}
 		refreshTokenService.deleteRefreshToken(username);
