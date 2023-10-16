@@ -79,14 +79,14 @@ public class UserService implements UserDetailsService {
 	}
 
 	public MemberReadResponseDto read(Long id) {
-		Optional<User> member = userRepository.findById(id);
-		if (member.isEmpty()) {
+		Optional<User> user = userRepository.findById(id);
+		if (user.isEmpty() || user.get().getDeletedAt() != null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
 		return MemberReadResponseDto.builder()
-				.id(member.get().getId())
-				.nickname(member.get().getNickname())
-				.username(member.get().getUsername())
+				.id(user.get().getId())
+				.nickname(user.get().getNickname())
+				.username(user.get().getUsername())
 				.build();
 	}
 
@@ -95,7 +95,9 @@ public class UserService implements UserDetailsService {
 	}
 
 	public List<User> list() {
-		return userRepository.findAll();
+		return userRepository.findAll().stream()
+				.filter(user -> user.getDeletedAt() == null)
+				.toList();
 	}
 
 	public MemberUpdateResponseDto update(String username, Long userId, MemberUpdateRequestDto memberUpdateRequestDto) {
