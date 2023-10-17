@@ -93,6 +93,8 @@ public class AuthService {
 			User newUser = User.builder()
 					.username(userService.generateOAuthUsername())
 					.nickname(authConfig.getDefaultNickname())
+					.password(authConfig.getDefaultPassword())
+					.role(Role.USER)
 					.build();
 			// 회원 정보 저장
 			User user = userService.create(newUser);
