@@ -46,7 +46,9 @@ public class AuthService {
 				.build();
 
 		User savedUser = userService.create(user);
-		return generateJwtTokenDto(savedUser);
+		JwtTokenDto jwtTokenDto = generateJwtTokenDto(savedUser);
+		refreshTokenService.storeRefreshToken(jwtTokenDto, savedUser.getUsername());
+		return jwtTokenDto;
 	}
 
 	/**
@@ -71,7 +73,7 @@ public class AuthService {
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
-
+		refreshTokenService.storeRefreshToken(jwtTokenDto, user.getUsername());
 		return jwtTokenDto;
 	}
 
@@ -101,8 +103,9 @@ public class AuthService {
 			// oauth 정보 저장
 			oAuth = oAuthService.create(user, userInfo, platform);
 		}
-
-		return generateJwtTokenDto(oAuth.getUser());
+		JwtTokenDto jwtTokenDto = generateJwtTokenDto(oAuth.getUser());
+		refreshTokenService.storeRefreshToken(jwtTokenDto, oAuth.getUser().getUsername());
+		return jwtTokenDto;
 	}
 
 	/**
@@ -134,6 +137,5 @@ public class AuthService {
 			throw new BusinessException("존재하지 않는 사용자입니다.", StatusEnum.UNAUTHORIZED);
 		}
 		refreshTokenService.deleteRefreshToken(username);
-		deviceTokenService.delete(signOutDto.getDeviceToken());
 	}
 }
