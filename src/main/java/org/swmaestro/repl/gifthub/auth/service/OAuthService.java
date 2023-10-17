@@ -23,61 +23,35 @@ public class OAuthService {
 	private final AppleService appleService;
 
 	public OAuthUserInfoDto getUserInfo(OAuthTokenDto oAuthTokenDto, OAuthPlatform platform) {
-		return switch (platform) {
-			case NAVER -> naverService.getUserInfo(oAuthTokenDto);
-			case KAKAO -> kakaoService.getUserInfo(oAuthTokenDto);
-			case GOOGLE -> googleService.getUserInfo(oAuthTokenDto);
-			case APPLE -> appleService.getUserInfo(oAuthTokenDto);
-			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		};
+		return platformToService(platform).getUserInfo(oAuthTokenDto);
 	}
 
 	public OAuth create(User user, OAuthUserInfoDto oAuthUserInfoDto, OAuthPlatform platform) {
-		return switch (platform) {
-			case NAVER -> naverService.create(user, oAuthUserInfoDto);
-			case KAKAO -> kakaoService.create(user, oAuthUserInfoDto);
-			case GOOGLE -> googleService.create(user, oAuthUserInfoDto);
-			case APPLE -> appleService.create(user, oAuthUserInfoDto);
-			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		};
+		return platformToService(platform).create(user, oAuthUserInfoDto);
 	}
 
 	public OAuth delete(User user, OAuthPlatform platform) {
-		return switch (platform) {
-			case NAVER -> naverService.delete(user);
-			case KAKAO -> kakaoService.delete(user);
-			case GOOGLE -> googleService.delete(user);
-			case APPLE -> appleService.delete(user);
-			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		};
+		return platformToService(platform).delete(user);
 	}
 
 	public OAuth read(OAuthUserInfoDto oAuthUserInfoDto, OAuthPlatform platform) {
-		return switch (platform) {
-			case NAVER -> naverService.read(oAuthUserInfoDto);
-			case KAKAO -> kakaoService.read(oAuthUserInfoDto);
-			case GOOGLE -> googleService.read(oAuthUserInfoDto);
-			case APPLE -> appleService.read(oAuthUserInfoDto);
-			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		};
+		return platformToService(platform).read(oAuthUserInfoDto);
 	}
 
 	public boolean isExists(User user, OAuthPlatform platform) {
-		return switch (platform) {
-			case NAVER -> naverService.isExists(user);
-			case KAKAO -> kakaoService.isExists(user);
-			case GOOGLE -> googleService.isExists(user);
-			case APPLE -> appleService.isExists(user);
-			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
-		};
+		return platformToService(platform).isExists(user);
 	}
 
 	public boolean isExists(OAuthUserInfoDto oAuthUserInfoDto, OAuthPlatform platform) {
+		return platformToService(platform).isExists(oAuthUserInfoDto);
+	}
+
+	public OAuth2Service platformToService(OAuthPlatform platform) {
 		return switch (platform) {
-			case NAVER -> naverService.isExists(oAuthUserInfoDto);
-			case KAKAO -> kakaoService.isExists(oAuthUserInfoDto);
-			case GOOGLE -> googleService.isExists(oAuthUserInfoDto);
-			case APPLE -> appleService.isExists(oAuthUserInfoDto);
+			case NAVER -> naverService;
+			case KAKAO -> kakaoService;
+			case GOOGLE -> googleService;
+			case APPLE -> appleService;
 			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		};
 	}

@@ -100,7 +100,7 @@ public class AuthController {
 			@ApiResponse(responseCode = "400", description = "네이버 로그인 실패"),
 	})
 	public ResponseEntity<Message> naverSignIn(HttpServletRequest request, @RequestBody OAuthTokenDto oAuthTokenDto) {
-		JwtTokenDto jwtTokenDto = authService.signIn(oAuthTokenDto, OAuthPlatform.KAKAO);
+		JwtTokenDto jwtTokenDto = authService.signIn(oAuthTokenDto, OAuthPlatform.NAVER);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
