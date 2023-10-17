@@ -45,14 +45,18 @@ public class NotificationService {
 	Entity를 Dto로 변환하는 메서드
 	 */
 	public NotificationReadResponseDto mapToDto(Notification notification) {
-		NotificationReadResponseDto notificationReadResponseDto = NotificationReadResponseDto.builder()
+		NotificationReadResponseDto.NotificationReadResponseDtoBuilder builder = NotificationReadResponseDto.builder()
 				.id(notification.getId())
 				.type(notification.getType().getDescription())
 				.message(notification.getMessage())
 				.notifiedAt(notification.getCreatedAt())
-				.voucherId(notification.getVoucher().getId())
-				.checkedAt(notification.getCheckedAt())
-				.build();
+				.checkedAt(notification.getCheckedAt());
+
+		if (notification.getVoucher() != null) {
+			builder.voucherId(notification.getVoucher().getId());
+		}
+
+		NotificationReadResponseDto notificationReadResponseDto = builder.build();
 		return notificationReadResponseDto;
 	}
 
