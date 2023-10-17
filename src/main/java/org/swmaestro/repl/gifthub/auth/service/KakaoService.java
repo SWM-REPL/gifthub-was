@@ -58,8 +58,8 @@ public class KakaoService implements OAuth2Service {
 
 			JsonElement responseElement = parser.parse(result);
 			String id = getStringOrNull(responseElement, "id");
-			String email = getStringOrNull(responseElement.getAsJsonObject().get("kakao_account").getAsJsonObject().get("profile"), "email");
-			String nickname = getStringOrNull(responseElement.getAsJsonObject().get("kakao_account"), "nickname");
+			String email = getStringOrNull(responseElement.getAsJsonObject().get("kakao_account"), "email");
+			String nickname = getStringOrNull(responseElement.getAsJsonObject().get("kakao_account").getAsJsonObject().get("profile"), "nickname");
 
 			return OAuthUserInfoDto.builder()
 					.id(id)
@@ -129,6 +129,6 @@ public class KakaoService implements OAuth2Service {
 
 	private String getStringOrNull(JsonElement element, String fieldName) {
 		JsonElement fieldElement = element.getAsJsonObject().get(fieldName);
-		return !fieldElement.isJsonNull() ? fieldElement.getAsString() : null;
+		return fieldElement != null ? fieldElement.getAsString() : null;
 	}
 }
