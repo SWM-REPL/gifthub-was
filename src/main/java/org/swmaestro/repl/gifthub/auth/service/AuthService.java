@@ -46,7 +46,9 @@ public class AuthService {
 				.build();
 
 		User savedUser = userService.create(user);
-		return generateJwtTokenDto(savedUser);
+		JwtTokenDto jwtTokenDto = generateJwtTokenDto(savedUser);
+		refreshTokenService.storeRefreshToken(jwtTokenDto, savedUser.getUsername());
+		return jwtTokenDto;
 	}
 
 	/**
