@@ -1,5 +1,6 @@
 package org.swmaestro.repl.gifthub.auth.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,8 @@ public interface OAuthRepository extends JpaRepository<OAuth, Long> {
 	Optional<OAuth> findByPlatformAndPlatformId(OAuthPlatform platform, String platformId);
 
 	Optional<OAuth> deleteByUserAndPlatform(User user, OAuthPlatform platform);
+
+	List<OAuth> findAllByUser(User user);
+
+	Optional<OAuth> findByPlatformAndPlatformIdAndDeletedAtIsNull(OAuthPlatform platform, String platformId);
 }
