@@ -1,10 +1,14 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.entity.User;
+import org.swmaestro.repl.gifthub.auth.repository.OAuthRepository;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
@@ -21,6 +25,7 @@ public class OAuthService {
 	private final KakaoService kakaoService;
 	private final GoogleService googleService;
 	private final AppleService appleService;
+	private final OAuthRepository oAuthRepository;
 
 	public OAuthUserInfoDto getUserInfo(OAuthTokenDto oAuthTokenDto, OAuthPlatform platform) {
 		return platformToService(platform).getUserInfo(oAuthTokenDto);
@@ -54,5 +59,19 @@ public class OAuthService {
 			case APPLE -> appleService;
 			default -> throw new BusinessException("지원하지 않는 OAuth 플랫폼입니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		};
+	}
+
+	/**
+	 * 해당 유저의 전체 oauth 정보를 삭제하는 메서
+	 * @param user
+	 * @return
+	 */
+	public List<OAuth> delete(User user) {
+		List<OAuth> oAuths = oAuthRepository.findAllByUser(user);
+		for (OAuth oAuth : oAuths) {
+			oAuth.setDeletedAt(LocalDateTime.now());
+			oAuthRepository.save(oAuth);
+		}
+		return oAuths;
 	}
 }

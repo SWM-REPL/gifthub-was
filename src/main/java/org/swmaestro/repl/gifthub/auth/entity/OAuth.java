@@ -29,7 +29,7 @@ public class OAuth {
 	@Column(columnDefinition = "TINYINT", nullable = false)
 	private OAuthPlatform platform;
 
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false)
 	private String platformId;
 
 	@Column
@@ -52,5 +52,9 @@ public class OAuth {
 		this.email = email;
 		this.nickname = nickname;
 		this.user = user;
+	}
+
+	public boolean isDeleted() {
+		return deletedAt != null;
 	}
 }

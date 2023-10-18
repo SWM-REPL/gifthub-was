@@ -142,6 +142,7 @@ public class UserService implements UserDetailsService {
 		user.setDeletedAt(LocalDateTime.now());
 		userRepository.save(user);
 
+		deleteOAuthInfo(user);
 		return MemberDeleteResponseDto.builder()
 				.id(id)
 				.build();
@@ -163,5 +164,9 @@ public class UserService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		return userRepository.findByUsername(username).getDeletedAt() == null ? userRepository.findByUsername(username) : null;
+	}
+
+	public List<OAuth> deleteOAuthInfo(User user) {
+		return oAuthService.delete(user);
 	}
 }

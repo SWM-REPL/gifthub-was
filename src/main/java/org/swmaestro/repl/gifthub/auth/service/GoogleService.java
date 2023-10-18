@@ -57,9 +57,9 @@ public class GoogleService implements OAuth2Service {
 
 			br.close();
 
-			JsonElement responseElement = parser.parse(result).getAsJsonObject().get("response").getAsJsonObject();
+			JsonElement responseElement = parser.parse(result).getAsJsonObject();
 
-			String id = getStringOrNull(responseElement, "id");
+			String id = getStringOrNull(responseElement, "sub");
 			String email = getStringOrNull(responseElement, "email");
 			String nickname = getStringOrNull(responseElement, "name");
 
@@ -121,12 +121,15 @@ public class GoogleService implements OAuth2Service {
 
 	@Override
 	public boolean isExists(User user) {
+		if (!user.isEnabled()) {
+			throw new BusinessException("탈퇴한 회원입니다.", StatusEnum.BAD_REQUEST);
+		}
 		return oAuthRepository.findByUserAndPlatform(user, OAuthPlatform.GOOGLE).isPresent();
 	}
 
 	@Override
 	public boolean isExists(OAuthUserInfoDto oAuthUserInfoDto) {
-		return oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.GOOGLE, oAuthUserInfoDto.getId()).isPresent();
+		return oAuthRepository.findByPlatformAndPlatformIdAndDeletedAtIsNull(OAuthPlatform.GOOGLE, oAuthUserInfoDto.getId()).isPresent();
 	}
 
 	private String getStringOrNull(JsonElement element, String fieldName) {

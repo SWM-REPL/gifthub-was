@@ -118,7 +118,7 @@ public class AppleService implements OAuth2Service {
 
 	@Override
 	public OAuth read(OAuthUserInfoDto oAuthUserInfoDto) {
-		OAuth oAuth = oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.APPLE, oAuthUserInfoDto.getId())
+		OAuth oAuth = oAuthRepository.findByPlatformAndPlatformIdAndDeletedAtIsNull(OAuthPlatform.APPLE, oAuthUserInfoDto.getId())
 				.orElseThrow(() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND));
 
 		if (oAuth.getDeletedAt() != null) {
@@ -144,6 +144,6 @@ public class AppleService implements OAuth2Service {
 
 	@Override
 	public boolean isExists(OAuthUserInfoDto oAuthUserInfoDto) {
-		return oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.APPLE, oAuthUserInfoDto.getId()).isPresent();
+		return oAuthRepository.findByPlatformAndPlatformIdAndDeletedAtIsNull(OAuthPlatform.APPLE, oAuthUserInfoDto.getId()).isPresent();
 	}
 }
