@@ -29,7 +29,7 @@ public class OAuth {
 	@Column(columnDefinition = "TINYINT", nullable = false)
 	private OAuthPlatform platform;
 
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false)
 	private String platformId;
 
 	@Column
@@ -38,7 +38,7 @@ public class OAuth {
 	@Column
 	private String nickname;
 
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	@ManyToOne
 	private User user;
 
