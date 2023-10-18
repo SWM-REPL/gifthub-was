@@ -90,6 +90,6 @@ public class User extends BaseTimeEntity implements UserDetails {
 
 	@Override
 	public boolean isEnabled() {
-		return true;
+		return this.deletedAt == null;
 	}
 }

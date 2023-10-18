@@ -38,7 +38,7 @@ public class OAuth {
 	@Column
 	private String nickname;
 
-	@JoinColumn(name = "user_id", nullable = false)
+	@JoinColumn(name = "user_id")
 	@ManyToOne
 	private User user;
 
@@ -52,5 +52,9 @@ public class OAuth {
 		this.email = email;
 		this.nickname = nickname;
 		this.user = user;
+	}
+
+	public boolean isDeleted() {
+		return deletedAt != null;
 	}
 }
