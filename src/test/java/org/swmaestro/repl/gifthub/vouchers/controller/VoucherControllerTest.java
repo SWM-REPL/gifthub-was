@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.swmaestro.repl.gifthub.giftcard.service.GiftcardService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.vouchers.dto.GptResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.OCRDto;
@@ -23,6 +24,8 @@ import org.swmaestro.repl.gifthub.vouchers.dto.VoucherListResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
@@ -61,6 +64,9 @@ class VoucherControllerTest {
 	private SearchService searchService;
 	@MockBean
 	private PendingVoucherService pendingVoucherService;
+
+	@MockBean
+	private GiftcardService giftcardService;
 
 	@Test
 	@WithMockUser(username = "이진우", roles = "USER")
@@ -291,4 +297,33 @@ class VoucherControllerTest {
 						.content(objectMapper.writeValueAsString(ocrDto)))
 				.andExpect(status().isOk());
 	}
+
+	/**
+	 * 기프티콘 공유 테스트
+	 */
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	void shareVoucher() throws Exception {
+		//Given
+		Long voucherId = 1L;
+		VoucherShareRequestDto voucherShareRequestDto = VoucherShareRequestDto.builder()
+				.message("축하드립니다")
+				.build();
+		VoucherShareResponseDto voucherShareResponseDto = VoucherShareResponseDto.builder()
+				.id("uuid")
+				.build();
+		//When
+		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
+		when(jwtProvider.getUsername(anyString())).thenReturn("이진우");
+		when(voucherService.share(anyString(), eq(voucherId), any(VoucherShareRequestDto.class)))
+				.thenReturn(voucherShareResponseDto);
+
+		//Then
+		mockMvc.perform(post("/vouchers/1/share")
+						.header("Authorization", "my_awesome_access_token")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(voucherShareRequestDto)))
+				.andExpect(status().isOk());
+	}
+
 }

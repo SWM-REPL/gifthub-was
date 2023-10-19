@@ -11,12 +11,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
+import org.swmaestro.repl.gifthub.giftcard.service.GiftcardService;
 import org.swmaestro.repl.gifthub.util.DateConverter;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherListResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
@@ -39,6 +42,7 @@ public class VoucherService {
 	private final UserService userService;
 	private final PendingVoucherService pendingVoucherService;
 	private final VoucherUsageHistoryService voucherUsageHistoryService;
+	private final GiftcardService giftCardService;
 
 	/*
 		기프티콘 저장 메서드
@@ -405,5 +409,24 @@ public class VoucherService {
 			return defaultBrand.get();
 		});
 		return brand;
+	}
+
+	/**
+	 * 기프티콘 공유 요청 메서드
+	 */
+	public VoucherShareResponseDto share(String username, Long voucherId, VoucherShareRequestDto voucherShareRequestDto) {
+		Voucher voucher = voucherRepository.findById(voucherId)
+				.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND));
+		if (!voucher.getUser().getUsername().equals(username)) {
+			throw new BusinessException("상품권을 공유할 권한이 없습니다.", StatusEnum.FORBIDDEN);
+		}
+		if (voucher.getDeletedAt() != null) {
+			throw new BusinessException("삭제된 상품권은 공유할 수 없습니다.", StatusEnum.BAD_REQUEST);
+		}
+		if (voucherShareRequestDto.getMessage() == null) {
+			throw new BusinessException("전달할 메시지를 입력해주세요.", StatusEnum.BAD_REQUEST);
+		}
+
+		return giftCardService.create(voucher, voucherShareRequestDto.getMessage());
 	}
 }
