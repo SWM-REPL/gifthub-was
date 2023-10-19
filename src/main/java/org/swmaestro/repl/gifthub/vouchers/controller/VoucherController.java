@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -189,6 +190,7 @@ public class VoucherController {
 	}
 
 	@PostMapping("/{voucherId}/share")
+	@PreAuthorize("hasRole('ROLE_USER')")
 	@Operation(summary = "Voucher 공유 요청 메서드", description = "클라이언트에서 요청한 기프티콘을 공유하기 위한 메서드입니다. 공유 정보를 생성하고 저장합니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "기프티콘 공유 요청 성공"),
