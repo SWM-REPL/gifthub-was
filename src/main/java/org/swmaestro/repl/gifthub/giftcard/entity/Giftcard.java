@@ -41,7 +41,7 @@ public class Giftcard {
 	@Column(nullable = false)
 	private LocalDateTime expiresAt;
 
-	@Column(length = 4)
+	@Column(length = 60, nullable = false)
 	private String password;
 
 	@Builder
