@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
-import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserDeleteResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.service.OAuthService;
 import org.swmaestro.repl.gifthub.auth.service.UserService;
@@ -47,7 +47,7 @@ public class UserController {
 			@ApiResponse(responseCode = "400(404-2)", description = "이미 삭제된 회원 아이디 입력")
 	})
 	public ResponseEntity<Message> deleteMember(HttpServletRequest request, @PathVariable Long userId) {
-		MemberDeleteResponseDto deletedMember = userService.delete(userId);
+		UserDeleteResponseDto deletedMember = userService.delete(userId);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
@@ -63,12 +63,12 @@ public class UserController {
 			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원 아이디 입력")
 	})
 	public ResponseEntity<Message> updateMember(HttpServletRequest request, @PathVariable Long userId,
-			@RequestBody MemberUpdateRequestDto memberUpdateRequestDto) {
+			@RequestBody UserUpdateRequestDto userUpdateRequestDto) {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
-						.data(userService.update(username, userId, memberUpdateRequestDto))
+						.data(userService.update(username, userId, userUpdateRequestDto))
 						.build());
 	}
 
@@ -135,5 +135,20 @@ public class UserController {
 		return ResponseEntity.ok(SuccessMessage.builder()
 				.path(request.getRequestURI())
 				.build());
+	}
+
+	@GetMapping("/me")
+	@Operation(summary = "내 정보 조회 메서드", description = "클라이언트에서 요청한 사용자 정보를 조회하기 위한 메서드입니다. 응답으로 회원 id와 nickname, 연결된 소셜 계정 정보를 반환합니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "회원 조회 성공"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원 정보 요청")
+	})
+	public ResponseEntity<Message> readMyInfo(HttpServletRequest request) {
+		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(userService.readInfo(username))
+						.build());
 	}
 }
