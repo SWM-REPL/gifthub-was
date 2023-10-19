@@ -22,6 +22,8 @@ import org.swmaestro.repl.gifthub.vouchers.dto.VoucherListResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
@@ -183,6 +185,23 @@ public class VoucherController {
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
+						.build());
+	}
+
+	@PostMapping("/{voucherId}/share")
+	@Operation(summary = "Voucher 공유 요청 메서드", description = "클라이언트에서 요청한 기프티콘을 공유하기 위한 메서드입니다. 공유 정보를 생성하고 저장합니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "기프티콘 공유 요청 성공"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 기프티콘 공유 요청 시도"),
+	})
+	public ResponseEntity<Message> shareVoucher(HttpServletRequest request, @PathVariable Long voucherId,
+			@RequestBody VoucherShareRequestDto voucherShareRequestDto) throws IOException {
+		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
+		VoucherShareResponseDto voucherShareResponseDto = voucherService.share(username, voucherId, voucherShareRequestDto);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(voucherShareResponseDto)
 						.build());
 	}
 }
