@@ -8,13 +8,13 @@ import lombok.Getter;
 
 @Getter
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class MemberReadResponseDto {
+public class UserReadResponseDto {
 	private Long id;
 	private String nickname;
 	private String username;
 
 	@Builder
-	public MemberReadResponseDto(Long id, String nickname, String username) {
+	public UserReadResponseDto(Long id, String nickname, String username) {
 		this.id = id;
 		this.nickname = nickname;
 		this.username = username;

@@ -12,12 +12,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.dto.MemberDeleteResponseDto;
-import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
-import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateRequestDto;
-import org.swmaestro.repl.gifthub.auth.dto.MemberUpdateResponseDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserDeleteResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserInfoResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserReadResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserUpdateRequestDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserUpdateResponseDto;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.repository.UserRepository;
@@ -78,12 +79,12 @@ public class UserService implements UserDetailsService {
 		return user;
 	}
 
-	public MemberReadResponseDto read(Long id) {
+	public UserReadResponseDto read(Long id) {
 		Optional<User> user = userRepository.findById(id);
 		if (user.isEmpty() || user.get().getDeletedAt() != null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
-		return MemberReadResponseDto.builder()
+		return UserReadResponseDto.builder()
 				.id(user.get().getId())
 				.nickname(user.get().getNickname())
 				.username(user.get().getUsername())
@@ -100,7 +101,7 @@ public class UserService implements UserDetailsService {
 				.toList();
 	}
 
-	public MemberUpdateResponseDto update(String username, Long userId, MemberUpdateRequestDto memberUpdateRequestDto) {
+	public UserUpdateResponseDto update(String username, Long userId, UserUpdateRequestDto userUpdateRequestDto) {
 		User user = userRepository.findByUsername(username);
 		if (user == null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
@@ -108,20 +109,20 @@ public class UserService implements UserDetailsService {
 		if (!user.getId().equals(userId)) {
 			throw new BusinessException("수정 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
-		if (memberUpdateRequestDto.getNickname() != null) {
-			if (isDuplicateNickname(memberUpdateRequestDto.getNickname())) {
+		if (userUpdateRequestDto.getNickname() != null) {
+			if (isDuplicateNickname(userUpdateRequestDto.getNickname())) {
 				throw new BusinessException("이미 존재하는 닉네임입니다.", StatusEnum.CONFLICT);
 			}
-			user.setNickname(memberUpdateRequestDto.getNickname());
+			user.setNickname(userUpdateRequestDto.getNickname());
 		}
-		if (memberUpdateRequestDto.getPassword() != null) {
-			if (!isValidatePassword(memberUpdateRequestDto.getPassword())) {
+		if (userUpdateRequestDto.getPassword() != null) {
+			if (!isValidatePassword(userUpdateRequestDto.getPassword())) {
 				throw new BusinessException("비밀번호는 영문, 숫자, 특수문자를 포함한 8자리 이상이어야 합니다.", StatusEnum.BAD_REQUEST);
 			}
-			user.setPassword(passwordEncoder.encode(memberUpdateRequestDto.getPassword()));
+			user.setPassword(passwordEncoder.encode(userUpdateRequestDto.getPassword()));
 		}
 		userRepository.save(user);
-		return MemberUpdateResponseDto.builder()
+		return UserUpdateResponseDto.builder()
 				.id(user.getId())
 				.nickname(user.getNickname())
 				.build();
@@ -131,7 +132,7 @@ public class UserService implements UserDetailsService {
 		return userRepository.findByNickname(nickname) != null;
 	}
 
-	public MemberDeleteResponseDto delete(Long id) {
+	public UserDeleteResponseDto delete(Long id) {
 		User user = userRepository.findById(id)
 				.orElseThrow(() -> new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND));
 
@@ -143,7 +144,7 @@ public class UserService implements UserDetailsService {
 		userRepository.save(user);
 
 		deleteOAuthInfo(user);
-		return MemberDeleteResponseDto.builder()
+		return UserDeleteResponseDto.builder()
 				.id(id)
 				.build();
 	}
@@ -168,5 +169,15 @@ public class UserService implements UserDetailsService {
 
 	public List<OAuth> deleteOAuthInfo(User user) {
 		return oAuthService.delete(user);
+	}
+
+	public UserInfoResponseDto readInfo(String username) {
+		User user = read(username);
+		UserInfoResponseDto userInfoResponseDto = UserInfoResponseDto.builder()
+				.username(username)
+				.nickname(user.getNickname())
+				.oauth(oAuthService.list(user))
+				.build();
+		return userInfoResponseDto;
 	}
 }

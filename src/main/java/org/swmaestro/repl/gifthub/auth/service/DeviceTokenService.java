@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.dto.MemberReadResponseDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserReadResponseDto;
 import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
 import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.repository.DeviceTokenRepository;
@@ -58,7 +58,7 @@ public class DeviceTokenService {
 	 * DeviceToken 존재 여부 반환 메서드 (회원 아이디와 토큰으로)
 	 */
 	public boolean isExist(Long memberId, String deviceToken) {
-		MemberReadResponseDto memberDto = userService.read(memberId);
+		UserReadResponseDto memberDto = userService.read(memberId);
 		User user = userService.read(memberDto.getUsername());
 
 		return deviceTokenRepository.findByUserAndToken(user, deviceToken).isPresent();
@@ -75,7 +75,7 @@ public class DeviceTokenService {
 	 * DeviceToken 전체 조회 메서드(memberId)
 	 */
 	public List<DeviceToken> list(Long memberId) {
-		MemberReadResponseDto memberDto = userService.read(memberId);
+		UserReadResponseDto memberDto = userService.read(memberId);
 		User user = userService.read(memberDto.getUsername());
 		return deviceTokenRepository.findAllByUser(user);
 	}

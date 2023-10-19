@@ -1,6 +1,7 @@
 package org.swmaestro.repl.gifthub.auth.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -62,7 +63,7 @@ public class OAuthService {
 	}
 
 	/**
-	 * 해당 유저의 전체 oauth 정보를 삭제하는 메서
+	 * 해당 유저의 전체 oauth 정보를 삭제하는 메서드
 	 * @param user
 	 * @return
 	 */
@@ -73,5 +74,25 @@ public class OAuthService {
 			oAuthRepository.save(oAuth);
 		}
 		return oAuths;
+	}
+
+	public List<OAuthUserInfoDto> list(User user) {
+		List<OAuth> oAuths = oAuthRepository.findAllByUserAndDeletedAtIsNull(user);
+		if (oAuths == null)
+			return null;
+		List<OAuthUserInfoDto> oAuthUserInfoDtos = new ArrayList<>();
+		for (OAuth oAuth : oAuths) {
+			oAuthUserInfoDtos.add(mapToDto(oAuth));
+		}
+		return oAuthUserInfoDtos;
+	}
+
+	public OAuthUserInfoDto mapToDto(OAuth oAuth) {
+		return OAuthUserInfoDto.builder()
+				.id(oAuth.getPlatformId())
+				.email(oAuth.getEmail())
+				.nickname(oAuth.getNickname())
+				.Provider(oAuth.getPlatform().toString())
+				.build();
 	}
 }
