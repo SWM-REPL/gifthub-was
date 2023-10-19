@@ -40,8 +40,6 @@ public class GiftcardService {
 				.build();
 		giftCardRepository.save(giftCard);
 
-		System.out.println("Giftcard password: " + decryptPassword(giftCard.getPassword()));
-
 		return VoucherShareResponseDto.builder()
 				.id(giftCard.getId())
 				.build();
