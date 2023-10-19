@@ -10,11 +10,13 @@ public class OAuthUserInfoDto {
 	private String id;
 	private String email;
 	private String nickname;
+	private String Provider;
 
 	@Builder
-	public OAuthUserInfoDto(String id, String email, String nickname) {
+	public OAuthUserInfoDto(String id, String email, String nickname, String Provider) {
 		this.id = id;
 		this.email = email;
 		this.nickname = nickname;
+		this.Provider = Provider;
 	}
 }
