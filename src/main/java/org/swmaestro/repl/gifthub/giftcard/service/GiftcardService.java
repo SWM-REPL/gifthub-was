@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
+import org.swmaestro.repl.gifthub.giftcard.config.GiftcardConfig;
 import org.swmaestro.repl.gifthub.giftcard.dto.GiftcardResponseDto;
 import org.swmaestro.repl.gifthub.giftcard.entity.Giftcard;
 import org.swmaestro.repl.gifthub.giftcard.repository.GiftcardRepository;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GiftcardService {
 	private final GiftcardRepository giftCardRepository;
+	private final GiftcardConfig giftcardConfig;
 
 	public VoucherShareResponseDto create(Voucher voucher, String message) {
 		if (isExist(voucher.getId())) {
@@ -29,7 +31,7 @@ public class GiftcardService {
 				.voucher(voucher)
 				.password(generatePassword())
 				.message(message)
-				.expiresAt(LocalDateTime.now().plusDays(3))
+				.expiresAt(LocalDateTime.now().plusDays(giftcardConfig.getEffectiveDay()))
 				.build();
 		giftCardRepository.save(giftCard);
 
