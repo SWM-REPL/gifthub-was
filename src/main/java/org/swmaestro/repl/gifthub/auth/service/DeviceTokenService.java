@@ -43,6 +43,7 @@ public class DeviceTokenService {
 		} else {
 			deviceToken = read(token);
 			deviceToken.setUpdatedAt(LocalDateTime.now());
+			deviceToken.setUser(user);
 		}
 		deviceTokenRepository.save(deviceToken);
 	}
