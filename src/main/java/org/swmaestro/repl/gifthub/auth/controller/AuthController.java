@@ -171,4 +171,18 @@ public class AuthController {
 						.data(null)
 						.build());
 	}
+
+	@PostMapping("/sign-up/anonymous")
+	@Operation(summary = "비회원 회원가입 메서드", description = "비회원 회원가입을 하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "회원가입 성공"),
+	})
+	public ResponseEntity<Message> signUpAnonymous(HttpServletRequest request) {
+		JwtTokenDto jwtTokenDto = authService.signUpAnonymous();
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.data(jwtTokenDto)
+						.build());
+	}
 }
