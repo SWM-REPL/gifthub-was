@@ -15,7 +15,10 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.swmaestro.repl.gifthub.giftcard.dto.GiftcardResponseDto;
+import org.swmaestro.repl.gifthub.giftcard.entity.Giftcard;
 import org.swmaestro.repl.gifthub.giftcard.service.GiftcardService;
+import org.swmaestro.repl.gifthub.util.JwtProvider;
+import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,6 +33,9 @@ class GiftcardControllerTest {
 
 	@MockBean
 	private GiftcardService giftcardService;
+
+	@MockBean
+	private JwtProvider jwtProvider;
 
 	@Test
 	@WithMockUser(username = "test", roles = "USER")
@@ -63,5 +69,36 @@ class GiftcardControllerTest {
 				.andExpect(jsonPath("$.data.product_name").value(giftcardResponseDto.getProductName()))
 				.andExpect(jsonPath("$.data.brand_name").value(giftcardResponseDto.getBrandName()))
 				.andExpect(jsonPath("$.data.expires_at").value(giftcardResponseDto.getExpiresAt().toString()));
+	}
+
+	@Test
+	@WithMockUser(username = "test", roles = "USER")
+	void changeVoucherUser() throws Exception {
+		// given
+		String giftcardId = "id";
+		String apiPath = "/giftcards/" + giftcardId + "/acquire";
+
+		Voucher voucher = Voucher.builder()
+				.id(1L)
+				.build();
+
+		Giftcard giftcard = Giftcard.builder()
+				.id(giftcardId)
+				.voucher(voucher)
+				.password("0000")
+				.message("메시지")
+				.expiresAt(LocalDate.now().atStartOfDay())
+				.build();
+
+		// when
+		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
+		when(jwtProvider.getUsername(anyString())).thenReturn("test");
+		when(giftcardService.changeVoucherUser(giftcardId, "test")).thenReturn(giftcard);
+
+		// then
+		mockMvc.perform(post(apiPath)
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.path").value(apiPath));
 	}
 }
