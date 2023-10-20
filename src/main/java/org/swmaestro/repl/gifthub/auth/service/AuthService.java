@@ -138,4 +138,21 @@ public class AuthService {
 		}
 		refreshTokenService.deleteRefreshToken(username);
 	}
+
+	/**
+	 * 비회원 회원가입
+	 * @return
+	 */
+	public JwtTokenDto signUpAnonymous() {
+		User user = User.builder()
+				.username(userService.generateOAuthUsername())
+				.password(authConfig.getDefaultPassword())
+				.nickname(authConfig.getDefaultNickname())
+				.role(Role.ANONYMOUS)
+				.build();
+		User savedUser = userService.create(user);
+		JwtTokenDto jwtTokenDto = generateJwtTokenDto(savedUser);
+		refreshTokenService.storeRefreshToken(jwtTokenDto, user.getUsername());
+		return jwtTokenDto;
+	}
 }
