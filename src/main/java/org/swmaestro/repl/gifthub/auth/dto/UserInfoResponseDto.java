@@ -11,14 +11,18 @@ import lombok.Getter;
 @Getter
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserInfoResponseDto {
+	private Long id;
 	private String username;
 	private String nickname;
 	private List<OAuthUserInfoDto> oauth;
+	public boolean allowNotifications;
 
 	@Builder
-	public UserInfoResponseDto(String username, String nickname, List<OAuthUserInfoDto> oauth) {
+	public UserInfoResponseDto(Long id, String username, String nickname, List<OAuthUserInfoDto> oauth, boolean allowNotifications) {
+		this.id = id;
 		this.username = username;
 		this.nickname = nickname;
 		this.oauth = oauth;
+		this.allowNotifications = allowNotifications;
 	}
 }

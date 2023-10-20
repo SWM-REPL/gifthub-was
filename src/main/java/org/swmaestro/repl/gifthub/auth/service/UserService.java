@@ -21,6 +21,7 @@ import org.swmaestro.repl.gifthub.auth.dto.UserUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.UserUpdateResponseDto;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.entity.User;
+import org.swmaestro.repl.gifthub.auth.repository.DeviceTokenRepository;
 import org.swmaestro.repl.gifthub.auth.repository.UserRepository;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -34,6 +35,7 @@ public class UserService implements UserDetailsService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final OAuthService oAuthService;
+	private final DeviceTokenRepository deviceTokenRepository;
 
 	public User passwordEncryption(User user) {
 		return User.builder()
@@ -174,10 +176,19 @@ public class UserService implements UserDetailsService {
 	public UserInfoResponseDto readInfo(String username) {
 		User user = read(username);
 		UserInfoResponseDto userInfoResponseDto = UserInfoResponseDto.builder()
+				.id(user.getId())
 				.username(username)
 				.nickname(user.getNickname())
 				.oauth(oAuthService.list(user))
+				.allowNotifications(isExistDeviceToken(user))
 				.build();
 		return userInfoResponseDto;
+	}
+
+	/**
+	 * DeviceToken 조회 메서드 (user)
+	 */
+	public boolean isExistDeviceToken(User user) {
+		return deviceTokenRepository.findByUser(user).isPresent();
 	}
 }
