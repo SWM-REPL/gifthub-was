@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import org.springframework.security.crypto.encrypt.AesBytesEncryptor;
 import org.springframework.stereotype.Service;
+import org.swmaestro.repl.gifthub.auth.entity.User;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.giftcard.config.GiftcardConfig;
 import org.swmaestro.repl.gifthub.giftcard.dto.GiftcardResponseDto;
@@ -16,6 +18,7 @@ import org.swmaestro.repl.gifthub.util.ByteArrayUtils;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
+import org.swmaestro.repl.gifthub.vouchers.repository.VoucherRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +28,8 @@ public class GiftcardService {
 	private final GiftcardRepository giftCardRepository;
 	private final GiftcardConfig giftcardConfig;
 	private final AesBytesEncryptor aesBytesEncryptor;
+	private final UserService userService;
+	private final VoucherRepository voucherRepository;  // 순환 참조로 인해 vocuherService를 사용할 수 없음
 
 	public VoucherShareResponseDto create(Voucher voucher, String message) {
 		if (isExist(voucher.getId())) {
@@ -47,7 +52,7 @@ public class GiftcardService {
 
 	public Giftcard read(String id) {
 		if (!isExist(id)) {
-			throw new BusinessException("존재하지 않는 링크입니다.", StatusEnum.NOT_FOUND);
+			throw new BusinessException("존재하지 않는 기프트 카드입니다.", StatusEnum.NOT_FOUND);
 		}
 
 		return giftCardRepository.findById(id).get();
@@ -71,6 +76,29 @@ public class GiftcardService {
 				.productName(giftcard.getVoucher().getProduct().getName())
 				.expiresAt(giftcard.getExpiresAt().toLocalDate())
 				.build();
+	}
+
+	/**
+	 * 기프트 카드의 소유자를 변경합니다.
+	 * @param giftcardId: 변경할 기프트 카드의 id
+	 * @param username: 변경할 소유자의 username
+	 * @return
+	 */
+	public Giftcard changeVoucherUser(String giftcardId, String username) {
+		Giftcard giftcard = read(giftcardId);
+
+		if (giftcard.getExpiresAt().isBefore(LocalDateTime.now())) {
+			throw new BusinessException("만료된 링크입니다.", StatusEnum.BAD_REQUEST);
+		}
+
+		Voucher updatedVoucher = giftcard.getVoucher();
+		User newUser = userService.read(username);
+		updatedVoucher.setUser(newUser);
+		voucherRepository.save(updatedVoucher);
+
+		giftcard.expire();
+		giftCardRepository.save(giftcard);
+		return giftcard;
 	}
 
 	public boolean isExist(String id) {
