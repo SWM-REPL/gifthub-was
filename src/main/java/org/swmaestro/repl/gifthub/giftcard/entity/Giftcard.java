@@ -52,4 +52,8 @@ public class Giftcard {
 		this.password = password;
 		this.expiresAt = expiresAt;
 	}
+
+	public void expire() {
+		this.expiresAt = LocalDateTime.now();
+	}
 }
