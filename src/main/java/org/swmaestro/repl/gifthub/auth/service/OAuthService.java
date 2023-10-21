@@ -92,7 +92,7 @@ public class OAuthService {
 				.id(oAuth.getPlatformId())
 				.email(oAuth.getEmail())
 				.nickname(oAuth.getNickname())
-				.Provider(oAuth.getPlatform().toString())
+				.Provider(oAuth.getPlatform().toString().toLowerCase())
 				.build();
 	}
 }
