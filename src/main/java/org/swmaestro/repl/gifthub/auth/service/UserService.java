@@ -73,15 +73,15 @@ public class UserService implements UserDetailsService {
 
 	public User read(String username) {
 		User user = userRepository.findByUsername(username);
-		if (user == null) {
-			return null;
+		if (user == null || !user.isEnabled()) {
+			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
 		return user;
 	}
 
 	public UserReadResponseDto read(Long id) {
 		Optional<User> user = userRepository.findById(id);
-		if (user.isEmpty() || user.get().getDeletedAt() != null) {
+		if (user.isEmpty() || !user.get().isEnabled()) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
 		return UserReadResponseDto.builder()
@@ -164,7 +164,7 @@ public class UserService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		return userRepository.findByUsername(username).getDeletedAt() == null ? userRepository.findByUsername(username) : null;
+		return userRepository.findByUsername(username);
 	}
 
 	public List<OAuth> deleteOAuthInfo(User user) {
