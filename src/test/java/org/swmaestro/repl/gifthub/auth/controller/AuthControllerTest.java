@@ -211,6 +211,25 @@ public class AuthControllerTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(objectMapper.writeValueAsString(signOutDto)))
 				.andExpect(status().isOk());
+	}
 
+	@Test
+	@WithMockUser(username = "test", roles = "ANONYMOUS")
+	void signUpAnonymous() throws Exception {
+		// given
+		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
+				.accessToken("myawesomejwt")
+				.refreshToken("myawesomejwt")
+				.build();
+
+		// when
+		when(authService.signUpAnonymous()).thenReturn(jwtTokenDto);
+
+		// then
+		mockMvc.perform(post("/auth/sign-up/anonymous")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.access_token").exists())
+				.andExpect(jsonPath("$.data.refresh_token").exists());
 	}
 }
