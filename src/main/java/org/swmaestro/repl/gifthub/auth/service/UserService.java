@@ -62,7 +62,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	public boolean isDuplicateUsername(String username) {
-		return userRepository.findByUsername(username) != null;
+		return userRepository.findByUsernameAndDeletedAtIsNull(username) != null;
 	}
 
 	public boolean isValidatePassword(String password) {
@@ -74,7 +74,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	public User read(String username) {
-		User user = userRepository.findByUsername(username);
+		User user = userRepository.findByUsernameAndDeletedAtIsNull(username);
 		if (user == null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
@@ -104,7 +104,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	public UserUpdateResponseDto update(String username, Long userId, UserUpdateRequestDto userUpdateRequestDto) {
-		User user = userRepository.findByUsername(username);
+		User user = userRepository.findByUsernameAndDeletedAtIsNull(username);
 		if (user == null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
@@ -166,7 +166,11 @@ public class UserService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		return userRepository.findByUsername(username).getDeletedAt() == null ? userRepository.findByUsername(username) : null;
+		User user = userRepository.findByUsernameAndDeletedAtIsNull(username);
+		if (user == null) {
+			throw new UsernameNotFoundException("존재하지 않는 회원입니다.");
+		}
+		return user;
 	}
 
 	public List<OAuth> deleteOAuthInfo(User user) {
