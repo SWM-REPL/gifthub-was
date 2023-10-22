@@ -40,7 +40,7 @@ public class AuthService {
 	public JwtTokenDto signUp(SignUpDto signUpDto) {
 		User user = User.builder()
 				.username(signUpDto.getUsername())
-				.password(passwordEncoder.encode(signUpDto.getPassword()))
+				.password(signUpDto.getPassword())
 				.nickname(signUpDto.getNickname())
 				.role(Role.USER)
 				.build();
@@ -132,7 +132,7 @@ public class AuthService {
 	 */
 	@Transactional
 	public void signOut(String username, SignOutDto signOutDto) {
-		User user = userRepository.findByUsername(username);
+		User user = userRepository.findByUsernameAndDeletedAtIsNull(username);
 		if (user == null || user.getDeletedAt() != null) {
 			throw new BusinessException("존재하지 않는 사용자입니다.", StatusEnum.UNAUTHORIZED);
 		}
