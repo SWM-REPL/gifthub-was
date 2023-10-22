@@ -10,6 +10,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.swmaestro.repl.gifthub.auth.repository.RefreshTokenRepository;
 import org.swmaestro.repl.gifthub.auth.service.UserService;
@@ -96,6 +97,9 @@ public class JwtProvider {
 	 */
 	public Authentication getAuthentication(String token) {
 		UserDetails userDetails = userService.loadUserByUsername(this.getUsername(token));
+		if (userDetails == null) {
+			throw new UsernameNotFoundException("존재하지 않는 회원입니다.");
+		}
 		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 	}
 
