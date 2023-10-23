@@ -31,7 +31,7 @@ public class User extends BaseTimeEntity implements UserDetails {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(length = 60, nullable = false, unique = true)
+	@Column(length = 60, nullable = false)
 	private String username;
 
 	@Column(length = 60)

@@ -36,6 +36,7 @@ public class SecurityConfig {
 				.authorizeHttpRequests(authorizeHttpRequests ->
 						authorizeHttpRequests.requestMatchers(
 										"/auth/sign-up",
+										"/auth/sign-up/anonymous",
 										"/auth/sign-in",
 										"/auth/sign-in/**",
 										"/giftcards/**",

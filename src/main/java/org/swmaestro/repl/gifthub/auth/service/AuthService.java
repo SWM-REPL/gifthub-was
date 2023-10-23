@@ -40,7 +40,7 @@ public class AuthService {
 	public JwtTokenDto signUp(SignUpDto signUpDto) {
 		User user = User.builder()
 				.username(signUpDto.getUsername())
-				.password(passwordEncoder.encode(signUpDto.getPassword()))
+				.password(signUpDto.getPassword())
 				.nickname(signUpDto.getNickname())
 				.role(Role.USER)
 				.build();
@@ -132,10 +132,27 @@ public class AuthService {
 	 */
 	@Transactional
 	public void signOut(String username, SignOutDto signOutDto) {
-		User user = userRepository.findByUsername(username);
+		User user = userRepository.findByUsernameAndDeletedAtIsNull(username);
 		if (user == null || user.getDeletedAt() != null) {
 			throw new BusinessException("존재하지 않는 사용자입니다.", StatusEnum.UNAUTHORIZED);
 		}
 		refreshTokenService.deleteRefreshToken(username);
+	}
+
+	/**
+	 * 비회원 회원가입
+	 * @return
+	 */
+	public JwtTokenDto signUpAnonymous() {
+		User user = User.builder()
+				.username(userService.generateOAuthUsername())
+				.password(authConfig.getDefaultPassword())
+				.nickname(authConfig.getDefaultNickname())
+				.role(Role.ANONYMOUS)
+				.build();
+		User savedUser = userService.create(user);
+		JwtTokenDto jwtTokenDto = generateJwtTokenDto(savedUser);
+		refreshTokenService.storeRefreshToken(jwtTokenDto, user.getUsername());
+		return jwtTokenDto;
 	}
 }
