@@ -111,6 +111,9 @@ public class UserService implements UserDetailsService {
 		if (!user.getId().equals(userId)) {
 			throw new BusinessException("수정 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
+		if (userUpdateRequestDto.getNickname().length() < 2 || userUpdateRequestDto.getNickname().length() > 12) {
+			throw new BusinessException("닉네임은 2자 이상 12자 이하로 입력해주세요.", StatusEnum.BAD_REQUEST);
+		}
 		if (userUpdateRequestDto.getNickname() != null) {
 			if (isDuplicateNickname(userUpdateRequestDto.getNickname())) {
 				throw new BusinessException("이미 존재하는 닉네임입니다.", StatusEnum.CONFLICT);
