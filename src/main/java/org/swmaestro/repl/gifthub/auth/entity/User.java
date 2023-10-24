@@ -92,4 +92,8 @@ public class User extends BaseTimeEntity implements UserDetails {
 	public boolean isEnabled() {
 		return this.deletedAt == null;
 	}
+
+	public boolean isAnonymous() {
+		return this.role == Role.ANONYMOUS;
+	}
 }
