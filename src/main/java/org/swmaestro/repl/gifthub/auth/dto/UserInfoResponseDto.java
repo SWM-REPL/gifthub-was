@@ -2,6 +2,7 @@ package org.swmaestro.repl.gifthub.auth.dto;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
@@ -16,13 +17,17 @@ public class UserInfoResponseDto {
 	private String nickname;
 	private List<OAuthUserInfoDto> oauth;
 	public boolean allowNotifications;
+	@JsonProperty("is_anonymous")
+	public boolean anonymous;
 
 	@Builder
-	public UserInfoResponseDto(Long id, String username, String nickname, List<OAuthUserInfoDto> oauth, boolean allowNotifications) {
+	public UserInfoResponseDto(Long id, String username, String nickname, List<OAuthUserInfoDto> oauth,
+			boolean allowNotifications, boolean anonymous) {
 		this.id = id;
 		this.username = username;
 		this.nickname = nickname;
 		this.oauth = oauth;
 		this.allowNotifications = allowNotifications;
+		this.anonymous = anonymous;
 	}
 }
