@@ -192,6 +192,7 @@ public class UserService implements UserDetailsService {
 				.nickname(user.getNickname())
 				.oauth(oAuthService.list(user))
 				.allowNotifications(isExistDeviceToken(user))
+				.anonymous(user.isAnonymous())
 				.build();
 		return userInfoResponseDto;
 	}
