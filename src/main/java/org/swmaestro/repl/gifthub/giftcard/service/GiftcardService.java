@@ -79,20 +79,19 @@ public class GiftcardService {
 		Giftcard giftcard = read(id);
 
 		if (!giftcard.isEnable()) {
-			throw new BusinessException("만료된 링크입니다.", StatusEnum.BAD_REQUEST);
+			throw new BusinessException("기간이 만료된 링크입니다.", StatusEnum.BAD_REQUEST);
 		}
 
 		if (giftcard.getInvalidPasswordCount() >= 10) {
-			throw new BusinessException("비밀번호를 10회 이상 틀렸습니다. 고객센터에 문의해주세요.", StatusEnum.FORBIDDEN);
+			throw new BusinessException("비밀번호를 10회 이상 틀렸습니다. 이 링크는 더 이상 사용할 수 없습니다.", StatusEnum.FORBIDDEN);
 		}
 
 		if (!decryptPassword(giftcard.getPassword()).equals(password)) {
-			giftcard.increaseInvalidPasswordCount();
+			save(giftcard.increaseInvalidPasswordCount());
 			throw new BusinessException("비밀번호가 일치하지 않습니다.", StatusEnum.FORBIDDEN);
 		}
 
-		giftcard.resetInvalidPasswordCount();
-		giftCardRepository.save(giftcard);
+		save(giftcard.resetInvalidPasswordCount());
 
 		return GiftcardResponseDto.builder()
 				.sender(giftcard.getVoucher().getUser().getNickname())
@@ -101,6 +100,10 @@ public class GiftcardService {
 				.productName(giftcard.getVoucher().getProduct().getName())
 				.expiresAt(giftcard.getExpiresAt().toLocalDate())
 				.build();
+	}
+
+	public Giftcard save(Giftcard giftcard) {
+		return giftCardRepository.save(giftcard);
 	}
 
 	/**
@@ -120,9 +123,7 @@ public class GiftcardService {
 		User newUser = userService.read(username);
 		updatedVoucher.setUser(newUser);
 		voucherRepository.save(updatedVoucher);
-
-		giftcard.expire();
-		giftCardRepository.save(giftcard);
+		giftCardRepository.save(giftcard.expire());
 		return giftcard;
 	}
 

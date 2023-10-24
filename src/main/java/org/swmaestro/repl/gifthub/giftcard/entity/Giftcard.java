@@ -57,17 +57,20 @@ public class Giftcard {
 		this.invalidPasswordCount = 0;
 	}
 
-	public void expire() {
+	public Giftcard expire() {
 		this.expiresAt = LocalDateTime.now();
+		return this;
 	}
 
-	public void increaseInvalidPasswordCount() {
+	public Giftcard increaseInvalidPasswordCount() {
 		this.invalidPasswordCount++;
+		return this;
 
 	}
 
-	public void resetInvalidPasswordCount() {
+	public Giftcard resetInvalidPasswordCount() {
 		this.invalidPasswordCount = 0;
+		return this;
 	}
 
 	public boolean isEnable() {
