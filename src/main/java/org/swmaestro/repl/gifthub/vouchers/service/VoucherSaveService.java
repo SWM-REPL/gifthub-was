@@ -1,10 +1,11 @@
 package org.swmaestro.repl.gifthub.vouchers.service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.service.UserService;
-import org.swmaestro.repl.gifthub.exception.BusinessException;
+import org.swmaestro.repl.gifthub.exception.GptResponseException;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationService;
 import org.swmaestro.repl.gifthub.notifications.service.NotificationService;
@@ -45,11 +46,18 @@ public class VoucherSaveService {
 						// onSuccess
 						voucherSaveResponseDto -> {
 							System.out.println("등록 성공");
-							//notification 저장(알림 성공 저장)
-							notificationService.save(userService.read(username), voucherService.read(voucherSaveResponseDto.getId()),
-									NotificationType.REGISTERED,
-									"기프티콘 등록에 성공했습니다.");
-							fcmNotificationService.sendNotification("기프티콘 등록 성공", "기프티콘 등록에 성공했습니다!", username);
+							// 만료된 기프티콘을 등록할 경우
+							if (voucherService.read(voucherSaveResponseDto.getId()).getExpiresAt().isBefore(LocalDate.now())) {
+								fcmNotificationService.sendNotification("기프티콘 등록 성공", "만료된 기프티콘을 등록했습니다.", username);
+								notificationService.save(userService.read(username), voucherService.read(voucherSaveResponseDto.getId()),
+										NotificationType.REGISTERED,
+										"만료된 기프티콘을 등록했습니다.");
+							} else {
+								fcmNotificationService.sendNotification("기프티콘 등록 성공", "기프티콘 등록에 성공했습니다!", username);
+								notificationService.save(userService.read(username), voucherService.read(voucherSaveResponseDto.getId()),
+										NotificationType.REGISTERED,
+										"기프티콘 등록에 성공했습니다.");
+							}
 							// 처리 완료
 							pendingVoucherService.delete(userService.read(username));
 						},
@@ -61,13 +69,24 @@ public class VoucherSaveService {
 							notificationService.save(userService.read(username), null,
 									NotificationType.REGISTERED,
 									"기프티콘 등록에 실패했습니다.");
-							fcmNotificationService.sendNotification("기프티콘 등록 실패", "기프티콘 등록에 실패했습니다.", username);
+							//Gpt 에러일 경우
+							if (throwable instanceof GptResponseException) {
+								fcmNotificationService.sendNotification("기프티콘 등록 실패", "자동 등록에 실패했습니다. 수동 등록을 이용해 주세요.", username);
+								notificationService.save(userService.read(username), null,
+										NotificationType.REGISTERED,
+										"Gpt 응답이 올바르지 않습니다.");
+							} else {
+								fcmNotificationService.sendNotification("기프티콘 등록 실패", "이미 등록된 기프티콘 입니다.", username);
+								notificationService.save(userService.read(username), null,
+										NotificationType.REGISTERED,
+										"이미 등록된 기프티콘 입니다.");
+							}
 							// 처리 완료
 							pendingVoucherService.delete(userService.read(username));
 						});
 	}
 
-	public Mono<VoucherSaveRequestDto> handleGptResponse(OCRDto ocrDto, String username) throws IOException {
+	public Mono<VoucherSaveRequestDto> handleGptResponse(OCRDto ocrDto, String username) throws IOException, GptResponseException {
 
 		return gptService.getGptResponse(ocrDto).flatMap(response -> {
 			try {
@@ -77,11 +96,11 @@ public class VoucherSaveService {
 				System.out.println(voucherSaveRequestDto.getProductName());
 
 				if (voucherSaveRequestDto.getBrandName() == "" || voucherSaveRequestDto.getProductName() == "") {
-					throw new BusinessException("GPT 응답이 올바르지 않습니다.", StatusEnum.NOT_FOUND);
+					throw new GptResponseException("GPT 응답이 올바르지 않습니다.", StatusEnum.NOT_FOUND);
 				}
 				return Mono.just(voucherSaveRequestDto);
 			} catch (JsonProcessingException e) {
-				return Mono.error(new BusinessException("GPT 응답이 올바르지 않습니다.", StatusEnum.NOT_FOUND));
+				return Mono.error(new GptResponseException("GPT 응답이 올바르지 않습니다.", StatusEnum.NOT_FOUND));
 			}
 		});
 	}
