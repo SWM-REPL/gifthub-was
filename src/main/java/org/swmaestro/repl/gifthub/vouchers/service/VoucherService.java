@@ -108,6 +108,9 @@ public class VoucherService {
 		if (!vouchers.contains(voucher.get())) {
 			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
+		if (voucher.get().isDeleted()) {
+			throw new BusinessException("삭제된 상품권 입니다.", StatusEnum.BAD_REQUEST);
+		}
 
 		VoucherReadResponseDto voucherReadResponseDto = mapToDto(voucher.get());
 		return voucherReadResponseDto;
