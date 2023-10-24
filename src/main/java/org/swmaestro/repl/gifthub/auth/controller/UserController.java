@@ -94,16 +94,7 @@ public class UserController {
 	})
 	public ResponseEntity<Message> createOAuthInfo(HttpServletRequest request, @PathVariable String platform,
 			@RequestBody OAuthTokenDto oAuthTokenDto) {
-		OAuthPlatform oAuthPlatform;
-
-		switch (platform) {
-			case "naver" -> oAuthPlatform = OAuthPlatform.NAVER;
-			case "kakao" -> oAuthPlatform = OAuthPlatform.KAKAO;
-			case "google" -> oAuthPlatform = OAuthPlatform.GOOGLE;
-			case "apple" -> oAuthPlatform = OAuthPlatform.APPLE;
-			default -> throw new BusinessException("올바르지 않은 플랫폼에 대한 요청입니다.", StatusEnum.BAD_REQUEST);
-		}
-
+		OAuthPlatform oAuthPlatform = stringToPlatform(platform);
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
 		User user = userService.read(username);
 		userService.createOAuthInfo(user, oAuthPlatform, oAuthTokenDto);
@@ -119,16 +110,7 @@ public class UserController {
 			@ApiResponse(responseCode = "400", description = "OAuth 연동 계정 삭제 실패")
 	})
 	public ResponseEntity<Message> deleteOAuthInfo(HttpServletRequest request, @PathVariable String platform) {
-		OAuthPlatform oAuthPlatform;
-
-		switch (platform) {
-			case "naver" -> oAuthPlatform = OAuthPlatform.NAVER;
-			case "kakao" -> oAuthPlatform = OAuthPlatform.KAKAO;
-			case "google" -> oAuthPlatform = OAuthPlatform.GOOGLE;
-			case "apple" -> oAuthPlatform = OAuthPlatform.APPLE;
-			default -> throw new BusinessException("올바르지 않은 플랫폼에 대한 요청입니다.", StatusEnum.BAD_REQUEST);
-		}
-
+		OAuthPlatform oAuthPlatform = stringToPlatform(platform);
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
 		User user = userService.read(username);
 		userService.deleteOAuthInfo(user, oAuthPlatform);
@@ -150,5 +132,20 @@ public class UserController {
 						.path(request.getRequestURI())
 						.data(userService.readInfo(username))
 						.build());
+	}
+
+	private OAuthPlatform stringToPlatform(String platform) {
+		switch (platform) {
+			case "naver":
+				return OAuthPlatform.NAVER;
+			case "kakao":
+				return OAuthPlatform.KAKAO;
+			case "google":
+				return OAuthPlatform.GOOGLE;
+			case "apple":
+				return OAuthPlatform.APPLE;
+			default:
+				throw new BusinessException("올바르지 않은 플랫폼에 대한 요청입니다.", StatusEnum.BAD_REQUEST);
+		}
 	}
 }
