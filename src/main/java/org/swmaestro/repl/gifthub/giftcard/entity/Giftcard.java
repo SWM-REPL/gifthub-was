@@ -44,6 +44,9 @@ public class Giftcard {
 	@Column(length = 60, nullable = false)
 	private String password;
 
+	@Column
+	private Integer invalidPasswordCount;
+
 	@Builder
 	public Giftcard(String id, Voucher voucher, String message, LocalDateTime expiresAt, String password) {
 		this.id = id;
@@ -51,9 +54,26 @@ public class Giftcard {
 		this.message = message;
 		this.password = password;
 		this.expiresAt = expiresAt;
+		this.invalidPasswordCount = 0;
 	}
 
-	public void expire() {
+	public Giftcard expire() {
 		this.expiresAt = LocalDateTime.now();
+		return this;
+	}
+
+	public Giftcard increaseInvalidPasswordCount() {
+		this.invalidPasswordCount++;
+		return this;
+
+	}
+
+	public Giftcard resetInvalidPasswordCount() {
+		this.invalidPasswordCount = 0;
+		return this;
+	}
+
+	public boolean isEnable() {
+		return this.expiresAt.isAfter(LocalDateTime.now());
 	}
 }
