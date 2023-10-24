@@ -78,13 +78,21 @@ public class GiftcardService {
 	public GiftcardResponseDto read(String id, String password) {
 		Giftcard giftcard = read(id);
 
-		if (giftcard.getExpiresAt().isBefore(LocalDateTime.now())) {
+		if (!giftcard.isEnable()) {
 			throw new BusinessException("만료된 링크입니다.", StatusEnum.BAD_REQUEST);
 		}
 
+		if (giftcard.getInvalidPasswordCount() >= 10) {
+			throw new BusinessException("비밀번호를 10회 이상 틀렸습니다. 고객센터에 문의해주세요.", StatusEnum.FORBIDDEN);
+		}
+
 		if (!decryptPassword(giftcard.getPassword()).equals(password)) {
+			giftcard.increaseInvalidPasswordCount();
 			throw new BusinessException("비밀번호가 일치하지 않습니다.", StatusEnum.FORBIDDEN);
 		}
+
+		giftcard.resetInvalidPasswordCount();
+		giftCardRepository.save(giftcard);
 
 		return GiftcardResponseDto.builder()
 				.sender(giftcard.getVoucher().getUser().getNickname())
