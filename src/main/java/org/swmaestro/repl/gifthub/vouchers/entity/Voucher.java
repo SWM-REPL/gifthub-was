@@ -67,4 +67,8 @@ public class Voucher extends BaseTimeEntity {
 		this.user = user;
 		this.imageUrl = imageUrl;
 	}
+
+	public boolean isDeleted() {
+		return deletedAt != null;
+	}
 }
