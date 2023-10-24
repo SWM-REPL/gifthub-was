@@ -40,6 +40,10 @@ public class OAuthService {
 		return platformToService(platform).delete(user);
 	}
 
+	public int count(User user) {
+		return oAuthRepository.countByUserAndDeletedAtIsNull(user);
+	}
+
 	public OAuth read(OAuthUserInfoDto oAuthUserInfoDto, OAuthPlatform platform) {
 		return platformToService(platform).read(oAuthUserInfoDto);
 	}

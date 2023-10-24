@@ -20,4 +20,6 @@ public interface OAuthRepository extends JpaRepository<OAuth, Long> {
 	Optional<OAuth> findByPlatformAndPlatformIdAndDeletedAtIsNull(OAuthPlatform platform, String platformId);
 
 	List<OAuth> findAllByUserAndDeletedAtIsNull(User user);
+
+	int countByUserAndDeletedAtIsNull(User user);
 }
