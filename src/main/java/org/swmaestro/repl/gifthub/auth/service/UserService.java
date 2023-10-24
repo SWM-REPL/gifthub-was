@@ -36,6 +36,7 @@ public class UserService implements UserDetailsService {
 	private final PasswordEncoder passwordEncoder;
 	private final OAuthService oAuthService;
 	private final DeviceTokenRepository deviceTokenRepository;
+	private final Pattern UUID_REGEX = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
 	public User passwordEncryption(User user) {
 		return User.builder()
@@ -164,7 +165,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	public OAuth deleteOAuthInfo(User user, OAuthPlatform oAuthPlatform) {
-		if (oAuthService.count(user) <= 1) {
+		if (UUID_REGEX.matcher(user.getUsername()).matches() && oAuthService.count(user) <= 1) {
 			throw new BusinessException("최소 하나 이상의 OAuth 연동 계정이 존재해야 합니다.", StatusEnum.BAD_REQUEST);
 		}
 		return oAuthService.delete(user, oAuthPlatform);
