@@ -106,7 +106,7 @@ public class NaverService implements OAuth2Service {
 		OAuth oAuth = oAuthRepository.findByPlatformAndPlatformIdAndDeletedAtIsNull(OAuthPlatform.NAVER, oAuthUserInfoDto.getId())
 				.orElseThrow(() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND));
 
-		if (oAuth.getDeletedAt() != null) {
+		if (oAuth.isDeleted()) {
 			throw new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND);
 		} else {
 			return oAuth;
