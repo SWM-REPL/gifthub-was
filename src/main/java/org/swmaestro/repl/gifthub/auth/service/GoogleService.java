@@ -100,10 +100,10 @@ public class GoogleService implements OAuth2Service {
 
 	@Override
 	public OAuth read(OAuthUserInfoDto oAuthUserInfoDto) {
-		OAuth oAuth = oAuthRepository.findByPlatformAndPlatformId(OAuthPlatform.GOOGLE, oAuthUserInfoDto.getId())
+		OAuth oAuth = oAuthRepository.findByPlatformAndPlatformIdAndDeletedAtIsNull(OAuthPlatform.GOOGLE, oAuthUserInfoDto.getId())
 				.orElseThrow(() -> new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND));
 
-		if (oAuth.getDeletedAt() != null) {
+		if (oAuth.isDeleted()) {
 			throw new BusinessException("존재하지 않는 OAuth 계정입니다.", StatusEnum.NOT_FOUND);
 		} else {
 			return oAuth;
