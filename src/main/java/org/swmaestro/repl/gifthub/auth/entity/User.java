@@ -55,13 +55,13 @@ public class User extends BaseTimeEntity implements UserDetails {
 	private boolean isAllowNotifications;
 
 	@Builder
-	public User(Long id, String username, String password, String nickname, Role role, boolean isAllowNotifications) {
+	public User(Long id, String username, String password, String nickname, Role role) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
 		this.nickname = nickname;
 		this.role = role;
-		this.isAllowNotifications = isAllowNotifications;
+		this.isAllowNotifications = true;
 	}
 
 	@Override
