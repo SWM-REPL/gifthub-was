@@ -201,6 +201,6 @@ public class UserService implements UserDetailsService {
 	 * DeviceToken 조회 메서드 (user)
 	 */
 	public boolean isExistDeviceToken(User user) {
-		return deviceTokenRepository.findByUser(user).isPresent();
+		return !deviceTokenRepository.findAllByUser(user).isEmpty();
 	}
 }
