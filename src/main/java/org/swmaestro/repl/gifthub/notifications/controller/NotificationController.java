@@ -129,4 +129,38 @@ public class NotificationController {
 						.path(request.getRequestURI())
 						.build());
 	}
+
+	@PostMapping("/expiration/allow")
+	@Operation(summary = "만료 알림 수신 허용 메서드", description = "만료 알림 수신을 허용하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "만료 알림 수신 허용 성공"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원")
+	})
+	public ResponseEntity<Message> allowExpirationNotification(
+			HttpServletRequest request,
+			@RequestHeader("Authorization") String accessToken) {
+		String username = jwtProvider.getUsername(accessToken.substring(7));
+		userService.allowNotifications(username);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.build());
+	}
+
+	@PostMapping("/expiration/deny")
+	@Operation(summary = "만료 알림 수신 거부 메서드", description = "만료 알림 수신을 거부하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "만료 알림 수신 거부 성공"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원")
+	})
+	public ResponseEntity<Message> denyExpirationNotification(
+			HttpServletRequest request,
+			@RequestHeader("Authorization") String accessToken) {
+		String username = jwtProvider.getUsername(accessToken.substring(7));
+		userService.denyNotifications(username);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.build());
+	}
 }

@@ -191,16 +191,27 @@ public class UserService implements UserDetailsService {
 				.username(username)
 				.nickname(user.getNickname())
 				.oauth(oAuthService.list(user))
-				.allowNotifications(isExistDeviceToken(user))
+				.allowNotifications(user.isAllowNotifications())
 				.anonymous(user.isAnonymous())
 				.build();
 		return userInfoResponseDto;
 	}
 
 	/**
-	 * DeviceToken 조회 메서드 (user)
+	 * 알림 동의 여부 허용 메서드 (user)
 	 */
-	public boolean isExistDeviceToken(User user) {
-		return !deviceTokenRepository.findAllByUser(user).isEmpty();
+	public void allowNotifications(String username) {
+		User user = read(username);
+		user.setAllowNotifications(true);
+		userRepository.save(user);
+	}
+
+	/**
+	 * 알림 동의 여부 거부 메서드 (user)
+	 */
+	public void denyNotifications(String username) {
+		User user = read(username);
+		user.setAllowNotifications(false);
+		userRepository.save(user);
 	}
 }

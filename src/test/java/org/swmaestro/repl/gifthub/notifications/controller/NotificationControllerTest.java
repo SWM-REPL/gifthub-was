@@ -142,4 +142,41 @@ public class NotificationControllerTest {
 						.content(objectMapper.writeValueAsString(deviceTokenRequestDto)))
 				.andExpect(status().isOk());
 	}
+
+	/**
+	 * 만료 알림 수신 허용 테스트
+	 */
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	void allowNotifications() throws Exception {
+		String accessToken = "my.access.token";
+		String username = "이진우";
+		User user = User.builder().username(username).build();
+
+		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
+		when(jwtProvider.getUsername(anyString())).thenReturn(username);
+		when(userService.read(username)).thenReturn(user);
+
+		mockMvc.perform(post("/notifications/expiration/allow").header("Authorization", "Bearer " + accessToken))
+				.andExpect(status().isOk());
+	}
+
+	/**
+	 * 만료 알림 수신 거부 테스트
+	 */
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	void denyNotifications() throws Exception {
+		String accessToken = "my.access.token";
+		String username = "이진우";
+		User user = User.builder().username(username).build();
+
+		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
+		when(jwtProvider.getUsername(anyString())).thenReturn(username);
+		when(userService.read(username)).thenReturn(user);
+
+		mockMvc.perform(post("/notifications/expiration/deny").header("Authorization", "Bearer " + accessToken))
+				.andExpect(status().isOk());
+	}
+
 }
