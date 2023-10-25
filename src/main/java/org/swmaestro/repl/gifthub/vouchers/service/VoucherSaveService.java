@@ -65,16 +65,12 @@ public class VoucherSaveService {
 						throwable -> {
 							System.out.println("등록 실패");
 							throwable.printStackTrace();
-							// notification 저장(알림 실패 저장)
-							notificationService.save(userService.read(username), null,
-									NotificationType.REGISTERED,
-									"기프티콘 등록에 실패했습니다.");
 							//Gpt 에러일 경우
 							if (throwable instanceof GptResponseException) {
 								fcmNotificationService.sendNotification("기프티콘 등록 실패", "자동 등록에 실패했습니다. 수동 등록을 이용해 주세요.", username);
 								notificationService.save(userService.read(username), null,
 										NotificationType.REGISTERED,
-										"Gpt 응답이 올바르지 않습니다.");
+										"자동 등록에 실패했습니다. 수동 등록을 이용해 주세요.");
 							} else {
 								fcmNotificationService.sendNotification("기프티콘 등록 실패", "이미 등록된 기프티콘 입니다.", username);
 								notificationService.save(userService.read(username), null,
