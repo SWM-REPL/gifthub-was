@@ -9,6 +9,7 @@ import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserDeviceDto;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.repository.UserRepository;
@@ -29,8 +30,7 @@ public class AuthService {
 	private final JwtProvider jwtProvider;
 	private final OAuthService oAuthService;
 	private final UserRepository userRepository;
-	private final RefreshTokenService refreshTokenService;
-	private final DeviceTokenService deviceTokenService;
+	private final DeviceService deviceService;
 	private final AuthConfig authConfig;
 
 	/**
@@ -47,7 +47,7 @@ public class AuthService {
 
 		User savedUser = userService.create(user);
 		JwtTokenDto jwtTokenDto = generateJwtTokenDto(savedUser);
-		refreshTokenService.storeRefreshToken(jwtTokenDto, savedUser.getUsername());
+		deviceService.create(jwtTokenDto, signUpDto.getDeviceToken(), signUpDto.getFcmToken());
 		return jwtTokenDto;
 	}
 
@@ -73,7 +73,7 @@ public class AuthService {
 				.accessToken(accessToken)
 				.refreshToken(refreshToken)
 				.build();
-		refreshTokenService.storeRefreshToken(jwtTokenDto, user.getUsername());
+		deviceService.create(jwtTokenDto, signInDto.getDeviceToken(), signInDto.getFcmToken());
 		return jwtTokenDto;
 	}
 
@@ -104,7 +104,7 @@ public class AuthService {
 			oAuth = oAuthService.create(user, userInfo, platform);
 		}
 		JwtTokenDto jwtTokenDto = generateJwtTokenDto(oAuth.getUser());
-		refreshTokenService.storeRefreshToken(jwtTokenDto, oAuth.getUser().getUsername());
+		deviceService.create(jwtTokenDto, oAuthTokenDto.getDeviceToken(), oAuthTokenDto.getFcmToken());
 		return jwtTokenDto;
 	}
 
@@ -127,23 +127,23 @@ public class AuthService {
 
 	/**
 	 * 로그아웃
-	 * @param username
+	 * @param userId
 	 * @param signOutDto
 	 */
 	@Transactional
-	public void signOut(String username, SignOutDto signOutDto) {
-		User user = userRepository.findByUsernameAndDeletedAtIsNull(username);
+	public void signOut(Long userId, SignOutDto signOutDto) {
+		User user = userRepository.findByIdAndDeletedAtIsNull(userId);
 		if (user == null || user.getDeletedAt() != null) {
 			throw new BusinessException("존재하지 않는 사용자입니다.", StatusEnum.UNAUTHORIZED);
 		}
-		refreshTokenService.deleteRefreshToken(username);
+		deviceService.delete(userId, signOutDto.getDeviceToken());
 	}
 
 	/**
 	 * 비회원 회원가입
 	 * @return
 	 */
-	public JwtTokenDto signUpAnonymous() {
+	public JwtTokenDto signUpAnonymous(UserDeviceDto userDeviceDto) {
 		User user = User.builder()
 				.username(userService.generateOAuthUsername())
 				.password(authConfig.getDefaultPassword())
@@ -152,7 +152,7 @@ public class AuthService {
 				.build();
 		User savedUser = userService.create(user);
 		JwtTokenDto jwtTokenDto = generateJwtTokenDto(savedUser);
-		refreshTokenService.storeRefreshToken(jwtTokenDto, user.getUsername());
+		deviceService.create(jwtTokenDto, userDeviceDto.getDeviceToken(), userDeviceDto.getFcmToken());
 		return jwtTokenDto;
 	}
 }
