@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
-import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
+import org.swmaestro.repl.gifthub.auth.entity.Device;
+import org.swmaestro.repl.gifthub.auth.service.DeviceService;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.dto.FCMNotificationRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
@@ -20,8 +20,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ScheduledTasks {
 	private final VoucherService voucherService;
-	private final DeviceTokenService deviceTokenService;
 	private final FCMNotificationService fcmNotificationService;
+	private final DeviceService deviceService;
 
 	@Scheduled(cron = "0 0 10 * * ?", zone = "Asia/Seoul") // 매일 오전 10시 실행
 	public void sendExpirationNotification() {
@@ -55,13 +55,12 @@ public class ScheduledTasks {
 	public void deleteDeviceToken() {
 		LocalDateTime now = LocalDateTime.now();
 
-		List<DeviceToken> DeviceTokenList = deviceTokenService.list();
-
-		for (DeviceToken deviceToken : DeviceTokenList) {
-			long daysDifference = ChronoUnit.DAYS.between(now, deviceToken.getUpdatedAt());
+		List<Device> deviceList = deviceService.list();
+		for (Device device : deviceList) {
+			long daysDifference = ChronoUnit.DAYS.between(now, device.getCreatedAt());
 
 			if (daysDifference > 30) {
-				deviceTokenService.delete(deviceToken.getToken());
+				deviceService.delete(device.getId());
 			}
 		}
 	}

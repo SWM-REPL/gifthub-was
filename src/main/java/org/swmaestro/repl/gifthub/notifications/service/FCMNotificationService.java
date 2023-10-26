@@ -3,9 +3,9 @@ package org.swmaestro.repl.gifthub.notifications.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.swmaestro.repl.gifthub.auth.entity.DeviceToken;
+import org.swmaestro.repl.gifthub.auth.entity.Device;
 import org.swmaestro.repl.gifthub.auth.entity.User;
-import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
+import org.swmaestro.repl.gifthub.auth.service.DeviceService;
 import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
 import org.swmaestro.repl.gifthub.notifications.dto.FCMNotificationRequestDto;
@@ -22,14 +22,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FCMNotificationService {
 	private final FirebaseMessaging firebaseMessaging;
-	private final DeviceTokenService deviceTokenService;
+	private final DeviceService deviceService;
 	private final NotificationService notificationService;
 	private final UserService userService;
 
 	public void sendNotificationByToken(FCMNotificationRequestDto requestDto) {
-		List<DeviceToken> deviceTokenList = deviceTokenService.list(requestDto.getTargetUser().getId());
+		Long userId = requestDto.getTargetUser().getId();
+		List<Device> deviceList = deviceService.list(userId);
 
-		for (DeviceToken deviceToken : deviceTokenList) {
+		for (Device device : deviceList) {
+			if (device.getFcmToken() == null) {
+				continue;
+			}
 			Notification notification = Notification.builder()
 					.setTitle(requestDto.getTitle())
 					.setBody(requestDto.getBody())
@@ -39,7 +43,7 @@ public class FCMNotificationService {
 					= notificationService.save(requestDto.getTargetUser(), requestDto.getTargetVoucher(), NotificationType.EXPIRATION, requestDto.getBody());
 
 			Message message = Message.builder()
-					.setToken(deviceToken.getToken())
+					.setToken(device.getFcmToken())
 					.setNotification(notification)
 					.putData("notification_id", savedNotification.getId().toString())
 					.build();
@@ -47,7 +51,7 @@ public class FCMNotificationService {
 			try {
 				firebaseMessaging.send(message);
 			} catch (FirebaseMessagingException e) {
-				deviceTokenService.delete(deviceToken.getToken());
+				deviceService.delete(userId, device.getDeviceToken());
 			}
 		}
 	}
@@ -58,19 +62,21 @@ public class FCMNotificationService {
 	 */
 
 	public void sendNotification(NoticeNotificationDto noticeNotificationDto) {
-		List<DeviceToken> deviceTokenList = deviceTokenService.list();
-
-		for (DeviceToken deviceToken : deviceTokenList) {
+		List<Device> deviceList = deviceService.list();
+		for (Device device : deviceList) {
+			if (device.getFcmToken() == null) {
+				continue;
+			}
 			Notification notification = Notification.builder()
 					.setTitle(noticeNotificationDto.getTitle())
 					.setBody(noticeNotificationDto.getBody())
 					.build();
-
+			Long userId = device.getUserId();
 			org.swmaestro.repl.gifthub.notifications.entity.Notification savedNotification
-					= notificationService.save(deviceToken.getUser(), null, NotificationType.NOTICE, noticeNotificationDto.getBody());
+					= notificationService.save(userService.readById(userId), null, NotificationType.NOTICE, noticeNotificationDto.getBody());
 
 			Message message = Message.builder()
-					.setToken(deviceToken.getToken())
+					.setToken(device.getFcmToken())
 					.setNotification(notification)
 					.putData("notification_id", savedNotification.getId().toString())
 					.build();
@@ -78,7 +84,7 @@ public class FCMNotificationService {
 			try {
 				firebaseMessaging.send(message);
 			} catch (FirebaseMessagingException e) {
-				deviceTokenService.delete(deviceToken.getToken());
+				deviceService.delete(device.getId());
 			}
 		}
 	}
@@ -94,16 +100,18 @@ public class FCMNotificationService {
 				.body(body)
 				.build();
 
-		List<DeviceToken> deviceTokenList = deviceTokenService.list(user.getId());
-
-		for (DeviceToken deviceToken : deviceTokenList) {
+		List<Device> deviceList = deviceService.list(user.getId());
+		for (Device device : deviceList) {
+			if (device.getFcmToken() == null) {
+				continue;
+			}
 			Notification notification = Notification.builder()
 					.setTitle(noticeNotificationDto.getTitle())
 					.setBody(noticeNotificationDto.getBody())
 					.build();
 
 			Message message = Message.builder()
-					.setToken(deviceToken.getToken())
+					.setToken(device.getFcmToken())
 					.setNotification(notification)
 					.putData("notification_type", NotificationType.REGISTERED.toString())
 					.build();
@@ -111,7 +119,7 @@ public class FCMNotificationService {
 			try {
 				firebaseMessaging.send(message);
 			} catch (FirebaseMessagingException e) {
-				deviceTokenService.delete(deviceToken.getToken());
+				deviceService.delete(user.getId(), device.getDeviceToken());
 			}
 		}
 	}
