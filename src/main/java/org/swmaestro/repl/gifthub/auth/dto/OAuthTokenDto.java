@@ -12,9 +12,13 @@ import lombok.NoArgsConstructor;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class OAuthTokenDto {
 	private String token;
+	private String deviceToken;
+	private String fcmToken;
 
 	@Builder
-	public OAuthTokenDto(String token) {
+	public OAuthTokenDto(String token, String deviceToken, String fcmToken) {
 		this.token = token;
+		this.deviceToken = deviceToken;
+		this.fcmToken = fcmToken;
 	}
 }
