@@ -69,4 +69,8 @@ public class Notification {
 	public void setCheckedAt(LocalDateTime checkedAt) {
 		this.checkedAt = checkedAt;
 	}
+
+	public void setDeletedAt(LocalDateTime deletedAt) {
+		this.deletedAt = deletedAt;
+	}
 }
