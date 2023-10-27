@@ -266,7 +266,7 @@ public class VoucherService {
 				.balance(voucher.getBalance())
 				.expiresAt(voucher.getExpiresAt().toString())
 				.imageUrl(voucher.getImageUrl())
-				.accessible(voucher.getBarcode() != null)
+				.accessible(voucher.getDeletedAt() == null)
 				.build();
 		return voucherReadResponseDto;
 	}
