@@ -36,7 +36,7 @@ public class Voucher extends BaseTimeEntity {
 	@JoinColumn(name = "product_id", nullable = false)
 	private Product product;
 
-	@Column(length = 12, nullable = false)
+	@Column(length = 12)
 	private String barcode;
 
 	@Column
