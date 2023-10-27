@@ -12,7 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
-import org.swmaestro.repl.gifthub.auth.repository.RefreshTokenRepository;
+import org.swmaestro.repl.gifthub.auth.entity.Device;
+import org.swmaestro.repl.gifthub.auth.repository.DeviceRepository;
 import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 
@@ -28,16 +29,16 @@ public class JwtProvider {
 	private final long expiration;
 	private final String issuer;
 	private final UserService userService;
-	private final RefreshTokenRepository refreshTokenRepository;
+	private final DeviceRepository deviceRepository;
 
 	public JwtProvider(@Value("${jwt.secret-key}") String secretKey, @Value("${jwt.expiration-time}") long expiration,
 			@Value("${issuer}") String issuer, UserService userService,
-			RefreshTokenRepository refreshTokenRepository) {
+			DeviceRepository deviceRepository) {
 		this.secretKey = secretKey;
 		this.expiration = expiration;
 		this.issuer = issuer;
 		this.userService = userService;
-		this.refreshTokenRepository = refreshTokenRepository;
+		this.deviceRepository = deviceRepository;
 	}
 
 	/**
@@ -156,9 +157,12 @@ public class JwtProvider {
 	public String reissueAccessToken(String refreshToken) {
 		String username = getUsername(refreshToken);
 		Long userId = getUserId(refreshToken);
-		String storedRefreshToken = refreshTokenRepository.findByUsername(username).get().getToken();
+		Device device = deviceRepository.findByRefreshToken(refreshToken);
+		if (device == null) {
+			throw new BusinessException("RefreshToken이 유효하지 않습니다.", StatusEnum.UNAUTHORIZED);
+		}
 
-		if (!refreshToken.equals(storedRefreshToken)) {
+		if (!refreshToken.equals(device.getRefreshToken())) {
 			throw new BusinessException("RefreshToken이 유효하지 않습니다.", StatusEnum.UNAUTHORIZED);
 		}
 		return generateToken(username, userId);

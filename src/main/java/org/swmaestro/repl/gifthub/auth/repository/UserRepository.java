@@ -10,4 +10,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	User findByNickname(String nickname);
 
 	User findByUsernameAndDeletedAtIsNull(String username);
+
+	User findByIdAndDeletedAtIsNull(Long userId);
 }

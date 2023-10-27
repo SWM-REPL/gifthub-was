@@ -19,8 +19,9 @@ import org.swmaestro.repl.gifthub.auth.dto.OAuthUserInfoDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserDeviceDto;
 import org.swmaestro.repl.gifthub.auth.service.AuthService;
-import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
+import org.swmaestro.repl.gifthub.auth.service.DeviceService;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 
@@ -39,7 +40,7 @@ public class AuthControllerTest {
 	private AuthService authService;
 
 	@MockBean
-	private RefreshTokenService refreshTokenService;
+	private DeviceService deviceService;
 
 	@MockBean
 	private JwtProvider jwtProvider;
@@ -99,7 +100,7 @@ public class AuthControllerTest {
 				.refreshToken(refreshToken)
 				.build();
 
-		when(refreshTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken)).thenReturn(newAccessToken);
+		when(deviceService.createNewAccessTokenByValidateRefreshToken(refreshToken)).thenReturn(newAccessToken);
 		when(jwtProvider.getUsername(refreshToken)).thenReturn(username);
 
 		mockMvc.perform(post("/auth/refresh")
@@ -221,15 +222,16 @@ public class AuthControllerTest {
 				.accessToken("myawesomejwt")
 				.refreshToken("myawesomejwt")
 				.build();
-
+		UserDeviceDto userDeviceDto = UserDeviceDto.builder()
+				.deviceToken("device_token")
+				.build();
 		// when
-		when(authService.signUpAnonymous()).thenReturn(jwtTokenDto);
+		when(authService.signUpAnonymous(userDeviceDto)).thenReturn(jwtTokenDto);
 
 		// then
 		mockMvc.perform(post("/auth/sign-up/anonymous")
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.access_token").exists())
-				.andExpect(jsonPath("$.data.refresh_token").exists());
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(userDeviceDto)))
+				.andExpect(status().isOk());
 	}
 }

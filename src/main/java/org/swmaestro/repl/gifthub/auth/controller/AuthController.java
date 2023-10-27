@@ -11,8 +11,9 @@ import org.swmaestro.repl.gifthub.auth.dto.OAuthTokenDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignInDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignOutDto;
 import org.swmaestro.repl.gifthub.auth.dto.SignUpDto;
+import org.swmaestro.repl.gifthub.auth.dto.UserDeviceDto;
 import org.swmaestro.repl.gifthub.auth.service.AuthService;
-import org.swmaestro.repl.gifthub.auth.service.RefreshTokenService;
+import org.swmaestro.repl.gifthub.auth.service.DeviceService;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.Message;
@@ -31,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Auth", description = "사용자 인증 관련 API")
 public class AuthController {
 	private final AuthService authService;
-	private final RefreshTokenService refreshTokenService;
+	private final DeviceService deviceService;
 	private final JwtProvider jwtProvider;
 
 	@PostMapping("/sign-up")
@@ -74,17 +75,17 @@ public class AuthController {
 			@ApiResponse(responseCode = "200", description = "Access Token 재발급 성공"),
 			@ApiResponse(responseCode = "400", description = "Access Token 재발급 실패"),
 	})
-	public ResponseEntity<Message> reissueAccessToken(HttpServletRequest request, @RequestHeader("Authorization") String refreshToken) {
-		String newAccessToken = refreshTokenService.createNewAccessTokenByValidateRefreshToken(refreshToken);
-		String newRefreshToken = refreshTokenService.createNewRefreshTokenByValidateRefreshToken(refreshToken);
+	public ResponseEntity<Message> reissueAccessToken(HttpServletRequest request, @RequestHeader("Authorization") String refreshToken,
+			@RequestBody UserDeviceDto userDeviceDto) {
+		String newAccessToken = deviceService.createNewAccessTokenByValidateRefreshToken(refreshToken);
+		String newRefreshToken = deviceService.createNewRefreshTokenByValidateRefreshToken(refreshToken);
 
 		JwtTokenDto jwtTokenDto = JwtTokenDto.builder()
 				.accessToken(newAccessToken)
 				.refreshToken(newRefreshToken)
 				.build();
 
-		refreshToken = refreshToken.substring(7);
-		refreshTokenService.storeRefreshToken(jwtTokenDto, jwtProvider.getUsername(refreshToken));
+		deviceService.create(jwtTokenDto, userDeviceDto.getDeviceToken(), userDeviceDto.getFcmToken());
 
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
@@ -163,8 +164,8 @@ public class AuthController {
 			@ApiResponse(responseCode = "400(401)", description = "존재하지 않는 사용자")
 	})
 	public ResponseEntity<Message> signOut(HttpServletRequest request, @RequestBody SignOutDto signOutDto) {
-		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		authService.signOut(username, signOutDto);
+		Long userId = jwtProvider.getUserId(jwtProvider.resolveToken(request).substring(7));
+		authService.signOut(userId, signOutDto);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
@@ -177,8 +178,8 @@ public class AuthController {
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "회원가입 성공"),
 	})
-	public ResponseEntity<Message> signUpAnonymous(HttpServletRequest request) {
-		JwtTokenDto jwtTokenDto = authService.signUpAnonymous();
+	public ResponseEntity<Message> signUpAnonymous(HttpServletRequest request, @RequestBody UserDeviceDto userDeviceDto) {
+		JwtTokenDto jwtTokenDto = authService.signUpAnonymous(userDeviceDto);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())

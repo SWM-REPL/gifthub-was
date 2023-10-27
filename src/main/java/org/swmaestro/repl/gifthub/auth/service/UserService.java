@@ -21,7 +21,6 @@ import org.swmaestro.repl.gifthub.auth.dto.UserUpdateRequestDto;
 import org.swmaestro.repl.gifthub.auth.dto.UserUpdateResponseDto;
 import org.swmaestro.repl.gifthub.auth.entity.OAuth;
 import org.swmaestro.repl.gifthub.auth.entity.User;
-import org.swmaestro.repl.gifthub.auth.repository.DeviceTokenRepository;
 import org.swmaestro.repl.gifthub.auth.repository.UserRepository;
 import org.swmaestro.repl.gifthub.auth.type.OAuthPlatform;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
@@ -35,7 +34,6 @@ public class UserService implements UserDetailsService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final OAuthService oAuthService;
-	private final DeviceTokenRepository deviceTokenRepository;
 	private final Pattern UUID_REGEX = Pattern.compile("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
 	public User passwordEncryption(User user) {
@@ -76,6 +74,14 @@ public class UserService implements UserDetailsService {
 
 	public User read(String username) {
 		User user = userRepository.findByUsernameAndDeletedAtIsNull(username);
+		if (user == null) {
+			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
+		}
+		return user;
+	}
+
+	public User readById(Long id) {
+		User user = userRepository.findByIdAndDeletedAtIsNull(id);
 		if (user == null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}

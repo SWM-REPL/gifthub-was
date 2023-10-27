@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.entity.User;
-import org.swmaestro.repl.gifthub.auth.service.DeviceTokenService;
 import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
@@ -15,7 +14,6 @@ import org.swmaestro.repl.gifthub.notifications.entity.Notification;
 import org.swmaestro.repl.gifthub.notifications.repository.NotificationRepository;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
-import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,8 +22,6 @@ import lombok.RequiredArgsConstructor;
 public class NotificationService {
 	private final UserService userService;
 	private final NotificationRepository notificationRepository;
-	private final DeviceTokenService deviceTokenService;
-	private final VoucherService voucherService;
 
 	public List<NotificationReadResponseDto> list(String username) {
 		if (userService.read(username) == null) {
@@ -60,27 +56,28 @@ public class NotificationService {
 		return notificationReadResponseDto;
 	}
 
-	/**
-	 * 디바이스 토큰을 저장하는 메서드
-	 */
-	public boolean saveDeviceToken(String username, String deviceToken) {
-		try {
-			deviceTokenService.save(username, deviceToken);
-			return true;
-		} catch (Exception e) {
-			throw new BusinessException("디바이스 토큰 저장에 실패하였습니다.", StatusEnum.BAD_REQUEST);
-		}
-
-	}
-
-	public boolean deleteDeviceToken(User user, String deviceToken) {
-		try {
-			deviceTokenService.delete(user, deviceToken);
-			return true;
-		} catch (Exception e) {
-			throw new BusinessException("디바이스 토큰 삭제에 실패하였습니다.", StatusEnum.BAD_REQUEST);
-		}
-	}
+	// /**
+	//  * 디바이스 토큰을 저장하는 메서드
+	//  */
+	// public boolean saveDeviceToken(String username, String deviceToken) {
+	// 	try {
+	// 		deviceTokenService.save(username, deviceToken);
+	//
+	// 		return true;
+	// 	} catch (Exception e) {
+	// 		throw new BusinessException("디바이스 토큰 저장에 실패하였습니다.", StatusEnum.BAD_REQUEST);
+	// 	}
+	//
+	// }
+	//
+	// public boolean deleteDeviceToken(User user, String deviceToken) {
+	// 	try {
+	// 		deviceTokenService.delete(user, deviceToken);
+	// 		return true;
+	// 	} catch (Exception e) {
+	// 		throw new BusinessException("디바이스 토큰 삭제에 실패하였습니다.", StatusEnum.BAD_REQUEST);
+	// 	}
+	// }
 
 	/**
 	 * Notification 저장 메서드
@@ -91,7 +88,6 @@ public class NotificationService {
 				.type(type)
 				.message(message)
 				.voucher(voucher)
-				// .createdAt(LocalDateTime.now())
 				.build();
 		return notificationRepository.save(notification);
 	}

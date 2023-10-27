@@ -18,7 +18,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.auth.service.UserService;
-import org.swmaestro.repl.gifthub.notifications.dto.DeviceTokenRequestDto;
 import org.swmaestro.repl.gifthub.notifications.dto.NotificationReadResponseDto;
 import org.swmaestro.repl.gifthub.notifications.service.NotificationService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -75,30 +74,6 @@ public class NotificationControllerTest {
 	}
 
 	/**
-	 * 디바이스 토큰 등록 테스트
-	 */
-	@Test
-	@WithMockUser(username = "이진우", roles = "USER")
-	void saveDeviceToken() throws Exception {
-		// given
-		String accessToken = "my.access.token";
-		String username = "이진우";
-		DeviceTokenRequestDto deviceTokenRequestDto = DeviceTokenRequestDto.builder().token("my.device.token").build();
-
-		// when
-		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
-		when(jwtProvider.getUsername(anyString())).thenReturn(username);
-		when(notificationService.saveDeviceToken(username, deviceTokenRequestDto.getToken())).thenReturn(true);
-
-		// then
-		mockMvc.perform(post("/notifications/device").header("Authorization", "Bearer " + accessToken)
-						.contentType("application/json")
-						.content(objectMapper.writeValueAsString(deviceTokenRequestDto)))
-				.andExpect(status().isOk())
-				.andReturn();
-	}
-
-	/**
 	 * 알림 상세 조회 테스트
 	 */
 	@Test
@@ -122,25 +97,6 @@ public class NotificationControllerTest {
 		mockMvc.perform(get("/notifications/1").header("Authorization", "Bearer " + accessToken))
 				.andExpect(status().isOk())
 				.andReturn();
-	}
-
-	@Test
-	@WithMockUser(username = "이진우", roles = "USER")
-	void deleteDeviceToken() throws Exception {
-		String accessToken = "my.access.token";
-		String username = "이진우";
-		DeviceTokenRequestDto deviceTokenRequestDto = DeviceTokenRequestDto.builder().token("my.device.token").build();
-		User user = User.builder().username(username).build();
-
-		when(jwtProvider.resolveToken(any())).thenReturn(accessToken);
-		when(jwtProvider.getUsername(anyString())).thenReturn(username);
-		when(userService.read(username)).thenReturn(user);
-		when(notificationService.deleteDeviceToken(user, deviceTokenRequestDto.getToken())).thenReturn(true);
-
-		mockMvc.perform(delete("/notifications/device").header("Authorization", "Bearer " + accessToken)
-						.contentType("application/json")
-						.content(objectMapper.writeValueAsString(deviceTokenRequestDto)))
-				.andExpect(status().isOk());
 	}
 
 	/**
