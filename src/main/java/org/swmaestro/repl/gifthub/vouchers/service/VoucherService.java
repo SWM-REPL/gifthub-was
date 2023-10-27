@@ -108,9 +108,9 @@ public class VoucherService {
 		if (!vouchers.contains(voucher.get())) {
 			throw new BusinessException("상품권을 조회할 권한이 없습니다.", StatusEnum.FORBIDDEN);
 		}
-		if (voucher.get().isDeleted()) {
-			throw new BusinessException("삭제된 상품권 입니다.", StatusEnum.BAD_REQUEST);
-		}
+		// if (voucher.get().isDeleted()) {
+		// 	throw new BusinessException("삭제된 상품권 입니다.", StatusEnum.BAD_REQUEST);
+		// }
 
 		VoucherReadResponseDto voucherReadResponseDto = mapToDto(voucher.get());
 		return voucherReadResponseDto;
@@ -246,6 +246,7 @@ public class VoucherService {
 
 		try {
 			voucher.get().setDeletedAt(LocalDateTime.now());
+			voucher.get().setBarcode(null);
 			voucherRepository.save(voucher.get());
 			return true;
 		} catch (Exception e) {
@@ -265,6 +266,7 @@ public class VoucherService {
 				.balance(voucher.getBalance())
 				.expiresAt(voucher.getExpiresAt().toString())
 				.imageUrl(voucher.getImageUrl())
+				.accessible(voucher.getBarcode() != null)
 				.build();
 		return voucherReadResponseDto;
 	}
@@ -275,6 +277,9 @@ public class VoucherService {
 	public boolean isDuplicateVoucher(String username, String barcode) {
 		List<Voucher> vouchers = voucherRepository.findAllByUserUsername(username);
 		for (Voucher voucher : vouchers) {
+			if (voucher.getBarcode() == null) {
+				continue;
+			}
 			if (voucher.getBarcode().equals(barcode)) {
 				return true;
 			}
