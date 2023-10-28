@@ -27,7 +27,7 @@ public class NotificationService {
 		if (userService.read(username) == null) {
 			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
 		}
-		List<Notification> notifications = notificationRepository.findAllByReceiverUsername(username);
+		List<Notification> notifications = notificationRepository.findAllByReceiverUsernameAndDeletedAtIsNull(username);
 
 		List<NotificationReadResponseDto> notificationReadResponseDtos = new ArrayList<>();
 
@@ -55,29 +55,6 @@ public class NotificationService {
 		NotificationReadResponseDto notificationReadResponseDto = builder.build();
 		return notificationReadResponseDto;
 	}
-
-	// /**
-	//  * 디바이스 토큰을 저장하는 메서드
-	//  */
-	// public boolean saveDeviceToken(String username, String deviceToken) {
-	// 	try {
-	// 		deviceTokenService.save(username, deviceToken);
-	//
-	// 		return true;
-	// 	} catch (Exception e) {
-	// 		throw new BusinessException("디바이스 토큰 저장에 실패하였습니다.", StatusEnum.BAD_REQUEST);
-	// 	}
-	//
-	// }
-	//
-	// public boolean deleteDeviceToken(User user, String deviceToken) {
-	// 	try {
-	// 		deviceTokenService.delete(user, deviceToken);
-	// 		return true;
-	// 	} catch (Exception e) {
-	// 		throw new BusinessException("디바이스 토큰 삭제에 실패하였습니다.", StatusEnum.BAD_REQUEST);
-	// 	}
-	// }
 
 	/**
 	 * Notification 저장 메서드
@@ -108,5 +85,21 @@ public class NotificationService {
 		notification.setCheckedAt(LocalDateTime.now());
 		notificationRepository.save(notification);
 		return notificationReadResponseDto;
+	}
+
+	/**
+	 * Notification 삭제 메서드
+	 */
+	public void delete(Long id, String username) {
+		if (userService.read(username) == null) {
+			throw new BusinessException("존재하지 않는 회원입니다.", StatusEnum.NOT_FOUND);
+		}
+		Notification notification = notificationRepository.findById(id).orElseThrow(() -> new BusinessException("존재하지 않는 알림입니다.", StatusEnum.NOT_FOUND));
+
+		if (!notification.getReceiver().getUsername().equals(username)) {
+			throw new BusinessException("알림을 삭제할 권한이 없습니다.", StatusEnum.FORBIDDEN);
+		}
+		notification.setDeletedAt(LocalDateTime.now());
+		notificationRepository.save(notification);
 	}
 }
