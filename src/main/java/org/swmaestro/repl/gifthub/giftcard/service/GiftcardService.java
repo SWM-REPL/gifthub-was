@@ -53,6 +53,7 @@ public class GiftcardService {
 
 		return VoucherShareResponseDto.builder()
 				.id(giftCard.getId())
+				.password(decryptPassword(giftCard.getPassword()))
 				.build();
 	}
 
