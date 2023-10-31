@@ -206,4 +206,20 @@ public class VoucherController {
 						.data(voucherShareResponseDto)
 						.build());
 	}
+
+	@DeleteMapping("/{voucherId}/share")
+	@PreAuthorize("hasRole('ROLE_USER')")
+	@Operation(summary = "Voucher 공유 취소 메서드", description = "클라이언트에서 요청한 기프티콘을 공유를 취소하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "기프트 카드 삭제 성공"),
+			@ApiResponse(responseCode = "404", description = "존재하지 않는 기프트 카드 삭제 시도"),
+	})
+	public ResponseEntity<Message> cancelShareVoucher(HttpServletRequest request, @PathVariable Long voucherId) {
+		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
+		voucherService.cancelShare(username, voucherId);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.build());
+	}
 }
