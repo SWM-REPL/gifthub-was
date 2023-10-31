@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
+import org.swmaestro.repl.gifthub.giftcard.entity.Giftcard;
 import org.swmaestro.repl.gifthub.giftcard.service.GiftcardService;
 import org.swmaestro.repl.gifthub.util.DateConverter;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
@@ -434,5 +435,24 @@ public class VoucherService {
 		}
 
 		return giftCardService.create(voucher, voucherShareRequestDto.getMessage());
+	}
+
+	/**
+	 * 기프티콘 공유 취소 메서드
+	 */
+	public Giftcard cancelShare(String username, Long voucherId) {
+		Voucher voucher = voucherRepository.findById(voucherId)
+				.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND));
+
+		if (!voucher.getUser().getUsername().equals(username)) {
+			throw new BusinessException("상품권을 공유 취소할 권한이 없습니다.", StatusEnum.FORBIDDEN);
+		}
+
+		Giftcard savedGiftcard = giftCardService.read(voucherId);
+		if (savedGiftcard == null) {
+			throw new BusinessException("존재하지 않는 공유 기프티콘 입니다.", StatusEnum.NOT_FOUND);
+		}
+
+		return giftCardService.delete(savedGiftcard.getId());
 	}
 }
