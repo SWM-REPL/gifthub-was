@@ -38,7 +38,7 @@ public class VoucherSaveService {
 	private final PendingVoucherService pendingVoucherService;
 
 	public void execute(OCRDto ocrDto, String username) throws IOException {
-		pendingVoucherService.create(userService.read(username));
+		Long pendingId = pendingVoucherService.create(userService.read(username));
 		handleGptResponse(ocrDto, username)
 				.flatMap(voucherSaveRequestDto -> handleSearchResponse(voucherSaveRequestDto, username))
 				.flatMap(voucherSaveRequestDto -> handleVoucherSaving(voucherSaveRequestDto, username))
@@ -46,6 +46,8 @@ public class VoucherSaveService {
 						// onSuccess
 						voucherSaveResponseDto -> {
 							System.out.println("등록 성공");
+							// 처리 완료
+							pendingVoucherService.delete(pendingId);
 							// 만료된 기프티콘을 등록할 경우
 							if (voucherService.read(voucherSaveResponseDto.getId()).getExpiresAt().isBefore(LocalDate.now())) {
 								fcmNotificationService.sendNotification("기프티콘 등록 성공", "만료된 기프티콘을 등록했습니다.", username);
@@ -58,12 +60,12 @@ public class VoucherSaveService {
 										NotificationType.REGISTERED,
 										"기프티콘 등록에 성공했습니다.");
 							}
-							// 처리 완료
-							pendingVoucherService.delete(userService.read(username));
 						},
 						// onError
 						throwable -> {
 							System.out.println("등록 실패");
+							// 처리 완료
+							pendingVoucherService.delete(pendingId);
 							throwable.printStackTrace();
 							//Gpt 에러일 경우
 							if (throwable instanceof GptResponseException) {
@@ -77,8 +79,6 @@ public class VoucherSaveService {
 										NotificationType.REGISTERED,
 										"이미 등록된 기프티콘 입니다.");
 							}
-							// 처리 완료
-							pendingVoucherService.delete(userService.read(username));
 						});
 	}
 
