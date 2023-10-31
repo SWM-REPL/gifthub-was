@@ -83,17 +83,13 @@ public class VoucherSaveService {
 	}
 
 	public Mono<VoucherSaveRequestDto> handleGptResponse(OCRDto ocrDto, String username) throws IOException, GptResponseException {
-
 		return gptService.getGptResponse(ocrDto).flatMap(response -> {
 			try {
 				VoucherSaveRequestDto voucherSaveRequestDto = createVoucherSaveRequestDto(response);
-				System.out.println("GPT response");
-				System.out.println(voucherSaveRequestDto.getBrandName());
-				System.out.println(voucherSaveRequestDto.getProductName());
-				System.out.println(voucherSaveRequestDto.getBarcode());
-				System.out.println(voucherSaveRequestDto.getExpiresAt());
-				if (voucherSaveRequestDto.getBrandName() == "" || voucherSaveRequestDto.getProductName() == ""
-						|| voucherSaveRequestDto.getBarcode() == "" || voucherSaveRequestDto.getExpiresAt() == "") {
+				if (voucherSaveRequestDto.getBrandName() == "" ||
+						voucherSaveRequestDto.getProductName() == "" ||
+						voucherSaveRequestDto.getBarcode() == "" ||
+						voucherSaveRequestDto.getExpiresAt() == "") {
 					throw new GptResponseException("GPT 응답이 올바르지 않습니다.", StatusEnum.NOT_FOUND);
 				}
 				return Mono.just(voucherSaveRequestDto);
