@@ -39,11 +39,18 @@ public class ScheduledTasks {
 			long daysDifference = ChronoUnit.DAYS.between(today, voucher.getExpiresAt());
 
 			if (daysDifference <= 3) {
+				String message;
+				if (daysDifference == 0) {
+					message = voucher.getBrand().getName() + "에서 사용할 수 있는 기프티콘이 오늘 만료됩니다.";
+				} else {
+					message = voucher.getBrand().getName() + "에서 사용할 수 있는 기프티콘 기한이 " + daysDifference + "일 남았습니다.";
+				}
+
 				FCMNotificationRequestDto requestDto = FCMNotificationRequestDto.builder()
 						.targetUser(voucher.getUser())
 						.targetVoucher(voucher)
 						.title(NotificationType.EXPIRATION.getDescription())
-						.body(voucher.getBrand().getName() + "에서 사용할 수 있는 기프티콘 기한이 " + daysDifference + "일 남았습니다.")
+						.body(message)
 						.build();
 
 				fcmNotificationService.sendNotificationByToken(requestDto);

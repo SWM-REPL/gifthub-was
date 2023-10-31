@@ -90,8 +90,10 @@ public class VoucherSaveService {
 				System.out.println("GPT response");
 				System.out.println(voucherSaveRequestDto.getBrandName());
 				System.out.println(voucherSaveRequestDto.getProductName());
-
-				if (voucherSaveRequestDto.getBrandName() == "" || voucherSaveRequestDto.getProductName() == "") {
+				System.out.println(voucherSaveRequestDto.getBarcode());
+				System.out.println(voucherSaveRequestDto.getExpiresAt());
+				if (voucherSaveRequestDto.getBrandName() == "" || voucherSaveRequestDto.getProductName() == ""
+						|| voucherSaveRequestDto.getBarcode() == "" || voucherSaveRequestDto.getExpiresAt() == "") {
 					throw new GptResponseException("GPT 응답이 올바르지 않습니다.", StatusEnum.NOT_FOUND);
 				}
 				return Mono.just(voucherSaveRequestDto);

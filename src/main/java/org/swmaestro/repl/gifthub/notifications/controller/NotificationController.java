@@ -3,6 +3,7 @@ package org.swmaestro.repl.gifthub.notifications.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -116,6 +117,26 @@ public class NotificationController {
 			@RequestHeader("Authorization") String accessToken) {
 		String username = jwtProvider.getUsername(accessToken.substring(7));
 		userService.denyNotifications(username);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.build());
+	}
+
+	@DeleteMapping("/{notificationId}")
+	@Operation(summary = "Notification 삭제 메서드", description = "클라이언트에서 요청한 알림을 삭제하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "알림 삭제 성공"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 알림"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 회원"),
+			@ApiResponse(responseCode = "400(403)", description = "알림 삭제 권한 없음")
+	})
+	public ResponseEntity<Message> deleteNotification(
+			HttpServletRequest request,
+			@RequestHeader("Authorization") String accessToken,
+			@PathVariable Long notificationId) {
+		String username = jwtProvider.getUsername(accessToken.substring(7));
+		notificationService.delete(notificationId, username);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
