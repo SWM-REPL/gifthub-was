@@ -1,4 +1,4 @@
-package org.swmaestro.repl.gifthub.giftcard.contorller;
+package org.swmaestro.repl.gifthub.giftcard.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
