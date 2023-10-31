@@ -70,6 +70,12 @@ public class GiftcardService {
 		return giftCardRepository.findById(id).get();
 	}
 
+	public Giftcard read(Long voucherId) {
+		return giftCardRepository.findAllByVoucherId(voucherId)
+				.filter(giftcard -> giftcard.getExpiresAt().isAfter(LocalDateTime.now()))
+				.orElseThrow(() -> new BusinessException("존재하지 않는 기프트 카드입니다.", StatusEnum.NOT_FOUND));
+	}
+
 	/**
 	 * 기프트 카드를 조회합니다.
 	 * @param id: 조회할 기프트 카드의 id
@@ -183,5 +189,12 @@ public class GiftcardService {
 		byte[] bytes = password.getBytes(StandardCharsets.UTF_8);
 		byte[] encrypt = aesBytesEncryptor.encrypt(bytes);
 		return ByteArrayUtils.byteArrayToString(encrypt);
+	}
+
+	public Giftcard delete(String id) {
+		Giftcard giftcard = giftCardRepository.findById(id).orElseThrow(() -> new BusinessException("존재하지 않는 기프트 카드입니다.", StatusEnum.NOT_FOUND));
+		giftcard.expire();
+		save(giftcard);
+		return giftcard;
 	}
 }
