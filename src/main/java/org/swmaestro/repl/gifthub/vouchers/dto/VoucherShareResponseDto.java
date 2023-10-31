@@ -14,9 +14,11 @@ import lombok.ToString;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class VoucherShareResponseDto {
 	private String id;
+	private String password;
 
 	@Builder
-	public VoucherShareResponseDto(String id) {
+	public VoucherShareResponseDto(String id, String password) {
 		this.id = id;
+		this.password = password;
 	}
 }

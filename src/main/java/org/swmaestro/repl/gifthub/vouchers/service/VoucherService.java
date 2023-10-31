@@ -277,10 +277,8 @@ public class VoucherService {
 	public boolean isDuplicateVoucher(String username, String barcode) {
 		List<Voucher> vouchers = voucherRepository.findAllByUserUsername(username);
 		for (Voucher voucher : vouchers) {
-			if (voucher.getBarcode() == null) {
-				continue;
-			}
-			if (voucher.getBarcode().equals(barcode)) {
+			String voucherBarcode = voucher.getBarcode();
+			if (voucherBarcode != null && voucherBarcode.equals(barcode)) {
 				return true;
 			}
 		}
