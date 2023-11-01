@@ -71,7 +71,7 @@ public class VoucherSaveService {
 							throwable.printStackTrace();
 							// 15초 이상 응답이 없을 경우
 							if (throwable instanceof TimeoutException) {
-								fcmNotificationService.sendNotification("기프티콘 등록 실패", "GPT 요청이 시간초과되었습니다.", username);
+								fcmNotificationService.sendNotification("기프티콘 등록 실패", "자동 등록에 실패했습니다. 다시 시도해 주세요", username);
 								notificationService.save(userService.read(username), null,
 										NotificationType.REGISTERED,
 										"GPT 요청이 시간초과되었습니다.");
