@@ -98,12 +98,6 @@ public class VoucherSaveService {
 				.flatMap(response -> {
 					try {
 						VoucherSaveRequestDto voucherSaveRequestDto = createVoucherSaveRequestDto(response);
-						System.out.println("GPT response");
-						System.out.println(voucherSaveRequestDto.getBrandName());
-						System.out.println(voucherSaveRequestDto.getProductName());
-						System.out.println(voucherSaveRequestDto.getBarcode());
-						System.out.println(voucherSaveRequestDto.getExpiresAt());
-
 						if (voucherSaveRequestDto.getBrandName() == "" ||
 								voucherSaveRequestDto.getProductName() == "" ||
 								voucherSaveRequestDto.getBarcode() == "" ||
@@ -148,7 +142,6 @@ public class VoucherSaveService {
 
 	private VoucherSaveRequestDto createVoucherSaveRequestDto(GptResponseDto gptResponseDto) throws JsonProcessingException {
 		String contentString = gptResponseDto.getChoices().get(0).getMessage().getContent();
-		System.out.println(contentString);
 		VoucherSaveRequestDto voucherSaveRequestDto = objectMapper.readValue(contentString, VoucherSaveRequestDto.class);
 		return voucherSaveRequestDto;
 	}
