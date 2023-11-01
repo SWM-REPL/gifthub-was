@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.swmaestro.repl.gifthub.giftcard.entity.Giftcard;
 import org.swmaestro.repl.gifthub.giftcard.service.GiftcardService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.vouchers.dto.GptResponseDto;
@@ -326,4 +327,32 @@ class VoucherControllerTest {
 				.andExpect(status().isOk());
 	}
 
+	/**
+	 * 기프티콘 공유 취소 테스트
+	 */
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	void shareCancel() throws Exception {
+		//Given
+		Long voucherId = 1L;
+		VoucherShareRequestDto voucherShareRequestDto = VoucherShareRequestDto.builder()
+				.message("축하드립니다")
+				.build();
+		VoucherShareResponseDto voucherShareResponseDto = VoucherShareResponseDto.builder()
+				.id("uuid")
+				.build();
+		Giftcard giftcard = Giftcard.builder()
+				.id("uuid")
+				.build();
+		//When
+		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
+		when(jwtProvider.getUsername(anyString())).thenReturn("이진우");
+		when(voucherService.cancelShare(anyString(), eq(voucherId))).thenReturn(giftcard);
+
+		//Then
+		mockMvc.perform(delete("/vouchers/1/share")
+						.header("Authorization", "my_awesome_access_token")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
 }
