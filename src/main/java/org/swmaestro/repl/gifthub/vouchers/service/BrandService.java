@@ -15,6 +15,10 @@ import lombok.RequiredArgsConstructor;
 public class BrandService {
 	private final BrandRepository brandRepository;
 
+	public Brand read(Long id) {
+		return brandRepository.findById(id).orElseThrow(() -> new BusinessException("존재하지 않는 브랜드 입니다.", StatusEnum.NOT_FOUND));
+	}
+
 	public Optional<Brand> read(String brandName) {
 		return brandRepository.findByName(brandName);
 	}

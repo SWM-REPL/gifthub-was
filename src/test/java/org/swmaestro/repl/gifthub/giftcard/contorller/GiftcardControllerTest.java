@@ -19,6 +19,8 @@ import org.swmaestro.repl.gifthub.giftcard.entity.Giftcard;
 import org.swmaestro.repl.gifthub.giftcard.service.GiftcardService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
+import org.swmaestro.repl.gifthub.vouchers.service.BrandService;
+import org.swmaestro.repl.gifthub.vouchers.service.ProductService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -37,6 +39,12 @@ class GiftcardControllerTest {
 	@MockBean
 	private JwtProvider jwtProvider;
 
+	@MockBean
+	private BrandService brandService;
+
+	@MockBean
+	private ProductService productService;
+
 	@Test
 	@WithMockUser(username = "test", roles = "USER")
 	void read() throws Exception {
@@ -49,8 +57,8 @@ class GiftcardControllerTest {
 		GiftcardResponseDto giftcardResponseDto = GiftcardResponseDto.builder()
 				.sender("보내는 사람")
 				.message("메시지")
-				.productName("상품명")
-				.brandName("브랜드명")
+				.product(productService.read("아이스 카페 아메리카노 T"))
+				.brand(brandService.read(6L))
 				.expiresAt(LocalDate.now())
 				.build();
 
@@ -66,8 +74,8 @@ class GiftcardControllerTest {
 				.andExpect(jsonPath("$.path").value(apiPath))
 				.andExpect(jsonPath("$.data.sender").value(giftcardResponseDto.getSender()))
 				.andExpect(jsonPath("$.data.message").value(giftcardResponseDto.getMessage()))
-				.andExpect(jsonPath("$.data.product_name").value(giftcardResponseDto.getProductName()))
-				.andExpect(jsonPath("$.data.brand_name").value(giftcardResponseDto.getBrandName()))
+				.andExpect(jsonPath("$.data.product").value(giftcardResponseDto.getProduct()))
+				.andExpect(jsonPath("$.data.brand").value(giftcardResponseDto.getBrand()))
 				.andExpect(jsonPath("$.data.expires_at").value(giftcardResponseDto.getExpiresAt().toString()));
 	}
 

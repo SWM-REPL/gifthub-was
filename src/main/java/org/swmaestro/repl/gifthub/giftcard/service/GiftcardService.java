@@ -103,8 +103,8 @@ public class GiftcardService {
 		return GiftcardResponseDto.builder()
 				.sender(giftcard.getVoucher().getUser().getNickname())
 				.message(giftcard.getMessage())
-				.brandName(giftcard.getVoucher().getBrand().getName())
-				.productName(giftcard.getVoucher().getProduct().getName())
+				.brand(giftcard.getVoucher().getBrand())
+				.product(giftcard.getVoucher().getProduct())
 				.expiresAt(giftcard.getExpiresAt().toLocalDate())
 				.build();
 	}
