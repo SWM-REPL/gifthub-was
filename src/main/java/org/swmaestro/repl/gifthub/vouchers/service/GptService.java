@@ -26,21 +26,23 @@ public class GptService {
 	@Value("${openai.api-key}")
 	private String apiKey;
 
-	@Value("${openai.question-path}")
-	private String promptPath;
+	// @Value("${openai.question-path}")
+	// private String promptPath;
+	private String prompt;
 
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	public GptService(WebClient.Builder webClientBuilder) {
+	public GptService(WebClient.Builder webClientBuilder, @Value("/gpt/question.txt") String promptPath) throws IOException {
 		this.gptClient = webClientBuilder.build();
+		this.prompt = loadQuestionFromFile(promptPath);
 	}
 
 	public Mono<GptResponseDto> getGptResponse(OCRDto ocrDto) throws IOException {
-		String question = loadQuestionFromFile(promptPath);
+		String question = prompt;
 		String content = ocrDto.concatenateTexts();
 
-		String prompt = question + content;
+		String prompt = content + question;
 		ObjectNode requestBody = objectMapper.createObjectNode();
 		requestBody.put("model", "gpt-3.5-turbo");
 		ArrayNode messages = requestBody.putArray("messages");
@@ -51,6 +53,7 @@ public class GptService {
 		return gptClient.post()
 				.uri(apiUrl)
 				.header("Authorization", "Bearer " + apiKey)
+				.header("Content-Type", "application/json")
 				.body(Mono.just(requestBody), ObjectNode.class)
 				.retrieve()
 				.bodyToMono(GptResponseDto.class);
