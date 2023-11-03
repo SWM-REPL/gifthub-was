@@ -57,8 +57,8 @@ class GiftcardControllerTest {
 		GiftcardResponseDto giftcardResponseDto = GiftcardResponseDto.builder()
 				.sender("보내는 사람")
 				.message("메시지")
-				.product(productService.read("아이스 카페 아메리카노 T"))
-				.brand(brandService.read(6L))
+				.product(productService.readById(1L))
+				.brand(brandService.readById(6L))
 				.expiresAt(LocalDate.now())
 				.build();
 

@@ -12,7 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.swmaestro.repl.gifthub.vouchers.entity.Brand;
+import org.swmaestro.repl.gifthub.vouchers.dto.BrandReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.service.BrandService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +36,7 @@ public class BrandControllerTest {
 	@WithMockUser(username = "이진우", roles = "USER")
 	void readBrand() throws Exception {
 		// given
-		Brand brand = Brand.builder()
+		BrandReadResponseDto brand = BrandReadResponseDto.builder()
 				.id(1L)
 				.name("스타벅스")
 				.imageUrl("image_url_1")
