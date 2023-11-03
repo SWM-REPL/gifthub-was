@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.swmaestro.repl.gifthub.util.Message;
 import org.swmaestro.repl.gifthub.util.SuccessMessage;
-import org.swmaestro.repl.gifthub.vouchers.entity.Brand;
+import org.swmaestro.repl.gifthub.vouchers.dto.BrandReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.service.BrandService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,13 +27,13 @@ public class BrandController {
 	private final BrandService brandService;
 
 	@GetMapping("/{brandId}")
-	@Operation(summary = "브랜드 상세 조회 메서드", description = "클라이언트에서 요청한 브랜드 상세 정보를 조회하기 위한 메서드입니다. 응답으로 brand-entity를 반환합니다.")
+	@Operation(summary = "브랜드 상세 조회 메서드", description = "클라이언트에서 요청한 브랜드 상세 정보를 조회하기 위한 메서드입니다. 응답으로 brand-response-dto를 반환합니다.")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "브랜드 조회 성공"),
 			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 브랜드 조회 시도")
 	})
 	public ResponseEntity<Message> readBrand(HttpServletRequest request, @PathVariable Long brandId) throws IOException {
-		Brand readBrand = brandService.readById(brandId);
+		BrandReadResponseDto readBrand = brandService.readById(brandId);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())

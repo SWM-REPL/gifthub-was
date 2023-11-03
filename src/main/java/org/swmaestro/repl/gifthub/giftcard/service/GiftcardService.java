@@ -19,6 +19,8 @@ import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 import org.swmaestro.repl.gifthub.vouchers.repository.VoucherRepository;
+import org.swmaestro.repl.gifthub.vouchers.service.BrandService;
+import org.swmaestro.repl.gifthub.vouchers.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +32,8 @@ public class GiftcardService {
 	private final AesBytesEncryptor aesBytesEncryptor;
 	private final UserService userService;
 	private final VoucherRepository voucherRepository;  // 순환 참조로 인해 vocuherService를 사용할 수 없음
+	private final BrandService brandService;
+	private final ProductService productService;
 
 	/**
 	 * 기프트 카드를 생성합니다.
@@ -103,8 +107,8 @@ public class GiftcardService {
 		return GiftcardResponseDto.builder()
 				.sender(giftcard.getVoucher().getUser().getNickname())
 				.message(giftcard.getMessage())
-				.brand(giftcard.getVoucher().getBrand())
-				.product(giftcard.getVoucher().getProduct())
+				.brand(brandService.readById(giftcard.getVoucher().getBrand().getId()))
+				.product(productService.readById(giftcard.getVoucher().getProduct().getId()))
 				.expiresAt(giftcard.getExpiresAt().toLocalDate())
 				.build();
 	}
