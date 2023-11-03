@@ -24,10 +24,12 @@ public class VoucherReadResponseDto {
 	private String imageUrl;
 	@JsonProperty("is_accessible")
 	private boolean accessible;
+	@JsonProperty("is_shared")
+	private boolean shared;
 
 	@Builder
 	public VoucherReadResponseDto(Long id, Long productId, String barcode, String expiresAt, Integer price,
-			Integer balance, String imageUrl, boolean accessible) {
+			Integer balance, String imageUrl, boolean accessible, boolean shared) {
 		this.id = id;
 		this.productId = productId;
 		this.barcode = barcode;
@@ -36,5 +38,6 @@ public class VoucherReadResponseDto {
 		this.balance = balance;
 		this.imageUrl = imageUrl;
 		this.accessible = accessible;
+		this.shared = shared;
 	}
 }
