@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
+import org.swmaestro.repl.gifthub.vouchers.dto.BrandReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.entity.Brand;
 import org.swmaestro.repl.gifthub.vouchers.repository.BrandRepository;
 
@@ -23,12 +24,13 @@ public class BrandService {
 		return brandRepository.findByName(brandName);
 	}
 
-	public Brand readById(Long id) {
+	public BrandReadResponseDto readById(Long id) {
 		Optional<Brand> brand = brandRepository.findById(id);
 		if (brand.isEmpty()) {
 			throw new BusinessException("존재하지 않는 브랜드 입니다.", StatusEnum.NOT_FOUND);
 		}
-		return brand.get();
+		BrandReadResponseDto brandReadResponseDto = mapToDto(brand.get());
+		return brandReadResponseDto;
 	}
 
 	public Brand save(String brandName) {
@@ -44,5 +46,14 @@ public class BrandService {
 	 */
 	public Brand save(Brand brand) {
 		return brandRepository.save(brand);
+	}
+
+	public BrandReadResponseDto mapToDto(Brand brand) {
+		BrandReadResponseDto brandReadResponseDto = BrandReadResponseDto.builder()
+				.id(brand.getId())
+				.name(brand.getName())
+				.imageUrl(brand.getImageUrl())
+				.build();
+		return brandReadResponseDto;
 	}
 }
