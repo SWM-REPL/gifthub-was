@@ -1,0 +1,20 @@
+{
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "brand_name.keyword": "%s"
+          }
+        }
+      ],
+      "must": [
+        {
+          "match": {
+            "product_name": "%s"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+version: '3'
+services:
+  was:
+    image: repl4242/gifthub-was:${IMAGE_TAG}
+    expose:
+      - 8080
+    ports:
+      - 8080:8080

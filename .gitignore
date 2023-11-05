@@ -36,4 +36,25 @@ out/
 ### VS Code ###
 .vscode/
 
-/src/main/resources/application.properties
+# Application Properties
+/src/main/resources/application.yml
+/src/main/resources/application-test.yml
+/src/main/resources/application-dev.yml
+/src/main/resources/application-prod.yml
+
+# Key Files
+/src/main/resources/keys/
+
+# Desktop Services Store
+.DS_Store
+src/.DS_Store
+
+# Firebase
+/src/main/resources/firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json
+
+# Actions Secrets
+actions-secrets.yml
+
+# log
+*.log
+*.jfr
