@@ -68,6 +68,6 @@ public class StorageService {
 		GeneratePresignedUrlRequest generatePresignedUrlRequest =
 				new GeneratePresignedUrlRequest(bucketName, key, HttpMethod.PUT)
 						.withExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5));
-		return amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest).toString();
+		return amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest).toString().replace("https://", "http://");
 	}
 }
