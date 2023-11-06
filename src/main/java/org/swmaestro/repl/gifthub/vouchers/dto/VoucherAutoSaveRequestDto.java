@@ -12,12 +12,14 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class OCRDto {
+public class VoucherAutoSaveRequestDto {
 	private List<String> texts;
+	private String filename;
 
 	@Builder
-	public OCRDto(List<String> texts) {
+	public VoucherAutoSaveRequestDto(List<String> texts, String filename) {
 		this.texts = texts;
+		this.filename = filename;
 	}
 
 	public String concatenateTexts() {
