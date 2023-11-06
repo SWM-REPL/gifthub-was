@@ -70,4 +70,12 @@ public class StorageService {
 						.withExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5));
 		return amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest).toString().replace("https://", "http://");
 	}
+
+	public String getPresignedUrl(String dirName, String filename) {
+		String key = dirName + "/" + filename;
+		GeneratePresignedUrlRequest generatePresignedUrlRequest =
+				new GeneratePresignedUrlRequest(bucketName, key, HttpMethod.GET)
+						.withExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5));
+		return amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest).toString();
+	}
 }
