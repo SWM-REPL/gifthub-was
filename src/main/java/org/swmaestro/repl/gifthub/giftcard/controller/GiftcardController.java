@@ -31,7 +31,7 @@ public class GiftcardController {
 
 	@GetMapping("/{id}")
 	@Operation(summary = "공유 정보 요청 메서드", description = "클라이언트에서 요청한 공유 정보를 전달하기 위한 메서드입니다.")
-	@CrossOrigin(origins = "http://seheon.kr, https://dev.gifthub.kr, https://gifthub.kr")
+	@CrossOrigin(origins = "http://seheon.kr,https://dev.gifthub.kr,https://gifthub.kr")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "공유하기 정보 조회 성공"),
 			@ApiResponse(responseCode = "400", description = "만료된 공유하기 정보 접근"),
