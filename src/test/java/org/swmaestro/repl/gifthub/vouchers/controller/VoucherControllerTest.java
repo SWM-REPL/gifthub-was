@@ -19,8 +19,8 @@ import org.swmaestro.repl.gifthub.giftcard.entity.Giftcard;
 import org.swmaestro.repl.gifthub.giftcard.service.GiftcardService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.vouchers.dto.GptResponseDto;
-import org.swmaestro.repl.gifthub.vouchers.dto.OCRDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.SearchResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherAutoSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherListResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherReadResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
@@ -261,8 +261,9 @@ class VoucherControllerTest {
 		texts.add("012345678910");
 		texts.add("2023-06-15");
 
-		OCRDto ocrDto = OCRDto.builder()
+		VoucherAutoSaveRequestDto voucherAutoSaveRequestDto = VoucherAutoSaveRequestDto.builder()
 				.texts(texts)
+				.filename("1623777600000_스타벅스_아이스아메리카노T.png")
 				.build();
 		GptResponseDto gptResponseDto = GptResponseDto.builder()
 				.choices(new ArrayList<>())
@@ -280,22 +281,22 @@ class VoucherControllerTest {
 				.id(1L)
 				.build();
 
-		OCRDto mockOcrDto = new OCRDto(); // You might want to set some properties if needed
+		VoucherAutoSaveRequestDto mockVoucherAutoSaveRequestDto = new VoucherAutoSaveRequestDto(); // You might want to set some properties if needed
 		String mockUsername = "testUser";
 
 		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
-		when(gptService.getGptResponse(any(OCRDto.class))).thenReturn(Mono.just(gptResponseDto));
+		when(gptService.getGptResponse(any(VoucherAutoSaveRequestDto.class))).thenReturn(Mono.just(gptResponseDto));
 		when(searchService.search(anyString())).thenReturn(Mono.just(searchResponseDto));
 		when(voucherService.save(anyString(), any(VoucherSaveRequestDto.class))).thenReturn(voucherSaveResponseDto);
 
 		// When
-		voucherSaveService.execute(mockOcrDto, mockUsername);
+		voucherSaveService.execute(mockVoucherAutoSaveRequestDto, mockUsername);
 
 		// Then
 		mockMvc.perform(post("/vouchers")
 						.header("Authorization", "Bearer my_awesome_access_token")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(ocrDto)))
+						.content(objectMapper.writeValueAsString(voucherAutoSaveRequestDto)))
 				.andExpect(status().isOk());
 	}
 
