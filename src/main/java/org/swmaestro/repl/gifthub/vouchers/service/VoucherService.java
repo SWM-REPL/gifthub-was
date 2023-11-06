@@ -46,7 +46,7 @@ public class VoucherService {
 	private final GiftcardService giftCardService;
 
 	/*
-		기프티콘 저장 메서드
+		기프티콘 수동 저장 메서드
 	 */
 	public VoucherSaveResponseDto save(String username, VoucherSaveRequestDto voucherSaveRequestDto) throws
 			IOException {
@@ -455,5 +455,14 @@ public class VoucherService {
 		}
 
 		return giftCardService.delete(savedGiftcard.getId());
+	}
+
+	/**
+	 * 기프티콘 이미지 조회를 위한 presigned url 생성 메서드를 위한 key 생성 메서드
+	 */
+	public String getPresignedUrlForVoucherImage(String username, Long voucherId) {
+		String imageUrl = read(voucherId, username).getImageUrl();
+		String filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+		return storageService.getPresignedUrl(voucherDirName, filename);
 	}
 }
