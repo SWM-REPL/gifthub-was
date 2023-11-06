@@ -458,7 +458,7 @@ public class VoucherService {
 	}
 
 	/**
-	 * 기프티콘 이미지 조회를 위한 presigned url 생성 메서드를 위한 key 생성 메서드
+	 * 기프티콘 이미지 조회를 위한 presigned url 생성 메서드를 위한 filename 추출 메서드
 	 */
 	public String getPresignedUrlForVoucherImage(String username, Long voucherId) {
 		String imageUrl = read(voucherId, username).getImageUrl();
