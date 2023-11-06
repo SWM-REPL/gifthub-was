@@ -15,7 +15,7 @@ import org.swmaestro.repl.gifthub.util.ProductNameProcessor;
 import org.swmaestro.repl.gifthub.util.QueryTemplateReader;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.vouchers.dto.GptResponseDto;
-import org.swmaestro.repl.gifthub.vouchers.dto.OCRDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherAutoSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
 
@@ -39,10 +39,11 @@ public class VoucherSaveService {
 	private final UserService userService;
 	private final PendingVoucherService pendingVoucherService;
 
-	public void execute(OCRDto ocrDto, String username) throws IOException {
+	public void execute(VoucherAutoSaveRequestDto voucherAutoSaveRequestDto, String username) throws IOException {
 		Long pendingId = pendingVoucherService.create(userService.read(username));
-		handleGptResponse(ocrDto, username)
-				.flatMap(voucherSaveRequestDto -> handleSearchResponse(voucherSaveRequestDto, username))
+		String filename = voucherAutoSaveRequestDto.getFilename();
+		handleGptResponse(voucherAutoSaveRequestDto, username)
+				.flatMap(voucherSaveRequestDto -> handleSearchResponse(voucherSaveRequestDto, username, filename))
 				.flatMap(voucherSaveRequestDto -> handleVoucherSaving(voucherSaveRequestDto, username))
 				.subscribe(
 						// onSuccess
@@ -91,8 +92,11 @@ public class VoucherSaveService {
 						});
 	}
 
-	public Mono<VoucherSaveRequestDto> handleGptResponse(OCRDto ocrDto, String username) throws IOException, GptResponseException, TimeoutException {
-		return gptService.getGptResponse(ocrDto)
+	public Mono<VoucherSaveRequestDto> handleGptResponse(VoucherAutoSaveRequestDto voucherAutoSaveRequestDto, String username) throws
+			IOException,
+			GptResponseException,
+			TimeoutException {
+		return gptService.getGptResponse(voucherAutoSaveRequestDto)
 				.timeout(Duration.ofSeconds(15))
 				.onErrorResume(TimeoutException.class, throwable -> Mono.error(new TimeoutException("GPT 요청이 시간초과되었습니다.", StatusEnum.NOT_FOUND)))
 				.flatMap(response -> {
@@ -112,16 +116,18 @@ public class VoucherSaveService {
 				});
 	}
 
-	public Mono<VoucherSaveRequestDto> handleSearchResponse(VoucherSaveRequestDto voucherSaveRequestDto, String username) {
+	public Mono<VoucherSaveRequestDto> handleSearchResponse(VoucherSaveRequestDto voucherSaveRequestDto, String username, String filename) {
 		return searchService.search(createQuery(productNameProcessor.preprocessing(voucherSaveRequestDto))).flatMap(searchResponseDto -> {
 			try {
 				String brandName = searchResponseDto.getHits().getHitsList().get(0).getSource().getBrandName();
 				String productName = searchResponseDto.getHits().getHitsList().get(0).getSource().getProductName();
 				voucherSaveRequestDto.setBrandName(brandName);
 				voucherSaveRequestDto.setProductName(productName);
+				voucherSaveRequestDto.setImageUrl(filename);
 				System.out.println("Search response");
 				System.out.println(brandName);
 				System.out.println(productName);
+				System.out.println(filename);
 				return Mono.just(voucherSaveRequestDto);
 			} catch (Exception e) {
 				e.printStackTrace();
