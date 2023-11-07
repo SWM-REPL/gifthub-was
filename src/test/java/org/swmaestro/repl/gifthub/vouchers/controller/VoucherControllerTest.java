@@ -290,7 +290,7 @@ class VoucherControllerTest {
 		when(voucherService.save(anyString(), any(VoucherSaveRequestDto.class))).thenReturn(voucherSaveResponseDto);
 
 		// When
-		voucherSaveService.execute(mockVoucherAutoSaveRequestDto, mockUsername);
+		voucherSaveService.execute(mockVoucherAutoSaveRequestDto, mockUsername, 1L);
 
 		// Then
 		mockMvc.perform(post("/vouchers")
