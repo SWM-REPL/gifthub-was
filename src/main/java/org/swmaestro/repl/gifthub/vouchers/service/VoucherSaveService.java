@@ -6,6 +6,7 @@ import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.service.UserService;
+import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.exception.GptResponseException;
 import org.swmaestro.repl.gifthub.exception.TimeoutException;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
@@ -39,8 +40,7 @@ public class VoucherSaveService {
 	private final UserService userService;
 	private final PendingVoucherService pendingVoucherService;
 
-	public void execute(VoucherAutoSaveRequestDto voucherAutoSaveRequestDto, String username) throws IOException {
-		Long pendingId = pendingVoucherService.create(userService.read(username));
+	public void execute(VoucherAutoSaveRequestDto voucherAutoSaveRequestDto, String username, Long pendingId) throws IOException {
 		String filename = voucherAutoSaveRequestDto.getFilename();
 		handleGptResponse(voucherAutoSaveRequestDto, username)
 				.flatMap(voucherSaveRequestDto -> handleSearchResponse(voucherSaveRequestDto, username, filename))
@@ -70,24 +70,16 @@ public class VoucherSaveService {
 							// 처리 완료
 							pendingVoucherService.delete(pendingId);
 							throwable.printStackTrace();
-							// 15초 이상 응답이 없을 경우
-							if (throwable instanceof TimeoutException) {
-								fcmNotificationService.sendNotification("기프티콘 등록 실패", "자동 등록에 실패했습니다. 다시 시도해 주세요", username);
-								notificationService.save(userService.read(username), null,
-										NotificationType.REGISTERED,
-										"GPT 요청이 시간초과되었습니다.");
-							}
-							//Gpt 에러일 경우
-							if (throwable instanceof GptResponseException) {
-								fcmNotificationService.sendNotification("기프티콘 등록 실패", "자동 등록에 실패했습니다. 수동 등록을 이용해 주세요.", username);
-								notificationService.save(userService.read(username), null,
-										NotificationType.REGISTERED,
-										"자동 등록에 실패했습니다. 수동 등록을 이용해 주세요.");
-							} else {
+							if (throwable instanceof BusinessException) {
 								fcmNotificationService.sendNotification("기프티콘 등록 실패", "이미 등록된 기프티콘 입니다.", username);
 								notificationService.save(userService.read(username), null,
 										NotificationType.REGISTERED,
 										"이미 등록된 기프티콘 입니다.");
+							} else {
+								fcmNotificationService.sendNotification("기프티콘 등록 실패", "자동 등록에 실패했습니다. 수동 등록을 이용해 주세요.", username);
+								notificationService.save(userService.read(username), null,
+										NotificationType.REGISTERED,
+										"자동 등록에 실패했습니다. 수동 등록을 이용해 주세요.");
 							}
 						});
 	}
