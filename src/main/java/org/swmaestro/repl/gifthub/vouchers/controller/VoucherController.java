@@ -184,7 +184,8 @@ public class VoucherController {
 	@ApiResponses({
 			@ApiResponse(responseCode = "200(202)", description = "기프티콘 등록 요청"),
 	})
-	public ResponseEntity<Message> test(HttpServletRequest request, @RequestBody VoucherAutoSaveRequestDto voucherAutoSaveRequestDto) throws IOException {
+	public ResponseEntity<Message> saveVoucher(HttpServletRequest request, @RequestBody VoucherAutoSaveRequestDto voucherAutoSaveRequestDto) throws
+			IOException {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
 		Long pendingId = pendingVoucherService.create(userService.read(username));
 		voucherSaveService.execute(voucherAutoSaveRequestDto, username, pendingId);
