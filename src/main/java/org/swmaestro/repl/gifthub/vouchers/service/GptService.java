@@ -35,7 +35,7 @@ public class GptService {
 		this.prompt = loadQuestionFromFile(promptPath);
 	}
 
-	public Mono<GptResponseDto> getGptResponse(VoucherAutoSaveRequestDto voucherAutoSaveRequestDto) throws IOException {
+	public Mono<GptResponseDto> getGptResponse(VoucherAutoSaveRequestDto voucherAutoSaveRequestDto) {
 		String question = prompt;
 		String content = voucherAutoSaveRequestDto.concatenateTexts();
 
