@@ -15,6 +15,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.swmaestro.repl.gifthub.auth.entity.User;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.giftcard.entity.Giftcard;
 import org.swmaestro.repl.gifthub.giftcard.service.GiftcardService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
@@ -68,6 +70,9 @@ class VoucherControllerTest {
 
 	@MockBean
 	private GiftcardService giftcardService;
+
+	@MockBean
+	private UserService userService;
 
 	@Test
 	@WithMockUser(username = "이진우", roles = "USER")
@@ -280,17 +285,19 @@ class VoucherControllerTest {
 		VoucherSaveResponseDto voucherSaveResponseDto = VoucherSaveResponseDto.builder()
 				.id(1L)
 				.build();
-
-		VoucherAutoSaveRequestDto mockVoucherAutoSaveRequestDto = new VoucherAutoSaveRequestDto(); // You might want to set some properties if needed
-		String mockUsername = "testUser";
+		User user = User.builder()
+				.id(1L)
+				.username("이진우")
+				.build();
 
 		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
 		when(gptService.getGptResponse(any(VoucherAutoSaveRequestDto.class))).thenReturn(Mono.just(gptResponseDto));
 		when(searchService.search(anyString())).thenReturn(Mono.just(searchResponseDto));
 		when(voucherService.save(anyString(), any(VoucherSaveRequestDto.class))).thenReturn(voucherSaveResponseDto);
-
+		when(userService.read(anyString())).thenReturn(user);
+		when(pendingVoucherService.create(user)).thenReturn(1L);
 		// When
-		voucherSaveService.execute(mockVoucherAutoSaveRequestDto, mockUsername);
+		voucherSaveService.execute(any(VoucherAutoSaveRequestDto.class), anyString(), anyLong());
 
 		// Then
 		mockMvc.perform(post("/vouchers")

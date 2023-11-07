@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.swmaestro.repl.gifthub.auth.service.UserService;
 import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.Message;
 import org.swmaestro.repl.gifthub.util.SuccessMessage;
@@ -28,6 +29,7 @@ import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.service.PendingVoucherService;
 import org.swmaestro.repl.gifthub.vouchers.service.StorageService;
 import org.swmaestro.repl.gifthub.vouchers.service.VoucherSaveService;
 import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
@@ -50,6 +52,8 @@ public class VoucherController {
 	private final StorageService storageService;
 	private final JwtProvider jwtProvider;
 	private final VoucherSaveService voucherSaveService;
+	private final PendingVoucherService pendingVoucherService;
+	private final UserService userService;
 
 	@GetMapping("/images/{extension}")
 	@Operation(summary = "Voucher 이미지 등록 메서드", description = "클라이언트에서 요청한 기프티콘 이미지를 Amazon S3에 저장하기 위한 메서드입니다. 요청 시 S3 PreSigned URL이 반환됩니다.")
@@ -180,9 +184,11 @@ public class VoucherController {
 	@ApiResponses({
 			@ApiResponse(responseCode = "200(202)", description = "기프티콘 등록 요청"),
 	})
-	public ResponseEntity<Message> test(HttpServletRequest request, @RequestBody VoucherAutoSaveRequestDto voucherAutoSaveRequestDto) throws IOException {
+	public ResponseEntity<Message> saveVoucher(HttpServletRequest request, @RequestBody VoucherAutoSaveRequestDto voucherAutoSaveRequestDto) throws
+			IOException {
 		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
-		voucherSaveService.execute(voucherAutoSaveRequestDto, username);
+		Long pendingId = pendingVoucherService.create(userService.read(username));
+		voucherSaveService.execute(voucherAutoSaveRequestDto, username, pendingId);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
