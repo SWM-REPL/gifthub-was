@@ -268,7 +268,7 @@ public class VoucherService {
 				.expiresAt(voucher.getExpiresAt().toString())
 				.imageUrl(voucher.getImageUrl())
 				.accessible(voucher.getDeletedAt() == null)
-				.shared(giftCardService.read(voucher.getId()).isEnable())
+				.shared(giftCardService.isExist(voucher.getId()))
 				.build();
 		return voucherReadResponseDto;
 	}

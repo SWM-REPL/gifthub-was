@@ -153,7 +153,12 @@ public class GiftcardService {
 	 * @return: 기프트 카드가 존재하는지 여부
 	 */
 	public boolean isExist(Long voucherId) {
-		return giftCardRepository.existsByVoucherId(voucherId);
+		if (giftCardRepository.existsByVoucherId(voucherId)) {
+			if (giftCardRepository.findAllByVoucherId(voucherId).get().getExpiresAt().isAfter(LocalDateTime.now())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
