@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.swmaestro.repl.gifthub.vouchers.dto.GptResponseDto;
-import org.swmaestro.repl.gifthub.vouchers.dto.OCRDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherAutoSaveRequestDto;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -25,9 +25,6 @@ public class GptService {
 	private String apiUrl;
 	@Value("${openai.api-key}")
 	private String apiKey;
-
-	// @Value("${openai.question-path}")
-	// private String promptPath;
 	private String prompt;
 
 	@Autowired
@@ -38,9 +35,9 @@ public class GptService {
 		this.prompt = loadQuestionFromFile(promptPath);
 	}
 
-	public Mono<GptResponseDto> getGptResponse(OCRDto ocrDto) throws IOException {
+	public Mono<GptResponseDto> getGptResponse(VoucherAutoSaveRequestDto voucherAutoSaveRequestDto) {
 		String question = prompt;
-		String content = ocrDto.concatenateTexts();
+		String content = voucherAutoSaveRequestDto.concatenateTexts();
 
 		String prompt = content + question;
 		ObjectNode requestBody = objectMapper.createObjectNode();
