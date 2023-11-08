@@ -157,9 +157,6 @@ public class GiftcardService {
 	 */
 	public boolean isExist(Long voucherId) {
 		if (giftCardRepository.existsByVoucherId(voucherId)) {
-			// if (giftCardRepository.findAllByVoucherId(voucherId).get().getExpiresAt().isAfter(LocalDateTime.now())) {
-			// 	return true;
-			// }
 			List<Giftcard> giftCards = giftCardRepository.findAllByVoucherId(voucherId);
 
 			return giftCards.stream()
