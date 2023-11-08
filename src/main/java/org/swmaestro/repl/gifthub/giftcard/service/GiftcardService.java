@@ -2,6 +2,7 @@ package org.swmaestro.repl.gifthub.giftcard.service;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -76,7 +77,9 @@ public class GiftcardService {
 
 	public Giftcard read(Long voucherId) {
 		return giftCardRepository.findAllByVoucherId(voucherId)
+				.stream()
 				.filter(giftcard -> giftcard.getExpiresAt().isAfter(LocalDateTime.now()))
+				.findFirst()
 				.orElseThrow(() -> new BusinessException("존재하지 않는 기프트 카드입니다.", StatusEnum.NOT_FOUND));
 	}
 
@@ -154,9 +157,14 @@ public class GiftcardService {
 	 */
 	public boolean isExist(Long voucherId) {
 		if (giftCardRepository.existsByVoucherId(voucherId)) {
-			if (giftCardRepository.findAllByVoucherId(voucherId).get().getExpiresAt().isAfter(LocalDateTime.now())) {
-				return true;
-			}
+			// if (giftCardRepository.findAllByVoucherId(voucherId).get().getExpiresAt().isAfter(LocalDateTime.now())) {
+			// 	return true;
+			// }
+			List<Giftcard> giftCards = giftCardRepository.findAllByVoucherId(voucherId);
+
+			return giftCards.stream()
+					.anyMatch(giftcard -> giftcard.getExpiresAt().isAfter(LocalDateTime.now()));
+
 		}
 		return false;
 	}
