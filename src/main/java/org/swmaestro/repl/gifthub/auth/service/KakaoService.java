@@ -72,6 +72,8 @@ public class KakaoService implements OAuth2Service {
 			throw new BusinessException("잘못된 Protocol을 통해 요청하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		} catch (IOException e) {
 			throw new BusinessException("IO Exception이 발생하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
+		} catch (Exception e) {
+			throw new BusinessException("오류가 발생했습니다. 다시 시도해 주세요!", StatusEnum.INTERNAL_SERVER_ERROR);
 		}
 	}
 
