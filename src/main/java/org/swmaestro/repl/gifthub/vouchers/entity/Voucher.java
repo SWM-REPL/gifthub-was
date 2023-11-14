@@ -3,6 +3,7 @@ package org.swmaestro.repl.gifthub.vouchers.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.swmaestro.repl.gifthub.auth.entity.User;
 import org.swmaestro.repl.gifthub.util.BaseTimeEntity;
 
@@ -55,6 +56,10 @@ public class Voucher extends BaseTimeEntity {
 	@Column
 	private LocalDateTime deletedAt;
 
+	@Column(name = "is_checked", columnDefinition = "TINYINT", nullable = false)
+	@ColumnDefault("0")
+	private boolean checked;
+
 	@Builder
 	public Voucher(Long id, Brand brand, Product product, String barcode, Integer balance, LocalDate expiresAt,
 			String imageUrl, User user) {
@@ -70,5 +75,14 @@ public class Voucher extends BaseTimeEntity {
 
 	public boolean isDeleted() {
 		return deletedAt != null;
+	}
+
+	public boolean isChecked() {
+		return checked;
+	}
+
+	public Voucher check() {
+		this.checked = true;
+		return this;
 	}
 }
