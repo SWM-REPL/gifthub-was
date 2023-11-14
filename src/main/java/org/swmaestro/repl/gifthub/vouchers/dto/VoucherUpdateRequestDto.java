@@ -19,13 +19,15 @@ public class VoucherUpdateRequestDto {
 	private String productName;
 	private String brandName;
 	private Integer balance;
+	private Boolean isChecked;
 
 	@Builder
-	public VoucherUpdateRequestDto(String barcode, String expiresAt, String productName, String brandName, int balance) {
+	public VoucherUpdateRequestDto(String barcode, String expiresAt, String productName, String brandName, int balance, boolean isChecked) {
 		this.barcode = barcode;
 		this.expiresAt = expiresAt;
 		this.productName = productName;
 		this.brandName = brandName;
 		this.balance = balance;
+		this.isChecked = isChecked;
 	}
 }

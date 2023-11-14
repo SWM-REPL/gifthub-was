@@ -114,6 +114,7 @@ public class VoucherService {
 		// }
 
 		VoucherReadResponseDto voucherReadResponseDto = mapToDto(voucher.get());
+
 		return voucherReadResponseDto;
 	}
 
@@ -204,6 +205,10 @@ public class VoucherService {
 		voucher.setBalance(voucherUpdateRequestDto.getBalance() == null ? voucher.getBalance() :
 				voucherUpdateRequestDto.getBalance());
 
+		// isChecked 수정
+		voucher.setChecked(voucherUpdateRequestDto.getIsChecked() == null ? voucher.isChecked() :
+				voucherUpdateRequestDto.getIsChecked());
+
 		voucherRepository.save(voucher);
 
 		return VoucherSaveResponseDto.builder()
@@ -269,6 +274,7 @@ public class VoucherService {
 				.imageUrl(voucher.getImageUrl())
 				.accessible(voucher.getDeletedAt() == null)
 				.shared(giftCardService.isExist(voucher.getId()))
+				.checked(voucher.isChecked())
 				.build();
 		return voucherReadResponseDto;
 	}
