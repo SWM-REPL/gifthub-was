@@ -245,4 +245,19 @@ public class VoucherController {
 						.data(presignedUrlResponseDto)
 						.build());
 	}
+
+	@PostMapping("/{voucherId}/check")
+	@Operation(summary = "Voucher 확인(읽음) 처리 메서드", description = "클라이언트에서 요청한 기프티콘을 확인(읽음) 처리하기 위한 메서드입니다.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "기프티콘 확인(읽음) 처리 성공"),
+			@ApiResponse(responseCode = "400(404)", description = "존재하지 않는 기프티콘 확인(읽음) 처리 시도"),
+	})
+	public ResponseEntity<Message> checkVoucher(HttpServletRequest request, @PathVariable Long voucherId) {
+		String username = jwtProvider.getUsername(jwtProvider.resolveToken(request).substring(7));
+		voucherService.check(username, voucherId);
+		return ResponseEntity.ok(
+				SuccessMessage.builder()
+						.path(request.getRequestURI())
+						.build());
+	}
 }
