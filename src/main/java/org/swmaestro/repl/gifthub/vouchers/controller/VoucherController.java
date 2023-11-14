@@ -27,6 +27,7 @@ import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.service.PendingVoucherService;
@@ -132,7 +133,7 @@ public class VoucherController {
 	})
 	public ResponseEntity<Message> updateVoucher(HttpServletRequest request, @PathVariable Long voucherId,
 			@RequestBody VoucherUpdateRequestDto voucherUpdateRequestDto) throws IOException {
-		VoucherSaveResponseDto updatedVoucher = voucherService.update(voucherId, voucherUpdateRequestDto);
+		VoucherUpdateResponseDto updatedVoucher = voucherService.update(voucherId, voucherUpdateRequestDto);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
