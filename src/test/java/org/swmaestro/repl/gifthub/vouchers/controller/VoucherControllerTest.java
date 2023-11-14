@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,6 +33,7 @@ import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
+import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 import org.swmaestro.repl.gifthub.vouchers.service.GptService;
 import org.swmaestro.repl.gifthub.vouchers.service.PendingVoucherService;
 import org.swmaestro.repl.gifthub.vouchers.service.SearchService;
@@ -359,6 +361,31 @@ class VoucherControllerTest {
 
 		//Then
 		mockMvc.perform(delete("/vouchers/1/share")
+						.header("Authorization", "my_awesome_access_token")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+	}
+
+	@Test
+	@WithMockUser(username = "이진우", roles = "USER")
+	void check() throws Exception {
+		// Given
+		Voucher voucher = Voucher.builder()
+				.id(1L)
+				.user(User.builder()
+						.id(1L)
+						.username("이진우")
+						.build())
+				.build();
+
+		// When
+		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
+		when(jwtProvider.getUsername(anyString())).thenReturn("이진우");
+		when(voucherService.check(anyString(), eq(voucher.getId()))).thenReturn(voucher.check());
+
+		// Then
+		Assertions.assertTrue(voucher.isChecked());
+		mockMvc.perform(post("/vouchers/1/check")
 						.header("Authorization", "my_awesome_access_token")
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
