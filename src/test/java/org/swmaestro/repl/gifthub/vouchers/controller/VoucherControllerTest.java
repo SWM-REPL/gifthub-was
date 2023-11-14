@@ -30,6 +30,7 @@ import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.service.GptService;
@@ -176,20 +177,20 @@ class VoucherControllerTest {
 				.expiresAt("2023-06-15")
 				.build();
 
-		VoucherSaveResponseDto voucherSaveResponseDto = VoucherSaveResponseDto.builder()
+		VoucherUpdateResponseDto voucherUpdateResponseDto = VoucherUpdateResponseDto.builder()
 				.id(1L)
 				.build();
 
 		// when
 		when(jwtProvider.resolveToken(any())).thenReturn("my_awesome_access_token");
 		when(jwtProvider.getUsername(anyString())).thenReturn("이진우");
-		when(voucherService.update(any(), any(VoucherUpdateRequestDto.class))).thenReturn(voucherSaveResponseDto);
+		when(voucherService.update(any(), any(VoucherUpdateRequestDto.class))).thenReturn(voucherUpdateResponseDto);
 
 		// then
 		mockMvc.perform(patch("/vouchers/1")
 						.header("Authorization", "Bearer my_awesome_access_token")
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(objectMapper.writeValueAsString(voucherSaveResponseDto)))
+						.content(objectMapper.writeValueAsString(voucherUpdateResponseDto)))
 				.andExpect(status().isOk());
 	}
 
