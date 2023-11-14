@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -15,9 +16,12 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 @Configuration
 public class FCMConfig {
+	@Value("${firebase.key-path}")
+	private String keyPath;
+
 	@Bean
 	FirebaseMessaging firebaseMessaging() throws IOException {
-		ClassPathResource resource = new ClassPathResource("firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json");
+		ClassPathResource resource = new ClassPathResource(keyPath);
 
 		InputStream refreshToken = resource.getInputStream();
 

@@ -50,7 +50,7 @@ out/
 src/.DS_Store
 
 # Firebase
-/src/main/resources/firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json
+/src/main/resources/firebase/
 
 # Actions Secrets
 actions-secrets.yml

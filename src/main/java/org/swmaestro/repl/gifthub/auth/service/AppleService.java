@@ -90,6 +90,8 @@ public class AppleService implements OAuth2Service {
 			throw new BusinessException("IO Exception이 발생하였습니다.", StatusEnum.INTERNAL_SERVER_ERROR);
 		} catch (JOSEException e) {
 			throw new RuntimeException(e);
+		} catch (Exception e) {
+			throw new BusinessException("오류가 발생했습니다. 다시 시도해 주세요!", StatusEnum.INTERNAL_SERVER_ERROR);
 		}
 
 		return null;
