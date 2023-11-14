@@ -115,7 +115,10 @@ public class VoucherService {
 
 		VoucherReadResponseDto voucherReadResponseDto = mapToDto(voucher.get());
 
-		voucherRepository.save(voucher.get().check());
+		if (!voucher.get().isChecked()) {
+			voucherRepository.save(voucher.get().check());
+		}
+
 		return voucherReadResponseDto;
 	}
 
