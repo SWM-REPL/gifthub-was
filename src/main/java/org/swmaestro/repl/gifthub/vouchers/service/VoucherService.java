@@ -114,6 +114,8 @@ public class VoucherService {
 		// }
 
 		VoucherReadResponseDto voucherReadResponseDto = mapToDto(voucher.get());
+
+		voucherRepository.save(voucher.get().check());
 		return voucherReadResponseDto;
 	}
 
@@ -269,6 +271,7 @@ public class VoucherService {
 				.imageUrl(voucher.getImageUrl())
 				.accessible(voucher.getDeletedAt() == null)
 				.shared(giftCardService.isExist(voucher.getId()))
+				.checked(voucher.isChecked())
 				.build();
 		return voucherReadResponseDto;
 	}
