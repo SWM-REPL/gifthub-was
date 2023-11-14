@@ -115,10 +115,6 @@ public class VoucherService {
 
 		VoucherReadResponseDto voucherReadResponseDto = mapToDto(voucher.get());
 
-		if (!voucher.get().isChecked()) {
-			voucherRepository.save(voucher.get().check());
-		}
-
 		return voucherReadResponseDto;
 	}
 
@@ -481,5 +477,21 @@ public class VoucherService {
 			voucher.setDeletedAt(LocalDateTime.now());
 			voucherRepository.save(voucher);
 		});
+	}
+
+	/**
+	 * 기프티콘 읽음 처리 메서드
+	 * @param username
+	 * @param voucherId
+	 * @return
+	 */
+	public Voucher check(String username, Long voucherId) {
+		Voucher voucher = read(voucherId);
+
+		if (!voucher.getUser().getUsername().equals(username)) {
+			throw new BusinessException("상품권을 읽음 처리할 권한이 없습니다.", StatusEnum.FORBIDDEN);
+		}
+
+		return voucherRepository.save(voucher.check());
 	}
 }
