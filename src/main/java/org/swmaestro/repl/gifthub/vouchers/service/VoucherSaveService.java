@@ -102,12 +102,12 @@ public class VoucherSaveService {
 
 	public Mono<VoucherSaveRequestDto> handleSearchResponse(VoucherSaveRequestDto voucherSaveRequestDto, String username, String filename) {
 		return searchService.search(createQuery(productNameProcessor.preprocessing(voucherSaveRequestDto))).flatMap(searchResponseDto -> {
+			voucherSaveRequestDto.setImageUrl(filename);
 			try {
 				String brandName = searchResponseDto.getHits().getHitsList().get(0).getSource().getBrandName();
 				String productName = searchResponseDto.getHits().getHitsList().get(0).getSource().getProductName();
 				voucherSaveRequestDto.setBrandName(brandName);
 				voucherSaveRequestDto.setProductName(productName);
-				voucherSaveRequestDto.setImageUrl(filename);
 				System.out.println("Search response");
 				System.out.println(brandName);
 				System.out.println(productName);
