@@ -465,4 +465,15 @@ public class VoucherService {
 		String filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
 		return storageService.getPresignedUrl(voucherDirName, filename);
 	}
+
+	/**
+	 * 사용자 별 기프티콘 전체 삭제 메서드
+	 * @param userId
+	 */
+	public void deleteAll(Long userId) {
+		voucherRepository.findAllByUserId(userId).stream().forEach(voucher -> {
+			voucher.setDeletedAt(LocalDateTime.now());
+			voucherRepository.save(voucher);
+		});
+	}
 }

@@ -22,6 +22,7 @@ import org.swmaestro.repl.gifthub.util.JwtProvider;
 import org.swmaestro.repl.gifthub.util.Message;
 import org.swmaestro.repl.gifthub.util.StatusEnum;
 import org.swmaestro.repl.gifthub.util.SuccessMessage;
+import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -38,6 +39,7 @@ public class UserController {
 	private final UserService userService;
 	private final OAuthService oAuthService;
 	private final JwtProvider jwtProvider;
+	private final VoucherService voucherService;
 
 	@DeleteMapping("/{userId}")
 	@Operation(summary = "User 삭제 메서드", description = "클라이언트에서 요청한 사용자 정보를 삭제(Soft-Delete)하기 위한 메서드입니다.")
@@ -48,6 +50,7 @@ public class UserController {
 	})
 	public ResponseEntity<Message> deleteMember(HttpServletRequest request, @PathVariable Long userId) {
 		UserDeleteResponseDto deletedMember = userService.delete(userId);
+		voucherService.deleteAll(userId);
 		return ResponseEntity.ok(
 				SuccessMessage.builder()
 						.path(request.getRequestURI())
