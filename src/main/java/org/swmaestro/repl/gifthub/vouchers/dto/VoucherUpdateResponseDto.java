@@ -26,10 +26,12 @@ public class VoucherUpdateResponseDto {
 	private boolean accessible;
 	@JsonProperty("is_shared")
 	private boolean shared;
+	@JsonProperty("is_checked")
+	private boolean checked;
 
 	@Builder
 	public VoucherUpdateResponseDto(Long id, Long productId, String barcode, String expiresAt, Integer price,
-			Integer balance, String imageUrl, boolean accessible, boolean shared) {
+			Integer balance, String imageUrl, boolean accessible, boolean shared, boolean checked) {
 		this.id = id;
 		this.productId = productId;
 		this.barcode = barcode;
@@ -39,5 +41,6 @@ public class VoucherUpdateResponseDto {
 		this.imageUrl = imageUrl;
 		this.accessible = accessible;
 		this.shared = shared;
+		this.checked = checked;
 	}
 }
