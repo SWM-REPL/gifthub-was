@@ -224,6 +224,7 @@ public class VoucherService {
 				.imageUrl(voucher.getImageUrl())
 				.accessible(voucher.getDeletedAt() == null)
 				.shared(giftCardService.isExist(voucher.getId()))
+				.checked(voucher.isChecked())
 				.build();
 	}
 
