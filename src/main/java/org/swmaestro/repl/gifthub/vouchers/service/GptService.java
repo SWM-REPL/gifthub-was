@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.swmaestro.repl.gifthub.config.WebClientConfig;
 import org.swmaestro.repl.gifthub.vouchers.dto.GptResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherAutoSaveRequestDto;
 
@@ -20,19 +19,19 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class GptService {
-	private final WebClient gptClient;
 	@Value("${openai.api-url}")
 	private String apiUrl;
 	@Value("${openai.api-key}")
 	private String apiKey;
 	private String prompt;
 
-	@Autowired
 	private ObjectMapper objectMapper;
+	private final WebClientConfig webClientConfig;
 
-	public GptService(WebClient.Builder webClientBuilder, @Value("/gpt/question.txt") String promptPath) throws IOException {
-		this.gptClient = webClientBuilder.build();
+	public GptService(@Value("/gpt/question.txt") String promptPath, WebClientConfig webClientConfig, ObjectMapper objectMapper) throws IOException {
 		this.prompt = loadQuestionFromFile(promptPath);
+		this.webClientConfig = webClientConfig;
+		this.objectMapper = objectMapper;
 	}
 
 	public Mono<GptResponseDto> getGptResponse(VoucherAutoSaveRequestDto voucherAutoSaveRequestDto) {
@@ -47,13 +46,14 @@ public class GptService {
 		message.put("role", "assistant");
 		message.put("content", prompt);
 
-		return gptClient.post()
+		return webClientConfig.webClient().post()
 				.uri(apiUrl)
 				.header("Authorization", "Bearer " + apiKey)
 				.header("Content-Type", "application/json")
 				.body(Mono.just(requestBody), ObjectNode.class)
 				.retrieve()
-				.bodyToMono(GptResponseDto.class);
+				.bodyToMono(GptResponseDto.class)
+				.retry(2);
 	}
 
 	public String loadQuestionFromFile(String filePath) throws IOException {
