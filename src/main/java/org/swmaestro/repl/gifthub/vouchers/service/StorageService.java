@@ -60,7 +60,7 @@ public class StorageService {
 	}
 
 	public String getDefaultImagePath(String dirName) {
-		return "https://" + cloudFrontBucketName + "/" + dirName + "/" + defaultImageFile;
+		return "https://" + cloudFrontBucketName + "/" + defaultImageFile;
 	}
 
 	public String getPresignedUrlForSaveVoucher(String dirName, String extension) {

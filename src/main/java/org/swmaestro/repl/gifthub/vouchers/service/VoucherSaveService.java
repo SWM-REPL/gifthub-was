@@ -72,8 +72,8 @@ public class VoucherSaveService {
 								fcmNotificationService.sendNotification("기프티콘 등록 실패", "이미 등록된 기프티콘 입니다.", username);
 								notificationService.save(userService.read(username), null, NotificationType.REGISTERED, "이미 등록된 기프티콘 입니다.");
 							} else {
-								fcmNotificationService.sendNotification("기프티콘 등록 실패", "자동 등록에 실패했습니다. 수동 등록을 이용해 주세요.", username);
-								notificationService.save(userService.read(username), null, NotificationType.REGISTERED, "자동 등록에 실패했습니다. 수동 등록을 이용해 주세요.");
+								fcmNotificationService.sendNotification("기프티콘 등록 실패", "자동 등록에 실패했습니다. 다시 시도해 주세요.", username);
+								notificationService.save(userService.read(username), null, NotificationType.REGISTERED, "자동 등록에 실패했습니다. 다시 시도해 주세요.");
 							}
 						});
 	}
@@ -83,7 +83,7 @@ public class VoucherSaveService {
 			GptTimeoutException {
 
 		return gptService.getGptResponse(voucherAutoSaveRequestDto)
-				.timeout(Duration.ofMinutes(15))
+				.timeout(Duration.ofMinutes(5))
 				.onErrorResume(GptTimeoutException.class, throwable -> Mono.error(new GptTimeoutException()))
 				.flatMap(response -> {
 					VoucherSaveRequestDto voucherSaveRequestDto = null;
@@ -102,12 +102,12 @@ public class VoucherSaveService {
 
 	public Mono<VoucherSaveRequestDto> handleSearchResponse(VoucherSaveRequestDto voucherSaveRequestDto, String username, String filename) {
 		return searchService.search(createQuery(productNameProcessor.preprocessing(voucherSaveRequestDto))).flatMap(searchResponseDto -> {
+			voucherSaveRequestDto.setImageUrl(filename);
 			try {
 				String brandName = searchResponseDto.getHits().getHitsList().get(0).getSource().getBrandName();
 				String productName = searchResponseDto.getHits().getHitsList().get(0).getSource().getProductName();
 				voucherSaveRequestDto.setBrandName(brandName);
 				voucherSaveRequestDto.setProductName(productName);
-				voucherSaveRequestDto.setImageUrl(filename);
 				System.out.println("Search response");
 				System.out.println(brandName);
 				System.out.println(productName);

@@ -65,8 +65,8 @@ jobs:
       - name: Create Json
         uses: jsdaniell/create-json@v1.2.2
         with:
-          name: "./src/main/resources/firebase/gifthub-b2dcb-firebase-adminsdk-yj7uq-912097b9ae.json"
-          json: ${{ secrets.FIREBASE_JSON }}
+          name: "./src/main/resources/firebase/gifthub-production-3d052-firebase-adminsdk-zkstv-377ec5747b.json"
+          json: ${{ secrets.FIREBASE_PRODUCTION_JSON }}
 
       # Docker 이미지 build 및 push
       - name: docker build and push

@@ -22,6 +22,7 @@ import org.swmaestro.repl.gifthub.vouchers.dto.VoucherSaveResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherShareResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateRequestDto;
+import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUpdateResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseRequestDto;
 import org.swmaestro.repl.gifthub.vouchers.dto.VoucherUseResponseDto;
 import org.swmaestro.repl.gifthub.vouchers.entity.Brand;
@@ -164,7 +165,7 @@ public class VoucherService {
 	/*
 	기프티콘 정보 수정 메서드
 	 */
-	public VoucherSaveResponseDto update(Long voucherId, VoucherUpdateRequestDto voucherUpdateRequestDto) {
+	public VoucherUpdateResponseDto update(Long voucherId, VoucherUpdateRequestDto voucherUpdateRequestDto) {
 		Voucher voucher = voucherRepository.findById(voucherId)
 				.orElseThrow(() -> new BusinessException("존재하지 않는 상품권 입니다.", StatusEnum.NOT_FOUND));
 		// Balance 수정
@@ -211,8 +212,19 @@ public class VoucherService {
 
 		voucherRepository.save(voucher);
 
-		return VoucherSaveResponseDto.builder()
+		return VoucherUpdateResponseDto.builder()
 				.id(voucherId)
+				.accessible(voucher.getDeletedAt() == null)
+				.id(voucher.getId())
+				.productId(voucher.getProduct().getId())
+				.barcode(voucher.getBarcode())
+				.price(voucher.getProduct().getPrice())
+				.balance(voucher.getBalance())
+				.expiresAt(voucher.getExpiresAt().toString())
+				.imageUrl(voucher.getImageUrl())
+				.accessible(voucher.getDeletedAt() == null)
+				.shared(giftCardService.isExist(voucher.getId()))
+				.checked(voucher.isChecked())
 				.build();
 	}
 
