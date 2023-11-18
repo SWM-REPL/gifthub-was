@@ -21,9 +21,10 @@ public class WebClientConfig {
 
 	HttpClient httpClient = HttpClient.create(
 			ConnectionProvider.builder("gifthub-connections")
-					.maxConnections(2)
+					.maxConnections(100)
 					.maxIdleTime(Duration.ofSeconds(30))
 					.pendingAcquireTimeout(Duration.ofSeconds(45))
+					.pendingAcquireMaxCount(-1)
 					.evictInBackground(Duration.ofSeconds(30))
 					.lifo()
 					.build()
