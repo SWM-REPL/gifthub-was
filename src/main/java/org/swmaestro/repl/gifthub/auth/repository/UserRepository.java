@@ -7,7 +7,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	User findByUsername(String username);
 
-	User findByNickname(String nickname);
+	User findAllByNickname(String nickname);
 
 	User findByUsernameAndDeletedAtIsNull(String username);
 

@@ -141,7 +141,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	public boolean isDuplicateNickname(String nickname) {
-		return userRepository.findByNickname(nickname) != null;
+		return userRepository.findAllByNickname(nickname) != null;
 	}
 
 	public UserDeleteResponseDto delete(Long id) {
