@@ -74,6 +74,10 @@ public class VoucherService {
 			imageUrl = storageService.getBucketAddress(voucherDirName) + voucherSaveRequestDto.getImageUrl();
 		}
 
+		if (voucherSaveRequestDto.getBarcode() == null) {
+			throw new BusinessException("바코드를 입력해주세요.", StatusEnum.BAD_REQUEST);
+		}
+
 		Voucher voucher = Voucher.builder()
 				.brand(brand)
 				.product(product)
