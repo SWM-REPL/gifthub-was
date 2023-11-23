@@ -6,7 +6,6 @@ import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
 import org.swmaestro.repl.gifthub.auth.service.UserService;
-import org.swmaestro.repl.gifthub.exception.BusinessException;
 import org.swmaestro.repl.gifthub.exception.GptResponseException;
 import org.swmaestro.repl.gifthub.exception.GptTimeoutException;
 import org.swmaestro.repl.gifthub.notifications.NotificationType;
@@ -68,12 +67,12 @@ public class VoucherSaveService {
 							// 처리 완료
 							pendingVoucherService.delete(pendingId);
 							throwable.printStackTrace();
-							if (throwable instanceof BusinessException) {
-								fcmNotificationService.sendNotification("기프티콘 등록 실패", "이미 등록된 기프티콘 입니다.", username);
-								notificationService.save(userService.read(username), null, NotificationType.REGISTERED, "이미 등록된 기프티콘 입니다.");
-							} else {
+							if (throwable instanceof GptResponseException || throwable instanceof GptTimeoutException) {
 								fcmNotificationService.sendNotification("기프티콘 등록 실패", "자동 등록에 실패했습니다. 다시 시도해 주세요.", username);
 								notificationService.save(userService.read(username), null, NotificationType.REGISTERED, "자동 등록에 실패했습니다. 다시 시도해 주세요.");
+							} else {
+								fcmNotificationService.sendNotification("기프티콘 등록 실패", "이미 등록된 기프티콘 입니다.", username);
+								notificationService.save(userService.read(username), null, NotificationType.REGISTERED, "이미 등록된 기프티콘 입니다.");
 							}
 						});
 	}
