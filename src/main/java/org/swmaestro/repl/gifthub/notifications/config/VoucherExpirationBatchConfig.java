@@ -1,5 +1,8 @@
 package org.swmaestro.repl.gifthub.notifications.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -10,6 +13,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.swmaestro.repl.gifthub.notifications.dto.FCMNotificationRequestDto;
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationItemWriter;
@@ -18,7 +24,8 @@ import org.swmaestro.repl.gifthub.notifications.service.VoucherExpirationItemPro
 import org.swmaestro.repl.gifthub.notifications.service.VoucherExpirationItemReader;
 import org.swmaestro.repl.gifthub.notifications.service.VoucherExpirationJobListener;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
-import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
+
+import com.google.firebase.messaging.FirebaseMessagingException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,9 +38,10 @@ import lombok.RequiredArgsConstructor;
 public class VoucherExpirationBatchConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
-    private final VoucherService voucherService;
     private final FCMNotificationService fcmNotificationService;
     private final VoucherExpirationJobListener jobListener;
+    private final VoucherExpirationItemReader voucherExpirationItemReader;
+    private final VoucherExpirationItemProcessor voucherExpirationItemProcessor;
 
     @Qualifier("voucherNotificationTaskExecutor")
     private final TaskExecutor voucherNotificationTaskExecutor;
@@ -61,42 +69,40 @@ public class VoucherExpirationBatchConfig {
      */
     @Bean
     public Step voucherExpirationNotificationStep() {
+        FCMNotificationItemWriter itemWriter = new FCMNotificationItemWriter(fcmNotificationService, fcmRetryTemplate());
+
         return new StepBuilder("voucherExpirationNotificationStep", jobRepository)
                 .<Voucher, FCMNotificationRequestDto>chunk(chunkSize, transactionManager)
-                .reader(voucherExpirationItemReader(voucherService))
-                .processor(voucherExpirationItemProcessor())
-                .writer(fcmNotificationItemWriter(fcmNotificationService))
+                .reader(voucherExpirationItemReader)
+                .processor(voucherExpirationItemProcessor)
+                .writer(itemWriter)
                 .taskExecutor(voucherNotificationTaskExecutor)  // 멀티스레딩 적용
                 .build();
     }
 
     /**
-     * 만료 예정 모바일 상품권 ItemReader 빈 생성
-     * @param voucherService 바우처 서비스
-     * @return 구성된 ItemReader
+     * FCM 전송 재시도를 위한 RetryTemplate 빈 생성
+     * @return 구성된 RetryTemplate
      */
     @Bean
-    public VoucherExpirationItemReader voucherExpirationItemReader(VoucherService voucherService) {
-        return new VoucherExpirationItemReader(voucherService);
+    public RetryTemplate fcmRetryTemplate() {
+        RetryTemplate retryTemplate = new RetryTemplate();
+
+        // 재시도 정책 설정 (3회 시도)
+        Map<Class<? extends Throwable>, Boolean> retryableExceptions = new HashMap<>();
+        retryableExceptions.put(FirebaseMessagingException.class, true);
+        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(3, retryableExceptions);
+
+        // 백오프 정책 설정 (초기 1초, 배수 2의 지수 백오프)
+        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+        backOffPolicy.setInitialInterval(1000);
+        backOffPolicy.setMultiplier(2);
+
+        retryTemplate.setRetryPolicy(retryPolicy);
+        retryTemplate.setBackOffPolicy(backOffPolicy);
+
+        return retryTemplate;
     }
 
-    /**
-     * 만료 예정 모바일 상품권 ItemProcessor 빈 생성
-     * @return 구성된 ItemProcessor
-     */
-    @Bean
-    public VoucherExpirationItemProcessor voucherExpirationItemProcessor() {
-        return new VoucherExpirationItemProcessor();
-    }
-
-    /**
-     * 만료 예정 모바일 상품권 ItemWriter 빈 생성
-     * FCM 알림 전송을 담당
-     * @return 구성된 ItemWriter
-     */
-    @Bean
-    public FCMNotificationItemWriter fcmNotificationItemWriter(FCMNotificationService fcmNotificationService) {
-        return new FCMNotificationItemWriter(fcmNotificationService);
-    }
 }
 

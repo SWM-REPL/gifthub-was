@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.support.RetryTemplate;
@@ -23,15 +22,6 @@ public class FCMNotificationItemWriter implements ItemWriter<FCMNotificationRequ
 
     private final FCMNotificationService fcmNotificationService;
     private final RetryTemplate retryTemplate;
-
-    @Value("${gifthub.batch.notification.fcm.retry.max-attempts:3}")
-    private int maxRetryAttempts;
-
-    @Value("${gifthub.batch.notification.fcm.retry.initial-interval:1000}")
-    private int initialInterval;
-
-    @Value("${gifthub.batch.notification.fcm.retry.multiplier:2}")
-    private double multiplier;
 
     @Override
     public void write(Chunk<? extends FCMNotificationRequestDto> notificationRequests) throws Exception {
