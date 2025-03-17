@@ -5,6 +5,8 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
@@ -14,6 +16,7 @@ import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationItemWrite
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationService;
 import org.swmaestro.repl.gifthub.notifications.service.VoucherExpirationItemProcessor;
 import org.swmaestro.repl.gifthub.notifications.service.VoucherExpirationItemReader;
+import org.swmaestro.repl.gifthub.notifications.service.VoucherExpirationJobListener;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
 
@@ -30,7 +33,13 @@ public class VoucherExpirationBatchConfig {
     private final PlatformTransactionManager transactionManager;
     private final VoucherService voucherService;
     private final FCMNotificationService fcmNotificationService;
+    private final VoucherExpirationJobListener jobListener;
+
+    @Qualifier("voucherNotificationTaskExecutor")
     private final TaskExecutor voucherNotificationTaskExecutor;
+
+    @Value("${gifthub.batch.notification.chunk-size:50}")
+    private int chunkSize;
 
     /***
      * 모바일 상품권 만료 알림 배치 Job 정의
@@ -40,23 +49,24 @@ public class VoucherExpirationBatchConfig {
     @Bean
     public Job voucherExpirationNotificationJob(Step voucherExpirationNotificationStep) {
         return new JobBuilder("voucherExpirationNotificationJob", jobRepository)
+                .listener(jobListener)
                 .start(voucherExpirationNotificationStep)
                 .build();
     }
 
     /**
      * 모바일 상품권 만료 알림을 위한 Step 정의
-     * 50개 아이템 단위의 청크 처리 설정
+     * 멀티스레딩 처리를 위한 TaskExecutor 설정 추가
      * @return 구성된 Step
      */
     @Bean
     public Step voucherExpirationNotificationStep() {
         return new StepBuilder("voucherExpirationNotificationStep", jobRepository)
-                .<Voucher, FCMNotificationRequestDto>chunk(50, transactionManager)
+                .<Voucher, FCMNotificationRequestDto>chunk(chunkSize, transactionManager)
                 .reader(voucherExpirationItemReader(voucherService))
                 .processor(voucherExpirationItemProcessor())
                 .writer(fcmNotificationItemWriter(fcmNotificationService))
-                .taskExecutor(voucherNotificationTaskExecutor)  // 멀티 스레딩 적용
+                .taskExecutor(voucherNotificationTaskExecutor)  // 멀티스레딩 적용
                 .build();
     }
 
@@ -81,6 +91,7 @@ public class VoucherExpirationBatchConfig {
 
     /**
      * 만료 예정 모바일 상품권 ItemWriter 빈 생성
+     * FCM 알림 전송을 담당
      * @return 구성된 ItemWriter
      */
     @Bean
@@ -88,3 +99,4 @@ public class VoucherExpirationBatchConfig {
         return new FCMNotificationItemWriter(fcmNotificationService);
     }
 }
+
