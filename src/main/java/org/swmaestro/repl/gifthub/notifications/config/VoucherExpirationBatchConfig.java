@@ -1,4 +1,4 @@
-package org.swmaestro.repl.gifthub.notifications.controller;
+package org.swmaestro.repl.gifthub.notifications.config;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -9,7 +9,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.swmaestro.repl.gifthub.notifications.dto.FCMNotificationRequestDto;
+import org.swmaestro.repl.gifthub.notifications.service.VoucherExpirationItemReader;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
+import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,6 +37,11 @@ public class VoucherExpirationBatchConfig {
                 .build();
     }
 
+    /**
+     * 모바일 상품권 만료 알림을 위한 Step 정의
+     * 50개 아이템 단위의 청크 처리 설정
+     * @return 구성된 Step
+     */
     @Bean
     public Step voucherExpirationNotificationStep() {
         return new StepBuilder("voucherExpirationNotificationStep", jobRepository)
@@ -43,5 +50,15 @@ public class VoucherExpirationBatchConfig {
                 .processor(voucherExpirationItemProcessor())
                 .writer(voucherExpirationItemWriter())
                 .build();
+    }
+
+    /**
+     * 만료 예정 모바일 상품권 ItemReader 빈 생성
+     * @param voucherService 바우처 서비스
+     * @return 구성된 ItemReader
+     */
+    @Bean
+    public VoucherExpirationItemReader voucherExpirationItemReader(VoucherService voucherService) {
+        return new VoucherExpirationItemReader(voucherService);
     }
 }
