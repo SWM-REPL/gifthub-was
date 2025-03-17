@@ -27,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 public class VoucherExpirationBatchConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
+    private final VoucherService voucherService;
+    private final FCMNotificationService fcmNotificationService;
 
     /***
      * 모바일 상품권 만료 알림 배치 Job 정의
@@ -49,9 +51,9 @@ public class VoucherExpirationBatchConfig {
     public Step voucherExpirationNotificationStep() {
         return new StepBuilder("voucherExpirationNotificationStep", jobRepository)
                 .<Voucher, FCMNotificationRequestDto>chunk(50, transactionManager)
-                .reader(voucherExpirationItemReader())
+                .reader(voucherExpirationItemReader(voucherService))
                 .processor(voucherExpirationItemProcessor())
-                .writer(voucherExpirationItemWriter())
+                .writer(fcmNotificationItemWriter(fcmNotificationService))
                 .build();
     }
 
