@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.swmaestro.repl.gifthub.notifications.dto.FCMNotificationRequestDto;
+import org.swmaestro.repl.gifthub.notifications.service.VoucherExpirationItemProcessor;
 import org.swmaestro.repl.gifthub.notifications.service.VoucherExpirationItemReader;
 import org.swmaestro.repl.gifthub.vouchers.entity.Voucher;
 import org.swmaestro.repl.gifthub.vouchers.service.VoucherService;
@@ -61,4 +62,14 @@ public class VoucherExpirationBatchConfig {
     public VoucherExpirationItemReader voucherExpirationItemReader(VoucherService voucherService) {
         return new VoucherExpirationItemReader(voucherService);
     }
+
+    /**
+     * 만료 예정 모바일 상품권 ItemProcessor 빈 생성
+     * @return 구성된 ItemProcessor
+     */
+    @Bean
+    public VoucherExpirationItemProcessor voucherExpirationItemProcessor() {
+        return new VoucherExpirationItemProcessor();
+    }
+
 }
