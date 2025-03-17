@@ -8,7 +8,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
- *
+ * 상품권 배치 처리를 위한 스레드 풀 설정
  */
 @Configuration
 public class VoucherBatchThreadConfig {

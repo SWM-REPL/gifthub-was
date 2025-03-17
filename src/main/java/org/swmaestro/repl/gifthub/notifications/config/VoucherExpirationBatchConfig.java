@@ -7,6 +7,7 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.swmaestro.repl.gifthub.notifications.dto.FCMNotificationRequestDto;
 import org.swmaestro.repl.gifthub.notifications.service.FCMNotificationItemWriter;
@@ -29,6 +30,7 @@ public class VoucherExpirationBatchConfig {
     private final PlatformTransactionManager transactionManager;
     private final VoucherService voucherService;
     private final FCMNotificationService fcmNotificationService;
+    private final TaskExecutor voucherNotificationTaskExecutor;
 
     /***
      * 모바일 상품권 만료 알림 배치 Job 정의
@@ -54,6 +56,7 @@ public class VoucherExpirationBatchConfig {
                 .reader(voucherExpirationItemReader(voucherService))
                 .processor(voucherExpirationItemProcessor())
                 .writer(fcmNotificationItemWriter(fcmNotificationService))
+                .taskExecutor(voucherNotificationTaskExecutor)  // 멀티 스레딩 적용
                 .build();
     }
 
